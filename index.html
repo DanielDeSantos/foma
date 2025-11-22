@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mate en 4 - Puzzles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e1e2f, #2c2c44);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    #container {
+      background: #ffffff10;
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      display: flex;
+      gap: 30px;
+      margin-top: 20px;
+    }
+    #board {
+      width: 420px;
+      height: 420px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    #panel {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 300px;
+    }
+
+    .card {
+      background: #ffffff15;
+      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 10px;
+      background: #4b7bec;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background: #3867d6;
+    }
+
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.13.4/chess.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chessground/8.2.1/chessground.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessground/8.2.1/chessground.min.css" />
+</head>
+<body>
+  <h1>Mates en 4</h1>
+  <p>Practica tus mates en 4. El negro jugará siempre la misma secuencia.</p>
+
+  <div id="container">
+    <div id="board"></div>
+
+    <div id="panel">
+      <div class="card">
+        <h3>Información del puzzle</h3>
+        <p id="info"></p>
+      </div>
+      <button onclick="siguientePuzzle()">➡️ Siguiente puzzle</button>
+    </div>
+  </div>
+
+  <script>
+    let puzzles = [
+      {
+        id: 1,
+        fen: "5rk1/1p4pp/p1p2q2/1PP1n3/3p1Q2/3P2P1/1P3P1P/4R1K1 w - - 0 1",
+        jugadas_negras: ["Nf3", "Qh6", "Qg2"],
+        numero_jugadas: 4,
+        titulo: "Mate elegante en 4"
+      },
+      {
+        id: 2,
+        fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 0 1",
+        jugadas_negras: ["d5", "Bg4", "Nd4"],
+        numero_jugadas: 4,
+        titulo: "Apertura táctica"
+      }
+    ];
+
+    let index = 0;
+    let game;
+    let ground;
+    let turnoBlancas;
+
+    function cargarPuzzle(p) {
+      document.getElementById("info").textContent = p.titulo;
+
+      game = new Chess(p.fen);
+      turnoBlancas = 0;
+
+      ground = Chessground(document.getElementById("board"), {
+        fen: p.fen,
+        movable: {
+          color: "white",
+          free: false,
+          events: {
+            after: (orig, dest) => moverBlancas(orig, dest, p)
+          }
+        }
+      });
+    }
+
+    function moverBlancas(orig, dest, p) {
+      const move = game.move({ from: orig, to: dest, promotion: "q" });
+      if (!move) {
+        alert("Movimiento ilegal");
+        ground.set({ fen: game.fen() });
+        return;
+      }
+
+      if (turnoBlancas === p.numero_jugadas - 1) {
+        if (game.isCheckmate()) alert("¡Mate en 4 correcto!");
+        else alert("No es mate. Inténtalo de nuevo.");
+        return;
+      }
+
+      const movNegro = game.move(p.jugadas_negras[turnoBlancas]);
+      if (!movNegro) {
+        alert("Error: jugada de negro inválida en este puzzle.");
+        return;
+      }
+
+      turnoBlancas++;
+      ground.set({ fen: game.fen() });
+    }
+
+    function siguientePuzzle() {
+      index = (index + 1) % puzzles.length;
+      cargarPuzzle(puzzles[index]);
+    }
+
+    cargarPuzzle(puzzles[0]);
+  </script>
+</body>
+</html>
