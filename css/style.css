@@ -1,3 +1,11 @@
 body { font-family: Arial; }
 #contenedor { display: flex; gap: 20px; }
-#board { width: 400px; height: 400px; }
+#board {
+    width: 400px;
+    height: 400px;
+}
+
+.cg-board {
+    width: 100% !important;
+    height: 100% !important;
+}
