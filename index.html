@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mates en 4</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="js/chessground.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mates en 4</title>
+
+    <!-- Estilos del tablero -->
+    <link rel="stylesheet" href="js/chessground.min.css">
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h1>Mates en 4</h1>
-<p>Practica tus mates en 4. El negro jugará siempre la misma secuencia.</p>
 
+    <h1>Mates en 4</h1>
 
-<div id="container">
-<div id="board"></div>
-<div id="panel">
-<div class="card">
-<h3>Información del puzzle</h3>
-<p id="info"></p>
-</div>
-<button onclick="siguientePuzzle()">➡️ Siguiente puzzle</button>
-</div>
-</div>
+    <div id="contenedor">
+        <div id="board"></div>
 
+        <div id="panel">
+            <h2>Problema</h2>
+            <p id="descripcion"></p>
+            <button id="btnSiguiente">Siguiente problema</button>
+        </div>
+    </div>
 
-<script src="js/chess.js"></script>
-<script src="js/chessground.min.js"></script>
-<script src="js/app.js" defer></script>
+    <!-- Librerías -->
+    <script src="js/chess.js"></script>
+    <script src="js/chessground.min.js"></script>
+
+    <!-- Tu lógica -->
+    <script src="js/app.js"></script>
 </body>
 </html>
