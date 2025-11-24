@@ -3,22 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mate en 4 Jugadas</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Chessboard.js CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <title>Mate en 4 Jugadas - Finales</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            margin: 20px auto;
+            border: 2px solid #333;
+            width: 400px;
+            height: 400px;
+        }
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            cursor: pointer;
+        }
+        .light {
+            background-color: #f0d9b5;
+        }
+        .dark {
+            background-color: #b58863;
+        }
+        .selected {
+            background-color: yellow;
+        }
+        #status {
+            margin: 10px 0;
+            font-size: 18px;
+            color: #d9534f;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 <body>
-    <h1>Mate en 4 Jugadas</h1>
-    <p>Resuelve el problema moviendo las piezas blancas. El rey negro se moverá automáticamente. ¡Sigue la secuencia correcta!</p>
-    <div id="board" style="width: 400px;"></div>
-    <div id="status"></div>
+    <h1>Mate en 4 Jugadas - Finales</h1>
+    <p>Resuelve finales de partida moviendo las piezas blancas. El rey negro se moverá automáticamente. ¡Sigue la secuencia correcta!</p>
+    <div id="board"></div>
+    <div id="status">¡Comienza el problema! Selecciona una pieza blanca.</div>
     <button id="reset">Reiniciar Problema</button>
     <button id="next">Siguiente Problema</button>
     
-    <!-- Chess.js y Chessboard.js via CDN -->
-    <script src="https://unpkg.com/chess.js@0.12.0/chess.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    <script src="script.js"></script>
+    <script>
+        // Piezas representadas con emojis
+        const pieces = {
+            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+        };
+
+        // Puzzles de finales (posiciones con menos piezas, mates en 4)
+        const puzzles = [
+            {
+                positions: [
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', 'k', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['K', 'R', 'R', '', '', '', '', '']
+                ],
+                whiteMoves: ['c1c5', 'd1d6', 'c5c7', 'd6d8'], // Mate con 2 torres
+                blackKingMoves: ['e6f6', 'f6e7', 'e7d8', 'd7e8']
+            },
+            {
+                positions: [
+                    ['', '', '', '', 'k', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['K', '', '', '', '', '', 'R', '']
+                ],
+                whiteMoves: ['g1g8', 'g8g7', 'g7g8', 'g8g7'], // Mate con torre
+                blackKingMoves: ['e8f8', 'f8e8', 'e8f8', 'f8e8']
+            },
+            {
+                positions: [
+                    ['', '', '', '', 'k', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['K', '', '', '', '', 'B', '', '']
+                ],
+                whiteMoves: ['f1g2', 'g2h3', 'h3g4', 'g4f5'], // Ataque con alfil
+                blackKingMoves: ['e8d7', 'd7c6', 'c6b5', 'b5a4']
+            },
+            {
+                positions: [
+                    ['', '', '', '', 'k', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['K', '', '', '', 'Q', '', '', '']
+                ],
+                whiteMoves: ['d1e2', 'e2f3', 'f3g4', 'g4h5'], // Mate con dama diagonal
+                blackKingMoves: ['e8d7', 'd7c6', 'c6b5', 'b5a4']
+            },
+            {
+                positions: [
+                    ['', '', '', '', 'k', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['K', '', '', '', '', '', '', 'R']
+                ],
+                whiteMoves: ['h1h8', 'h8h7', 'h7h8', 'h8h7'], // Otro mate con torre
+                blackKingMoves: ['e8f8', 'f8e8', 'e8f8', 'f8e8']
+            }
+        ];
+
+        let currentPuzzleIndex = 0;
+        let moveIndex = 0;
+        let selectedSquare = null;
+        let currentPositions = JSON.parse(JSON.stringify(puzzles[0].positions));
+
+        // Crear tablero
+        function createBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.classList.add('square');
+                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.textContent = pieces[currentPositions[row][col]] || '';
+                    square.addEventListener('click', handleSquareClick);
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        // Manejar clic en cuadrado
+        function handleSquareClick(event) {
+            const square = event.target;
+            const row = parseInt(square.dataset.row);
+            const col = parseInt(square.dataset.col);
+            const piece = currentPositions[row][col];
+
+            if (selectedSquare) {
+                // Intentar mover
+                const fromRow = parseInt(selectedSquare.dataset.row);
+                const fromCol = parseInt(selectedSquare.dataset.col);
+                const toRow = row;
+                const toCol = col;
+                const move = String.fromCharCode(97 + fromCol) + (8 - fromRow) + String.fromCharCode(97 + toCol) + (8 - toRow);
+
+                if (move === puzzles[currentPuzzleIndex].whiteMoves[moveIndex]) {
+                    // Movimiento correcto: actualizar posiciones
+                    currentPositions[toRow][toCol] = currentPositions[fromRow][fromCol];
+                    currentPositions[fromRow][fromCol] = '';
+                    moveIndex++;
+
+                    // Mover rey negro automáticamente
+                    const blackMove = puzzles[currentPuzzleIndex].blackKingMoves[moveIndex - 1];
+                    if (blackMove) {
+                        const from = blackMove.slice(0, 2);
+                        const to = blackMove.slice(2, 4);
+                        const fromColB = from.charCodeAt(0) - 97;
+                        const fromRowB = 8 - parseInt(from[1]);
+                        const toColB = to.charCodeAt(0) - 97;
+                        const toRowB = 8 - parseInt(to[1]);
+                        currentPositions[toRowB][toColB] = currentPositions[fromRowB][fromColB];
+                        currentPositions[fromRowB][fromColB] = '';
+                    }
+
+                    createBoard();
+
+                    if (moveIndex === 4) {
+                        updateStatus('¡Mate en 4! ¡Éxito! Pasa al siguiente.');
+                    } else {
+                        updateStatus(`Movimiento ${moveIndex}/4 correcto. Sigue.`);
+                    }
+                } else {
+                    // Movimiento incorrecto: deshacer y mostrar error
+                    chess.undo();
+                    board.position(chess.fen());
+                    updateStatus('Movimiento incorrecto. Reinicia el problema.');
+                    loadPuzzle(currentPuzzleIndex);
+                }
+                selectedSquare.classList.remove('selected');
+                selectedSquare = null;
+            } else if (piece && piece === piece.toUpperCase()) {
+                // Seleccionar pieza blanca
+                selectedSquare = square;
+                square.classList.add('selected');
+            }
+        }
+
+        // Cargar puzzle
+        function loadPuzzle(index) {
+            currentPositions = JSON.parse(JSON.stringify(puzzles[index].positions));
+            moveIndex = 0;
+            selectedSquare = null;
+            createBoard();
+            updateStatus('¡Comienza el problema! Selecciona una pieza blanca.');
+        }
+
+        // Actualizar status
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        // Inicializar
+        createBoard();
+
+        // Botones
+        document.getElementById('reset').addEventListener('click', () => loadPuzzle(currentPuzzleIndex));
+        document.getElementById('next').addEventListener('click', () => {
+            currentPuzzleIndex = (currentPuzzleIndex + 1) % puzzles.length;
+            loadPuzzle(currentPuzzleIndex);
+        });
+    </script>
 </body>
 </html>
