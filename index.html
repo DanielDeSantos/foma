@@ -573,6 +573,7 @@
                         cell.appendChild(pieceElement);
                     }
                     
+                    // Solo permitir clics durante el turno de las blancas y cuando no hay coronación pendiente
                     if (gameActive && isWhiteTurn && !pendingPromotion) {
                         cell.addEventListener('click', () => handleCellClick(row, col));
                     }
@@ -593,7 +594,7 @@
             return symbols[piece] || '';
         }
 
-        // Manejar clic en una celda en modo juego
+        // Manejar clic en una celda - VERSIÓN CORREGIDA
         function handleCellClick(row, col) {
             if (!gameActive || !isWhiteTurn || pendingPromotion) return;
             
@@ -619,7 +620,7 @@
                     
                     // Verificar coronación de peón
                     if (movedPiece === 'wp' && row === 0) {
-                        pendingPromotion = { row, col };
+                        pendingPromotion = { row, col, from: selectedPiece };
                         showPromotionModal();
                         return;
                     }
@@ -630,27 +631,32 @@
                     moveCount++;
                     
                     processMoveAftermath(moveNotation);
-                } else if (piece && piece.startsWith('w')) {
-                    // Seleccionar una nueva pieza blanca
+                } else {
+                    // Si se hace clic en otra pieza blanca, seleccionarla
+                    if (piece && piece.startsWith('w')) {
+                        selectedPiece = { row, col };
+                        validMoves = calculateValidMoves(row, col, piece);
+                        updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
+                        renderBoard();
+                    } else {
+                        // Deseleccionar si se hace clic en una celda vacía o pieza negra
+                        selectedPiece = null;
+                        validMoves = [];
+                        updateStatus("Selecciona una pieza blanca para mover.");
+                        renderBoard();
+                    }
+                }
+            } else {
+                // Seleccionar una pieza blanca
+                if (piece && piece.startsWith('w')) {
                     selectedPiece = { row, col };
                     validMoves = calculateValidMoves(row, col, piece);
                     updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
+                    renderBoard();
                 } else {
-                    // Deseleccionar si se hace clic en una celda vacía o pieza negra
-                    selectedPiece = null;
-                    validMoves = [];
                     updateStatus("Selecciona una pieza blanca para mover.");
                 }
-            } else if (piece && piece.startsWith('w')) {
-                // Seleccionar una pieza blanca
-                selectedPiece = { row, col };
-                validMoves = calculateValidMoves(row, col, piece);
-                updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
-            } else {
-                updateStatus("Selecciona una pieza blanca para mover.");
             }
-            
-            renderBoard();
         }
 
         // Procesar las consecuencias después de un movimiento
@@ -693,6 +699,8 @@
             
             // El rey negro responde automáticamente
             setTimeout(() => makeBlackKingMove(), 800);
+            
+            renderBoard();
         }
 
         // Mostrar modal de coronación
@@ -704,8 +712,8 @@
             const promotionPieces = document.querySelectorAll('.promotion-piece');
             promotionPieces.forEach(piece => {
                 piece.onclick = () => {
-                    const selectedPiece = piece.getAttribute('data-piece');
-                    completePromotion(selectedPiece);
+                    const selectedPieceType = piece.getAttribute('data-piece');
+                    completePromotion(selectedPieceType);
                     modal.style.display = 'none';
                 };
             });
@@ -715,17 +723,16 @@
         function completePromotion(pieceType) {
             if (!pendingPromotion) return;
             
-            const { row, col } = pendingPromotion;
+            const { row, col, from } = pendingPromotion;
             boardState[row][col] = pieceType;
             pendingPromotion = null;
             
             // Registrar la jugada blanca con coronación
-            const moveNotation = getMoveNotation(selectedPiece, {row, col}) + "=" + pieceType.substring(1).toUpperCase();
+            const moveNotation = getMoveNotation(from, {row, col}) + "=" + pieceType.substring(1).toUpperCase();
             moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
             moveCount++;
             
             processMoveAftermath(moveNotation);
-            renderBoard();
         }
 
         // Hacer movimiento automático del rey negro - SIEMPRE SE MUEVE
@@ -844,6 +851,8 @@
             } else {
                 updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
             }
+            
+            renderBoard();
         }
 
         // Calcular movimientos válidos
