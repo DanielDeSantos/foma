@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Problemas de Ajedrez</title>
+    <title>Problemas de Ajedrez: Mate en 4 Jugadas</title>
     <style>
         * {
             margin: 0;
@@ -145,6 +145,14 @@
             background-color: rgba(0, 255, 0, 0.5);
         }
         
+        .check {
+            background-color: rgba(255, 0, 0, 0.3) !important;
+        }
+        
+        .checkmate {
+            background-color: rgba(255, 0, 0, 0.6) !important;
+        }
+        
         .control-group {
             margin-bottom: 25px;
         }
@@ -212,6 +220,29 @@
             text-align: center;
         }
         
+        .move-history {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .move-history h3 {
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        
+        .move-list {
+            list-style-type: none;
+        }
+        
+        .move-list li {
+            padding: 5px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
         .instructions {
             margin-top: 30px;
             padding: 20px;
@@ -233,6 +264,21 @@
             margin-bottom: 10px;
         }
         
+        .problem-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .problem-info div {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -241,24 +287,40 @@
             .board-section, .controls-section {
                 min-width: 100%;
             }
+            
+            .problem-info {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Editor de Problemas de Ajedrez</h1>
-            <p class="subtitle">Controla los movimientos de las piezas negras para crear problemas personalizados</p>
+            <h1>Problemas de Ajedrez: Mate en 4 Jugadas</h1>
+            <p class="subtitle">Resuelve problemas donde las blancas dan mate en exactamente 4 jugadas</p>
         </header>
         
         <div class="main-content">
             <section class="board-section">
                 <h2 class="section-title">Tablero de Ajedrez</h2>
+                <div class="problem-info">
+                    <div>Jugadas: <span id="moveCount">0</span>/8</div>
+                    <div>Turno: <span id="turnIndicator">Blancas</span></div>
+                    <div>Problema: <span id="problemNumber">1</span>/3</div>
+                </div>
                 <div class="chessboard" id="chessboard">
                     <!-- El tablero se generará con JavaScript -->
                 </div>
                 <div class="status" id="status">
-                    Estado: Selecciona una pieza negra para mover
+                    Estado: Las blancas juegan primero. Encuentra el mate en 4 jugadas.
+                </div>
+                <div class="move-history">
+                    <h3>Historial de Jugadas</h3>
+                    <ul class="move-list" id="moveList">
+                        <!-- Las jugadas se añadirán aquí -->
+                    </ul>
                 </div>
             </section>
             
@@ -266,12 +328,34 @@
                 <h2 class="section-title">Controles</h2>
                 
                 <div class="control-group">
-                    <h3 class="control-title">Modo de Juego</h3>
+                    <h3 class="control-title">Problemas de Mate en 4</h3>
+                    <div class="button-group">
+                        <button id="prevProblem">Problema Anterior</button>
+                        <button id="nextProblem">Siguiente Problema</button>
+                    </div>
+                    <select id="problemSelector">
+                        <option value="1">Problema 1: Mate con dama y torre</option>
+                        <option value="2">Problema 2: Mate con dos alfiles</option>
+                        <option value="3">Problema 3: Mate con caballo y alfil</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Acciones</h3>
+                    <div class="button-group">
+                        <button id="resetProblem">Reiniciar Problema</button>
+                        <button id="hint">Pista</button>
+                        <button id="showSolution">Mostrar Solución</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Crear Problema</h3>
                     <div class="button-group">
                         <button id="setupMode">Modo Configuración</button>
                         <button id="playMode" class="active">Modo Juego</button>
                     </div>
-                    <p>En Modo Configuración puedes colocar piezas. En Modo Juego controlas las piezas negras.</p>
+                    <p>En Modo Configuración puedes crear tus propios problemas.</p>
                 </div>
                 
                 <div class="control-group">
@@ -294,17 +378,11 @@
                 </div>
                 
                 <div class="control-group">
-                    <h3 class="control-title">Acciones</h3>
+                    <h3 class="control-title">Guardar/Cargar</h3>
                     <div class="button-group">
-                        <button id="clearBoard">Limpiar Tablero</button>
-                        <button id="resetBoard">Posición Inicial</button>
                         <button id="saveProblem">Guardar Problema</button>
                         <button id="loadProblem">Cargar Problema</button>
                     </div>
-                </div>
-                
-                <div class="control-group">
-                    <h3 class="control-title">Problemas Guardados</h3>
                     <select id="savedProblems">
                         <option value="">Selecciona un problema guardado</option>
                     </select>
@@ -315,11 +393,13 @@
         <div class="instructions">
             <h3>Instrucciones de Uso</h3>
             <ol>
-                <li>En <strong>Modo Configuración</strong> puedes colocar piezas en el tablero usando el selector de piezas.</li>
-                <li>En <strong>Modo Juego</strong> puedes controlar las piezas negras para crear problemas personalizados.</li>
-                <li>Selecciona una pieza negra para ver sus movimientos válidos (marcados con puntos verdes).</li>
-                <li>Haz clic en una casilla válida para mover la pieza seleccionada.</li>
-                <li>Usa los botones para guardar y cargar tus problemas personalizados.</li>
+                <li>Selecciona un problema de la lista. Las blancas juegan primero y deben dar mate en 4 jugadas.</li>
+                <li>Haz clic en una pieza blanca para seleccionarla y ver sus movimientos válidos.</li>
+                <li>Haz clic en una casilla verde para mover la pieza seleccionada.</li>
+                <li>Las negras responderán automáticamente con la mejor defensa.</li>
+                <li>Si logras dar mate en exactamente 4 jugadas, ¡has resuelto el problema!</li>
+                <li>Usa el botón "Pista" si necesitas ayuda o "Mostrar Solución" para ver la secuencia completa.</li>
+                <li>En Modo Configuración puedes crear tus propios problemas de mate en 4.</li>
             </ol>
         </div>
     </div>
@@ -331,27 +411,84 @@
         let validMoves = [];
         let isSetupMode = false;
         let selectedPieceType = 'empty';
+        let moveHistory = [];
+        let currentProblem = 1;
+        let moveCount = 0;
+        let isWhiteTurn = true;
+        let gameActive = true;
 
-        // Inicializar el tablero
-        function initializeBoard() {
-            // Posición inicial estándar
-            const initialPosition = [
-                ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
-                ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                [null, null, null, null, null, null, null, null],
-                ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
-                ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
-            ];
+        // Problemas predefinidos de mate en 4
+        const problems = {
+            1: {
+                name: "Mate con dama y torre",
+                board: [
+                    [null, null, null, null, 'bk', null, null, null],
+                    [null, null, null, null, 'bp', 'bp', null, null],
+                    [null, null, null, null, null, null, 'wp', null],
+                    [null, null, null, 'wn', null, null, null, null],
+                    [null, 'wq', null, null, null, null, null, null],
+                    [null, null, null, null, null, 'wb', null, null],
+                    [null, null, 'wp', null, null, null, null, null],
+                    [null, null, null, null, 'wk', 'wr', null, null]
+                ],
+                solution: ["Dc7", "Rf6", "Th6+", "Rg5", "Dg7+", "Rh4", "Th6#"]
+            },
+            2: {
+                name: "Mate con dos alfiles",
+                board: [
+                    [null, null, null, null, 'bk', null, null, null],
+                    [null, null, 'bp', null, 'bp', null, null, null],
+                    [null, null, null, null, null, 'bp', null, null],
+                    [null, null, 'wp', null, null, null, null, null],
+                    [null, null, null, 'wb', null, 'wb', null, null],
+                    [null, null, null, null, null, null, 'wp', null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, 'wk', null, null, null]
+                ],
+                solution: ["Ae5", "Rd7", "Ad6", "Rc8", "Ae6+", "Rb8", "Ab7#"]
+            },
+            3: {
+                name: "Mate con caballo y alfil",
+                board: [
+                    [null, null, null, null, 'bk', null, null, null],
+                    [null, null, 'bp', null, null, null, null, null],
+                    [null, null, null, null, 'bp', null, null, null],
+                    [null, 'wp', null, 'wn', null, null, null, null],
+                    [null, null, null, null, 'wb', null, null, null],
+                    [null, null, null, null, null, null, null, null],
+                    [null, null, null, null, null, null, 'wp', null],
+                    [null, null, null, null, 'wk', null, null, null]
+                ],
+                solution: ["Cc6", "Ra7", "Ab5", "Rb8", "Ca7", "Ra8", "Cc8#"]
+            }
+        };
+
+        // Inicializar el tablero con un problema
+        function initializeProblem(problemNumber) {
+            currentProblem = problemNumber;
+            const problem = problems[problemNumber];
             
-            // Copiar la posición inicial al estado del tablero
+            // Copiar la posición del problema al estado del tablero
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
-                    boardState[row][col] = initialPosition[row][col];
+                    boardState[row][col] = problem.board[row][col];
                 }
             }
+            
+            // Reiniciar variables de juego
+            selectedPiece = null;
+            validMoves = [];
+            moveHistory = [];
+            moveCount = 0;
+            isWhiteTurn = true;
+            gameActive = true;
+            
+            // Actualizar la interfaz
+            updateMoveCount();
+            updateTurnIndicator();
+            updateProblemNumber();
+            updateMoveHistory();
+            updateStatus(`Problema ${problemNumber}: ${problem.name}. Las blancas juegan primero.`);
             
             renderBoard();
         }
@@ -360,6 +497,11 @@
         function renderBoard() {
             const chessboard = document.getElementById('chessboard');
             chessboard.innerHTML = '';
+            
+            // Determinar si el rey negro está en jaque o jaque mate
+            const blackKingPosition = findKing('b');
+            const isCheck = isKingInCheck('b');
+            const isCheckmate = isCheck && isCheckmateForBlack();
             
             for (let row = 0; row < 8; row++) {
                 const boardRow = document.createElement('div');
@@ -381,6 +523,15 @@
                         cell.classList.add('selected');
                     }
                     
+                    // Marcar jaque o jaque mate
+                    if (blackKingPosition && blackKingPosition.row === row && blackKingPosition.col === col) {
+                        if (isCheckmate) {
+                            cell.classList.add('checkmate');
+                        } else if (isCheck) {
+                            cell.classList.add('check');
+                        }
+                    }
+                    
                     // Añadir pieza si existe
                     const piece = boardState[row][col];
                     if (piece) {
@@ -390,7 +541,10 @@
                         cell.appendChild(pieceElement);
                     }
                     
-                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    if (gameActive && ((isWhiteTurn && !isSetupMode) || isSetupMode)) {
+                        cell.addEventListener('click', () => handleCellClick(row, col));
+                    }
+                    
                     boardRow.appendChild(cell);
                 }
                 
@@ -416,7 +570,7 @@
                 return;
             }
             
-            // En modo juego, manejar movimiento de piezas negras
+            // En modo juego, manejar movimiento de piezas blancas
             const piece = boardState[row][col];
             
             // Si ya hay una pieza seleccionada, intentar moverla
@@ -425,32 +579,154 @@
                 const isValidMove = validMoves.some(move => move.row === row && move.col === col);
                 
                 if (isValidMove) {
+                    // Registrar la jugada
+                    const fromCol = String.fromCharCode(97 + selectedPiece.col);
+                    const fromRow = 8 - selectedPiece.row;
+                    const toCol = String.fromCharCode(97 + col);
+                    const toRow = 8 - row;
+                    const pieceType = boardState[selectedPiece.row][selectedPiece.col].substring(1).toUpperCase();
+                    
+                    let moveNotation = '';
+                    if (pieceType !== 'P') {
+                        moveNotation = pieceType + toCol + toRow;
+                    } else {
+                        moveNotation = toCol + toRow;
+                    }
+                    
                     // Mover la pieza
                     boardState[row][col] = boardState[selectedPiece.row][selectedPiece.col];
                     boardState[selectedPiece.row][selectedPiece.col] = null;
                     
+                    // Añadir al historial
+                    moveHistory.push(`${moveCount + 1}. ${moveNotation}`);
+                    moveCount++;
+                    
                     // Actualizar estado
                     selectedPiece = null;
                     validMoves = [];
-                    updateStatus("Movimiento realizado. Selecciona otra pieza negra.");
-                } else if (piece && piece.startsWith('b')) {
-                    // Seleccionar una nueva pieza negra
+                    
+                    // Verificar si es jaque mate
+                    if (isCheckmateForBlack()) {
+                        updateStatus(`¡Jaque mate! ${moveCount % 2 === 1 ? 'Blancas' : 'Negras'} ganan.`);
+                        if (moveCount === 8) {
+                            updateStatus("¡Felicidades! Has logrado el mate en 4 jugadas.");
+                        } else {
+                            updateStatus(`Mate en ${Math.ceil(moveCount / 2)} jugadas, pero el objetivo era mate en 4.`);
+                        }
+                        gameActive = false;
+                    } else {
+                        // Cambiar turno a negras y hacer su movimiento automático
+                        isWhiteTurn = false;
+                        updateTurnIndicator();
+                        updateMoveCount();
+                        updateMoveHistory();
+                        
+                        setTimeout(makeBlackMove, 500);
+                    }
+                } else if (piece && piece.startsWith('w') && isWhiteTurn) {
+                    // Seleccionar una nueva pieza blanca
                     selectedPiece = { row, col };
                     validMoves = calculateValidMoves(row, col, piece);
                     updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
                 } else {
-                    // Deseleccionar si se hace clic en una celda vacía o pieza blanca
+                    // Deseleccionar si se hace clic en una celda vacía o pieza negra
                     selectedPiece = null;
                     validMoves = [];
-                    updateStatus("Selecciona una pieza negra para mover.");
+                    updateStatus("Selecciona una pieza blanca para mover.");
                 }
-            } else if (piece && piece.startsWith('b')) {
-                // Seleccionar una pieza negra
+            } else if (piece && piece.startsWith('w') && isWhiteTurn) {
+                // Seleccionar una pieza blanca
                 selectedPiece = { row, col };
                 validMoves = calculateValidMoves(row, col, piece);
                 updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
             } else {
-                updateStatus("Selecciona una pieza negra para mover.");
+                updateStatus("Selecciona una pieza blanca para mover.");
+            }
+            
+            renderBoard();
+        }
+
+        // Hacer movimiento automático de las negras
+        function makeBlackMove() {
+            if (!gameActive) return;
+            
+            // Encontrar todos los movimientos posibles de las negras
+            const allBlackMoves = [];
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = boardState[row][col];
+                    if (piece && piece.startsWith('b')) {
+                        const moves = calculateValidMoves(row, col, piece);
+                        for (const move of moves) {
+                            allBlackMoves.push({
+                                from: { row, col },
+                                to: move,
+                                piece: piece
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Si no hay movimientos posibles, es jaque mate o tablas
+            if (allBlackMoves.length === 0) {
+                if (isKingInCheck('b')) {
+                    updateStatus("¡Jaque mate! Las blancas ganan.");
+                    if (moveCount === 7) {
+                        updateStatus("¡Felicidades! Has logrado el mate en 4 jugadas.");
+                    } else {
+                        updateStatus(`Mate en ${Math.ceil((moveCount + 1) / 2)} jugadas, pero el objetivo era mate en 4.`);
+                    }
+                } else {
+                    updateStatus("Tablas por ahogado.");
+                }
+                gameActive = false;
+                renderBoard();
+                return;
+            }
+            
+            // Elegir un movimiento al azar (en una implementación real, aquí iría una IA)
+            const randomMove = allBlackMoves[Math.floor(Math.random() * allBlackMoves.length)];
+            
+            // Registrar la jugada
+            const fromCol = String.fromCharCode(97 + randomMove.from.col);
+            const fromRow = 8 - randomMove.from.row;
+            const toCol = String.fromCharCode(97 + randomMove.to.col);
+            const toRow = 8 - randomMove.to.row;
+            const pieceType = randomMove.piece.substring(1).toUpperCase();
+            
+            let moveNotation = '';
+            if (pieceType !== 'P') {
+                moveNotation = pieceType + toCol + toRow;
+            } else {
+                moveNotation = toCol + toRow;
+            }
+            
+            // Mover la pieza
+            boardState[randomMove.to.row][randomMove.to.col] = boardState[randomMove.from.row][randomMove.from.col];
+            boardState[randomMove.from.row][randomMove.from.col] = null;
+            
+            // Añadir al historial
+            moveHistory.push(`${moveNotation}`);
+            moveCount++;
+            
+            // Cambiar turno a blancas
+            isWhiteTurn = true;
+            updateTurnIndicator();
+            updateMoveCount();
+            updateMoveHistory();
+            
+            // Verificar si es jaque mate
+            if (isCheckmateForBlack()) {
+                updateStatus("¡Jaque mate! Las blancas ganan.");
+                if (moveCount === 8) {
+                    updateStatus("¡Felicidades! Has logrado el mate en 4 jugadas.");
+                } else {
+                    updateStatus(`Mate en ${Math.ceil(moveCount / 2)} jugadas, pero el objetivo era mate en 4.`);
+                }
+                gameActive = false;
+            } else {
+                updateStatus("Turno de las blancas. Encuentra el mate en 4 jugadas.");
             }
             
             renderBoard();
@@ -460,24 +736,43 @@
         function calculateValidMoves(row, col, piece) {
             const moves = [];
             const pieceType = piece.substring(1); // Eliminar el color
+            const isWhite = piece.startsWith('w');
             
             // Movimientos básicos para cada tipo de pieza (simplificado)
             switch (pieceType) {
                 case 'p': // Peón
-                    // Peones negros se mueven hacia abajo (aumentando el índice de fila)
-                    if (row < 7 && !boardState[row + 1][col]) {
-                        moves.push({ row: row + 1, col });
-                    }
-                    // Primer movimiento: puede avanzar dos casillas
-                    if (row === 1 && !boardState[row + 1][col] && !boardState[row + 2][col]) {
-                        moves.push({ row: row + 2, col });
-                    }
-                    // Captura en diagonal
-                    if (row < 7 && col > 0 && boardState[row + 1][col - 1] && boardState[row + 1][col - 1].startsWith('w')) {
-                        moves.push({ row: row + 1, col: col - 1 });
-                    }
-                    if (row < 7 && col < 7 && boardState[row + 1][col + 1] && boardState[row + 1][col + 1].startsWith('w')) {
-                        moves.push({ row: row + 1, col: col + 1 });
+                    if (isWhite) {
+                        // Peones blancos se mueven hacia arriba (disminuyendo el índice de fila)
+                        if (row > 0 && !boardState[row - 1][col]) {
+                            moves.push({ row: row - 1, col });
+                        }
+                        // Primer movimiento: puede avanzar dos casillas
+                        if (row === 6 && !boardState[row - 1][col] && !boardState[row - 2][col]) {
+                            moves.push({ row: row - 2, col });
+                        }
+                        // Captura en diagonal
+                        if (row > 0 && col > 0 && boardState[row - 1][col - 1] && boardState[row - 1][col - 1].startsWith('b')) {
+                            moves.push({ row: row - 1, col: col - 1 });
+                        }
+                        if (row > 0 && col < 7 && boardState[row - 1][col + 1] && boardState[row - 1][col + 1].startsWith('b')) {
+                            moves.push({ row: row - 1, col: col + 1 });
+                        }
+                    } else {
+                        // Peones negros se mueven hacia abajo (aumentando el índice de fila)
+                        if (row < 7 && !boardState[row + 1][col]) {
+                            moves.push({ row: row + 1, col });
+                        }
+                        // Primer movimiento: puede avanzar dos casillas
+                        if (row === 1 && !boardState[row + 1][col] && !boardState[row + 2][col]) {
+                            moves.push({ row: row + 2, col });
+                        }
+                        // Captura en diagonal
+                        if (row < 7 && col > 0 && boardState[row + 1][col - 1] && boardState[row + 1][col - 1].startsWith('w')) {
+                            moves.push({ row: row + 1, col: col - 1 });
+                        }
+                        if (row < 7 && col < 7 && boardState[row + 1][col + 1] && boardState[row + 1][col + 1].startsWith('w')) {
+                            moves.push({ row: row + 1, col: col + 1 });
+                        }
                     }
                     break;
                     
@@ -486,7 +781,7 @@
                     for (let i = row - 1; i >= 0; i--) {
                         if (!boardState[i][col]) {
                             moves.push({ row: i, col });
-                        } else if (boardState[i][col].startsWith('w')) {
+                        } else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
                             moves.push({ row: i, col });
                             break;
                         } else {
@@ -496,7 +791,7 @@
                     for (let i = row + 1; i < 8; i++) {
                         if (!boardState[i][col]) {
                             moves.push({ row: i, col });
-                        } else if (boardState[i][col].startsWith('w')) {
+                        } else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
                             moves.push({ row: i, col });
                             break;
                         } else {
@@ -506,7 +801,7 @@
                     for (let j = col - 1; j >= 0; j--) {
                         if (!boardState[row][j]) {
                             moves.push({ row, col: j });
-                        } else if (boardState[row][j].startsWith('w')) {
+                        } else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
                             moves.push({ row, col: j });
                             break;
                         } else {
@@ -516,7 +811,7 @@
                     for (let j = col + 1; j < 8; j++) {
                         if (!boardState[row][j]) {
                             moves.push({ row, col: j });
-                        } else if (boardState[row][j].startsWith('w')) {
+                        } else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
                             moves.push({ row, col: j });
                             break;
                         } else {
@@ -539,7 +834,9 @@
                         const newCol = col + move.c;
                         
                         if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                            if (!boardState[newRow][newCol] || boardState[newRow][newCol].startsWith('w')) {
+                            if (!boardState[newRow][newCol] || 
+                                (isWhite && boardState[newRow][newCol].startsWith('b')) ||
+                                (!isWhite && boardState[newRow][newCol].startsWith('w'))) {
                                 moves.push({ row: newRow, col: newCol });
                             }
                         }
@@ -552,7 +849,7 @@
                         if (row - i >= 0 && col - i >= 0) {
                             if (!boardState[row - i][col - i]) {
                                 moves.push({ row: row - i, col: col - i });
-                            } else if (boardState[row - i][col - i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row - i][col - i].startsWith('b')) || (!isWhite && boardState[row - i][col - i].startsWith('w'))) {
                                 moves.push({ row: row - i, col: col - i });
                                 break;
                             } else {
@@ -564,7 +861,7 @@
                         if (row - i >= 0 && col + i < 8) {
                             if (!boardState[row - i][col + i]) {
                                 moves.push({ row: row - i, col: col + i });
-                            } else if (boardState[row - i][col + i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row - i][col + i].startsWith('b')) || (!isWhite && boardState[row - i][col + i].startsWith('w'))) {
                                 moves.push({ row: row - i, col: col + i });
                                 break;
                             } else {
@@ -576,7 +873,7 @@
                         if (row + i < 8 && col - i >= 0) {
                             if (!boardState[row + i][col - i]) {
                                 moves.push({ row: row + i, col: col - i });
-                            } else if (boardState[row + i][col - i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row + i][col - i].startsWith('b')) || (!isWhite && boardState[row + i][col - i].startsWith('w'))) {
                                 moves.push({ row: row + i, col: col - i });
                                 break;
                             } else {
@@ -588,7 +885,7 @@
                         if (row + i < 8 && col + i < 8) {
                             if (!boardState[row + i][col + i]) {
                                 moves.push({ row: row + i, col: col + i });
-                            } else if (boardState[row + i][col + i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row + i][col + i].startsWith('b')) || (!isWhite && boardState[row + i][col + i].startsWith('w'))) {
                                 moves.push({ row: row + i, col: col + i });
                                 break;
                             } else {
@@ -604,7 +901,7 @@
                     for (let i = row - 1; i >= 0; i--) {
                         if (!boardState[i][col]) {
                             moves.push({ row: i, col });
-                        } else if (boardState[i][col].startsWith('w')) {
+                        } else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
                             moves.push({ row: i, col });
                             break;
                         } else {
@@ -614,7 +911,7 @@
                     for (let i = row + 1; i < 8; i++) {
                         if (!boardState[i][col]) {
                             moves.push({ row: i, col });
-                        } else if (boardState[i][col].startsWith('w')) {
+                        } else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
                             moves.push({ row: i, col });
                             break;
                         } else {
@@ -624,7 +921,7 @@
                     for (let j = col - 1; j >= 0; j--) {
                         if (!boardState[row][j]) {
                             moves.push({ row, col: j });
-                        } else if (boardState[row][j].startsWith('w')) {
+                        } else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
                             moves.push({ row, col: j });
                             break;
                         } else {
@@ -634,7 +931,7 @@
                     for (let j = col + 1; j < 8; j++) {
                         if (!boardState[row][j]) {
                             moves.push({ row, col: j });
-                        } else if (boardState[row][j].startsWith('w')) {
+                        } else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
                             moves.push({ row, col: j });
                             break;
                         } else {
@@ -647,7 +944,7 @@
                         if (row - i >= 0 && col - i >= 0) {
                             if (!boardState[row - i][col - i]) {
                                 moves.push({ row: row - i, col: col - i });
-                            } else if (boardState[row - i][col - i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row - i][col - i].startsWith('b')) || (!isWhite && boardState[row - i][col - i].startsWith('w'))) {
                                 moves.push({ row: row - i, col: col - i });
                                 break;
                             } else {
@@ -659,7 +956,7 @@
                         if (row - i >= 0 && col + i < 8) {
                             if (!boardState[row - i][col + i]) {
                                 moves.push({ row: row - i, col: col + i });
-                            } else if (boardState[row - i][col + i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row - i][col + i].startsWith('b')) || (!isWhite && boardState[row - i][col + i].startsWith('w'))) {
                                 moves.push({ row: row - i, col: col + i });
                                 break;
                             } else {
@@ -671,7 +968,7 @@
                         if (row + i < 8 && col - i >= 0) {
                             if (!boardState[row + i][col - i]) {
                                 moves.push({ row: row + i, col: col - i });
-                            } else if (boardState[row + i][col - i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row + i][col - i].startsWith('b')) || (!isWhite && boardState[row + i][col - i].startsWith('w'))) {
                                 moves.push({ row: row + i, col: col - i });
                                 break;
                             } else {
@@ -683,7 +980,7 @@
                         if (row + i < 8 && col + i < 8) {
                             if (!boardState[row + i][col + i]) {
                                 moves.push({ row: row + i, col: col + i });
-                            } else if (boardState[row + i][col + i].startsWith('w')) {
+                            } else if ((isWhite && boardState[row + i][col + i].startsWith('b')) || (!isWhite && boardState[row + i][col + i].startsWith('w'))) {
                                 moves.push({ row: row + i, col: col + i });
                                 break;
                             } else {
@@ -706,7 +1003,9 @@
                         const newCol = col + move.c;
                         
                         if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                            if (!boardState[newRow][newCol] || boardState[newRow][newCol].startsWith('w')) {
+                            if (!boardState[newRow][newCol] || 
+                                (isWhite && boardState[newRow][newCol].startsWith('b')) ||
+                                (!isWhite && boardState[newRow][newCol].startsWith('w'))) {
                                 moves.push({ row: newRow, col: newCol });
                             }
                         }
@@ -715,6 +1014,82 @@
             }
             
             return moves;
+        }
+
+        // Encontrar la posición del rey
+        function findKing(color) {
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (boardState[row][col] === `${color}k`) {
+                        return { row, col };
+                    }
+                }
+            }
+            return null;
+        }
+
+        // Verificar si el rey está en jaque
+        function isKingInCheck(color) {
+            const kingPos = findKing(color);
+            if (!kingPos) return false;
+            
+            // Verificar si alguna pieza del oponente puede capturar al rey
+            const opponentColor = color === 'w' ? 'b' : 'w';
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = boardState[row][col];
+                    if (piece && piece.startsWith(opponentColor)) {
+                        const moves = calculateValidMoves(row, col, piece);
+                        if (moves.some(move => move.row === kingPos.row && move.col === kingPos.col)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            
+            return false;
+        }
+
+        // Verificar si es jaque mate para las negras
+        function isCheckmateForBlack() {
+            // Primero verificar si el rey negro está en jaque
+            if (!isKingInCheck('b')) return false;
+            
+            // Verificar si hay algún movimiento legal para las negras
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const piece = boardState[row][col];
+                    if (piece && piece.startsWith('b')) {
+                        const moves = calculateValidMoves(row, col, piece);
+                        
+                        // Probar cada movimiento para ver si sale del jaque
+                        for (const move of moves) {
+                            // Guardar el estado actual
+                            const originalPiece = boardState[move.row][move.col];
+                            
+                            // Hacer el movimiento
+                            boardState[move.row][move.col] = piece;
+                            boardState[row][col] = null;
+                            
+                            // Verificar si todavía está en jaque
+                            const stillInCheck = isKingInCheck('b');
+                            
+                            // Deshacer el movimiento
+                            boardState[row][col] = piece;
+                            boardState[move.row][move.col] = originalPiece;
+                            
+                            // Si hay al menos un movimiento que saque del jaque, no es mate
+                            if (!stillInCheck) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Si no hay movimientos que saquen del jaque, es mate
+            return true;
         }
 
         // Obtener nombre de la pieza
@@ -731,6 +1106,88 @@
         // Actualizar el estado
         function updateStatus(message) {
             document.getElementById('status').textContent = `Estado: ${message}`;
+        }
+
+        // Actualizar contador de jugadas
+        function updateMoveCount() {
+            document.getElementById('moveCount').textContent = moveCount;
+        }
+
+        // Actualizar indicador de turno
+        function updateTurnIndicator() {
+            document.getElementById('turnIndicator').textContent = isWhiteTurn ? 'Blancas' : 'Negras';
+        }
+
+        // Actualizar número de problema
+        function updateProblemNumber() {
+            document.getElementById('problemNumber').textContent = currentProblem;
+        }
+
+        // Actualizar historial de jugadas
+        function updateMoveHistory() {
+            const moveList = document.getElementById('moveList');
+            moveList.innerHTML = '';
+            
+            for (let i = 0; i < moveHistory.length; i++) {
+                const li = document.createElement('li');
+                li.textContent = moveHistory[i];
+                moveList.appendChild(li);
+            }
+            
+            // Desplazar hacia abajo para ver la última jugada
+            moveList.scrollTop = moveList.scrollHeight;
+        }
+
+        // Mostrar pista
+        function showHint() {
+            const problem = problems[currentProblem];
+            const nextMove = problem.solution[moveHistory.length];
+            
+            if (nextMove) {
+                updateStatus(`Pista: El siguiente movimiento es ${nextMove}`);
+            } else {
+                updateStatus("No hay más pistas disponibles.");
+            }
+        }
+
+        // Mostrar solución completa
+        function showSolution() {
+            const problem = problems[currentProblem];
+            let solutionText = "Solución completa: ";
+            
+            for (let i = 0; i < problem.solution.length; i++) {
+                if (i % 2 === 0) {
+                    solutionText += `${Math.floor(i/2) + 1}. ${problem.solution[i]} `;
+                } else {
+                    solutionText += `${problem.solution[i]} `;
+                }
+            }
+            
+            updateStatus(solutionText);
+        }
+
+        // Cambiar modo
+        function toggleMode(mode) {
+            isSetupMode = mode === 'setup';
+            
+            const setupBtn = document.getElementById('setupMode');
+            const playBtn = document.getElementById('playMode');
+            
+            if (isSetupMode) {
+                setupBtn.classList.add('active');
+                playBtn.classList.remove('active');
+                updateStatus("Modo Configuración: Selecciona una pieza y haz clic en el tablero para colocarla.");
+                gameActive = false;
+            } else {
+                playBtn.classList.add('active');
+                setupBtn.classList.remove('active');
+                updateStatus("Modo Juego: Las blancas juegan primero. Encuentra el mate en 4 jugadas.");
+                gameActive = true;
+            }
+            
+            selectedPiece = null;
+            validMoves = [];
+            renderBoard();
         }
 
         // Guardar problema
@@ -764,7 +1221,14 @@
                 boardState = JSON.parse(problemData);
                 selectedPiece = null;
                 validMoves = [];
+                moveHistory = [];
+                moveCount = 0;
+                isWhiteTurn = true;
+                gameActive = true;
                 renderBoard();
+                updateMoveCount();
+                updateTurnIndicator();
+                updateMoveHistory();
                 updateStatus(`Problema "${selectedProblem}" cargado correctamente.`);
             } else {
                 updateStatus("Error al cargar el problema.");
@@ -788,51 +1252,29 @@
             }
         }
 
-        // Cambiar modo
-        function toggleMode(mode) {
-            isSetupMode = mode === 'setup';
-            
-            const setupBtn = document.getElementById('setupMode');
-            const playBtn = document.getElementById('playMode');
-            
-            if (isSetupMode) {
-                setupBtn.classList.add('active');
-                playBtn.classList.remove('active');
-                updateStatus("Modo Configuración: Selecciona una pieza y haz clic en el tablero para colocarla.");
-            } else {
-                playBtn.classList.add('active');
-                setupBtn.classList.remove('active');
-                updateStatus("Modo Juego: Selecciona una pieza negra para mover.");
-            }
-            
-            selectedPiece = null;
-            validMoves = [];
-            renderBoard();
-        }
-
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar el tablero
-            initializeBoard();
+            // Inicializar el primer problema
+            initializeProblem(1);
             
             // Configurar eventos de los botones
             document.getElementById('setupMode').addEventListener('click', () => toggleMode('setup'));
             document.getElementById('playMode').addEventListener('click', () => toggleMode('play'));
-            document.getElementById('clearBoard').addEventListener('click', () => {
-                // Limpiar el tablero
-                for (let row = 0; row < 8; row++) {
-                    for (let col = 0; col < 8; col++) {
-                        boardState[row][col] = null;
-                    }
+            document.getElementById('resetProblem').addEventListener('click', () => initializeProblem(currentProblem));
+            document.getElementById('hint').addEventListener('click', showHint);
+            document.getElementById('showSolution').addEventListener('click', showSolution);
+            document.getElementById('prevProblem').addEventListener('click', () => {
+                if (currentProblem > 1) {
+                    initializeProblem(currentProblem - 1);
                 }
-                selectedPiece = null;
-                validMoves = [];
-                renderBoard();
-                updateStatus("Tablero limpiado.");
             });
-            document.getElementById('resetBoard').addEventListener('click', () => {
-                initializeBoard();
-                updateStatus("Tablero restablecido a la posición inicial.");
+            document.getElementById('nextProblem').addEventListener('click', () => {
+                if (currentProblem < Object.keys(problems).length) {
+                    initializeProblem(currentProblem + 1);
+                }
+            });
+            document.getElementById('problemSelector').addEventListener('change', function() {
+                initializeProblem(parseInt(this.value));
             });
             document.getElementById('saveProblem').addEventListener('click', saveProblem);
             document.getElementById('loadProblem').addEventListener('click', loadProblem);
@@ -844,9 +1286,6 @@
             
             // Actualizar lista de problemas guardados
             updateSavedProblemsList();
-            
-            // Iniciar en modo juego
-            toggleMode('play');
         });
     </script>
 </body>
