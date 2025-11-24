@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Problema 1 (Notación FEN Corregida)</title>
+    <title>Ajedrez de Ataque - Problema 1</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -193,10 +193,20 @@
             margin: 10px 0;
             border-left: 4px solid #3498db;
         }
+        .checkmate {
+            color: #e74c3c;
+            font-weight: bold;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
-    <h1>Ajedrez de Ataque - Problema 1 (Notación FEN Corregida)</h1>
+    <h1>Ajedrez de Ataque - Problema 1</h1>
     
     <div class="container">
         <div class="board-container">
@@ -235,7 +245,7 @@
             
             <div class="solution-text">
                 <h3>Solución del Problema:</h3>
-                <p><strong>1.g6 c6 2.h5 Ad7 3.Ah4 Ac8 4.Axg3#</strong></p>
+                <p class="checkmate">1.g6 c6 2.h5 Ad7 3.Ah4 Ac8 4.Axg3++</p>
             </div>
             
             <div class="moves-list">
@@ -296,17 +306,17 @@
                 black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }  // Ad7-c8
             },
             { 
-                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3#
+                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3++
                 black: null // Jaque mate, no hay respuesta
             }
         ];
 
-        // Notación algebraica de los movimientos
+        // Notación algebraica de los movimientos (con ++ para jaque mate)
         const moveNotation = [
             "1. g6 c6",
             "2. h5 Ad7", 
             "3. Ah4 Ac8",
-            "4. Axg3#"
+            "4. Axg3++"
         ];
 
         let currentPosition = JSON.parse(JSON.stringify(initialPosition));
@@ -454,7 +464,7 @@
                     // Verificar si es jaque mate
                     if (currentMoveIndex === solution.length) {
                         gameCompleted = true;
-                        document.getElementById('status').textContent = "¡Felicidades! ¡Jaque mate en 4 jugadas!";
+                        document.getElementById('status').innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                         document.getElementById('status').className = "status success";
                     } else {
                         // Movimiento de las negras
@@ -512,7 +522,7 @@
             const statusElement = document.getElementById('status');
             
             if (gameCompleted) {
-                statusElement.textContent = "¡Felicidades! ¡Jaque mate en 4 jugadas!";
+                statusElement.innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                 statusElement.className = "status success";
             } else if (currentMoveIndex === 0) {
                 statusElement.textContent = "¡Selecciona una pieza blanca para comenzar!";
@@ -534,7 +544,11 @@
                 playerMoves.forEach((move, index) => {
                     const moveElement = document.createElement('div');
                     moveElement.className = 'move-item';
-                    moveElement.textContent = moveNotation[index];
+                    if (index === 3) {
+                        moveElement.innerHTML = `<strong class="checkmate">${moveNotation[index]}</strong>`;
+                    } else {
+                        moveElement.textContent = moveNotation[index];
+                    }
                     movesContainer.appendChild(moveElement);
                 });
             }
@@ -604,18 +618,6 @@
         document.getElementById('reset-btn').addEventListener('click', resetGame);
         document.getElementById('hint-btn').addEventListener('click', showHint);
         document.getElementById('solution-btn').addEventListener('click', showSolution);
-
-        // Mostrar la posición inicial en la consola para verificación
-        console.log("Posición inicial del tablero:");
-        console.log("8 | " + initialPosition[0].map(p => p || '.').join('  '));
-        console.log("7 | " + initialPosition[1].map(p => p || '.').join('  '));
-        console.log("6 | " + initialPosition[2].map(p => p || '.').join('  '));
-        console.log("5 | " + initialPosition[3].map(p => p || '.').join('  '));
-        console.log("4 | " + initialPosition[4].map(p => p || '.').join('  '));
-        console.log("3 | " + initialPosition[5].map(p => p || '.').join('  '));
-        console.log("2 | " + initialPosition[6].map(p => p || '.').join('  '));
-        console.log("1 | " + initialPosition[7].map(p => p || '.').join('  '));
-        console.log("    a  b  c  d  e  f  g  h");
     </script>
 </body>
 </html>
