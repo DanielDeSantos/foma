@@ -64,12 +64,6 @@
         .last-move {
             background-color: rgba(52, 152, 219, 0.3);
         }
-        .coordinates {
-            display: grid;
-            grid-template-columns: repeat(8, 60px);
-            text-align: center;
-            font-weight: bold;
-        }
         .file-coordinates {
             display: flex;
             justify-content: space-around;
@@ -146,16 +140,6 @@
         .error {
             color: #e74c3c;
         }
-        .move-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 12px;
-            color: #333;
-            background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 3px;
-            padding: 1px 3px;
-        }
         .legend {
             display: flex;
             justify-content: center;
@@ -203,6 +187,11 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+        .move-explanation {
+            margin-top: 10px;
+            font-style: italic;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -245,7 +234,10 @@
             
             <div class="solution-text">
                 <h3>Solución del Problema:</h3>
-                <p class="checkmate">1.g6 c6 2.h5 Ad7 3.Ah4 Ac8 4.Axg3++</p>
+                <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
+                <div class="move-explanation">
+                    <p><strong>Explicación:</strong> Esta secuencia fuerza al rey negro a una posición de mate donde no puede escapar del ataque del alfil blanco.</p>
+                </div>
             </div>
             
             <div class="moves-list">
@@ -295,19 +287,23 @@
         const solution = [
             { 
                 white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2-g6
-                black: { from: { row: 1, col: 1 }, to: { row: 2, col: 2 } }  // b7-c6
+                black: { from: { row: 1, col: 1 }, to: { row: 2, col: 2 } }, // b7-c6
+                description: "Las blancas avanzan el peón a g6, amenazando abrir líneas de ataque."
             },
             { 
                 white: { from: { row: 6, col: 7 }, to: { row: 3, col: 7 } }, // h2-h5
-                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }  // Ae8-d7
+                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // Ae8-d7
+                description: "Las blancas continúan con h5, mientras las negras mueven su alfil a d7."
             },
             { 
                 white: { from: { row: 6, col: 3 }, to: { row: 4, col: 7 } }, // Ad2-h4
-                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }  // Ad7-c8
+                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // Ad7-c8
+                description: "El alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
             },
             { 
                 white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3++
-                black: null // Jaque mate, no hay respuesta
+                black: null, // Jaque mate, no hay respuesta
+                description: "¡Jaque mate! El alfil captura en g3 y el rey negro no puede escapar."
             }
         ];
 
