@@ -192,6 +192,12 @@
             font-style: italic;
             color: #666;
         }
+        .position-summary {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -209,8 +215,10 @@
                 <div id="board" class="board"></div>
             </div>
             
-            <div class="fen-notation">
-                <strong>Notación FEN:</strong> 4b3/1p2Bp1p/8/p1ppppp1/pp1pp1pp/2p1K1p1/1p1B2p1/4k3
+            <div class="position-summary">
+                <h3>Posición Inicial:</h3>
+                <p><strong>Blancas:</strong> Alfiles en e7 y e2; Rey en e3; Peones en c2, g2, b4, d4, f4, h4, c5, g5</p>
+                <p><strong>Negras:</strong> Alfil en e8; Rey en e1; Peones en c3, g3, c4, g4, f5, d5, c7, g7</p>
             </div>
             
             <div id="status" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -254,40 +262,31 @@
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
         };
 
-        // Función para convertir notación FEN a matriz de posiciones
-        function fenToPosition(fen) {
-            // Tomar solo la parte de la posición (antes del primer espacio)
-            const fenPosition = fen.split(' ')[0];
-            const rows = fenPosition.split('/');
-            const position = [];
-            
-            for (let row of rows) {
-                const newRow = [];
-                for (let char of row) {
-                    if (isNaN(char)) {
-                        newRow.push(char);
-                    } else {
-                        // Añadir espacios vacíos según el número
-                        for (let i = 0; i < parseInt(char); i++) {
-                            newRow.push('');
-                        }
-                    }
-                }
-                position.push(newRow);
-            }
-            
-            return position;
-        }
-
-        // Posición inicial del problema en notación FEN
-        const fenString = "4b3/1p2Bp1p/8/p1ppppp1/pp1pp1pp/2p1K1p1/1p1B2p1/4k3";
-        const initialPosition = fenToPosition(fenString);
+        // Crear posición inicial basada en la descripción
+        const initialPosition = [
+            // Fila 8 (a8-h8)
+            ['', '', '', '', 'b', '', '', ''],  // Alfil negro en e8
+            // Fila 7 (a7-h7)
+            ['', '', 'p', '', '', '', 'p', ''],  // Peones negros en c7, g7
+            // Fila 6 (a6-h6)
+            ['', '', '', '', '', '', '', ''],    // Vacía
+            // Fila 5 (a5-h5)
+            ['', '', 'P', '', '', 'p', 'P', ''], // Peones blancos c5, g5; negro f5
+            // Fila 4 (a4-h4)
+            ['', 'P', '', 'P', '', 'P', '', 'P'], // Peones blancos b4, d4, f4, h4
+            // Fila 3 (a3-h3)
+            ['', '', 'p', '', 'K', '', 'p', ''],  // Peones negros c3, g3; Rey blanco e3
+            // Fila 2 (a2-h2)
+            ['', '', 'P', '', 'B', '', 'P', ''],  // Peones blancos c2, g2; Alfil blanco e2
+            // Fila 1 (a1-h1)
+            ['', '', '', '', 'k', '', '', '']     // Rey negro en e1
+        ];
 
         // Secuencia de movimientos correcta
         const solution = [
             { 
                 white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2-g6
-                black: { from: { row: 1, col: 1 }, to: { row: 2, col: 2 } }, // b7-c6
+                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7-c6
                 description: "Las blancas avanzan el peón a g6, amenazando abrir líneas de ataque."
             },
             { 
@@ -296,7 +295,7 @@
                 description: "Las blancas continúan con h5, mientras las negras mueven su alfil a d7."
             },
             { 
-                white: { from: { row: 6, col: 3 }, to: { row: 4, col: 7 } }, // Ad2-h4
+                white: { from: { row: 6, col: 4 }, to: { row: 4, col: 7 } }, // Ae2-h4
                 black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // Ad7-c8
                 description: "El alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
             },
@@ -614,6 +613,18 @@
         document.getElementById('reset-btn').addEventListener('click', resetGame);
         document.getElementById('hint-btn').addEventListener('click', showHint);
         document.getElementById('solution-btn').addEventListener('click', showSolution);
+
+        // Mostrar la posición inicial en la consola para verificación
+        console.log("Posición inicial del tablero:");
+        console.log("8 | " + initialPosition[0].map(p => p || '.').join('  '));
+        console.log("7 | " + initialPosition[1].map(p => p || '.').join('  '));
+        console.log("6 | " + initialPosition[2].map(p => p || '.').join('  '));
+        console.log("5 | " + initialPosition[3].map(p => p || '.').join('  '));
+        console.log("4 | " + initialPosition[4].map(p => p || '.').join('  '));
+        console.log("3 | " + initialPosition[5].map(p => p || '.').join('  '));
+        console.log("2 | " + initialPosition[6].map(p => p || '.').join('  '));
+        console.log("1 | " + initialPosition[7].map(p => p || '.').join('  '));
+        console.log("    a  b  c  d  e  f  g  h");
     </script>
 </body>
 </html>
