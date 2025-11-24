@@ -376,7 +376,8 @@
                 <li>Haz clic en una casilla verde para mover la pieza blanca seleccionada</li>
                 <li>Las negras responderán automáticamente después de tu movimiento</li>
                 <li>El objetivo es dar MATE en exactamente 4 JUGADAS (8 movimientos en total)</li>
-                <li>Usa "Editar Respuestas" para definir cómo responderán las negras</li>
+                <li>Si das mate antes o después de 4 jugadas, el problema se reiniciará</li>
+                <li>Los reyes NO pueden ser capturados - solo se puede dar jaque mate</li>
             </ol>
         </div>
     </div>
@@ -485,6 +486,12 @@
             renderBoard();
         }
 
+        // Reiniciar con alerta
+        function resetWithAlert(message) {
+            alert(message);
+            initializeProblem(currentProblem);
+        }
+
         // Renderizar el tablero
         function renderBoard() {
             const chessboard = document.getElementById('chessboard');
@@ -567,6 +574,13 @@
                 const isValidMove = validMoves.some(move => move.row === row && move.col === col);
                 
                 if (isValidMove) {
+                    // Verificar que no se está intentando capturar un rey
+                    const targetPiece = boardState[row][col];
+                    if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
+                        updateStatus("¡No puedes capturar reyes! Solo se permite jaque mate.");
+                        return;
+                    }
+                    
                     // Registrar la jugada blanca
                     const moveNotation = getMoveNotation(selectedPiece, {row, col});
                     
@@ -578,17 +592,31 @@
                     moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
                     moveCount++;
                     
+                    // Verificar si es jaque mate prematuro
+                    if (isCheckmateForBlack()) {
+                        const jugadasCompletas = Math.ceil(moveCount / 2);
+                        if (jugadasCompletas < 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        } else if (jugadasCompletas > 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        }
+                    }
+                    
+                    // Verificar si se superó el límite de jugadas
+                    if (moveCount >= 8 && !isCheckmateForBlack()) {
+                        resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
+                        return;
+                    }
+                    
                     // Actualizar estado
                     selectedPiece = null;
                     validMoves = [];
                     
-                    // Verificar si es jaque mate
-                    if (isCheckmateForBlack()) {
-                        if (moveCount === 7) {
-                            updateStatus("¡Felicidades! ¡Has logrado el mate en 4 jugadas!");
-                        } else {
-                            updateStatus(`¡Jaque mate! Pero el objetivo era mate en 4 jugadas (hiciste mate en ${Math.ceil(moveCount/2)} jugadas).`);
-                        }
+                    // Verificar si es jaque mate exacto en 4 jugadas
+                    if (isCheckmateForBlack() && moveCount === 7) {
+                        updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
                         gameActive = false;
                         renderBoard();
                         return;
@@ -625,11 +653,162 @@
             renderBoard();
         }
 
+        // Calcular movimientos válidos CORREGIDA
+        function calculateValidMoves(row, col, piece) {
+            const moves = [];
+            const pieceType = piece.substring(1);
+            const isWhite = piece.startsWith('w');
+            
+            // Función auxiliar para verificar si se puede mover a una casilla
+            const canMoveTo = (r, c) => {
+                // No se puede mover fuera del tablero
+                if (r < 0 || r >= 8 || c < 0 || c >= 8) return false;
+                
+                const targetPiece = boardState[r][c];
+                
+                // No se puede capturar al rey propio
+                if (targetPiece && ((isWhite && targetPiece === 'wk') || (!isWhite && targetPiece === 'bk'))) {
+                    return false;
+                }
+                
+                // No se puede capturar al rey enemigo (solo jaque mate)
+                if (targetPiece && ((isWhite && targetPiece === 'bk') || (!isWhite && targetPiece === 'wk'))) {
+                    return false;
+                }
+                
+                // Casilla vacía o pieza enemiga
+                return !targetPiece || (isWhite && targetPiece.startsWith('b')) || (!isWhite && targetPiece.startsWith('w'));
+            };
+            
+            // Peones
+            if (pieceType === 'p') {
+                if (isWhite) {
+                    // Movimiento hacia adelante
+                    if (row > 0 && !boardState[row-1][col]) {
+                        moves.push({row: row-1, col});
+                        // Primer movimiento (2 casillas)
+                        if (row === 6 && !boardState[row-2][col]) {
+                            moves.push({row: row-2, col});
+                        }
+                    }
+                    // Capturas diagonales
+                    if (row > 0 && col > 0 && boardState[row-1][col-1] && boardState[row-1][col-1].startsWith('b')) {
+                        moves.push({row: row-1, col: col-1});
+                    }
+                    if (row > 0 && col < 7 && boardState[row-1][col+1] && boardState[row-1][col+1].startsWith('b')) {
+                        moves.push({row: row-1, col: col+1});
+                    }
+                } else {
+                    // Movimiento hacia adelante (negras)
+                    if (row < 7 && !boardState[row+1][col]) {
+                        moves.push({row: row+1, col});
+                        // Primer movimiento (2 casillas)
+                        if (row === 1 && !boardState[row+2][col]) {
+                            moves.push({row: row+2, col});
+                        }
+                    }
+                    // Capturas diagonales
+                    if (row < 7 && col > 0 && boardState[row+1][col-1] && boardState[row+1][col-1].startsWith('w')) {
+                        moves.push({row: row+1, col: col-1});
+                    }
+                    if (row < 7 && col < 7 && boardState[row+1][col+1] && boardState[row+1][col+1].startsWith('w')) {
+                        moves.push({row: row+1, col: col+1});
+                    }
+                }
+            } 
+            // Torres
+            else if (pieceType === 'r') {
+                const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+                for (const [dr, dc] of directions) {
+                    for (let i = 1; i < 8; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        if (!canMoveTo(newRow, newCol)) break;
+                        
+                        moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
+                        if (boardState[newRow][newCol]) break;
+                    }
+                }
+            }
+            // Alfiles
+            else if (pieceType === 'b') {
+                const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
+                for (const [dr, dc] of directions) {
+                    for (let i = 1; i < 8; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        if (!canMoveTo(newRow, newCol)) break;
+                        
+                        moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
+                        if (boardState[newRow][newCol]) break;
+                    }
+                }
+            }
+            // Caballos
+            else if (pieceType === 'n') {
+                const knightMoves = [
+                    [-2,-1], [-2,1], [-1,-2], [-1,2],
+                    [1,-2], [1,2], [2,-1], [2,1]
+                ];
+                for (const [dr, dc] of knightMoves) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    if (canMoveTo(newRow, newCol)) {
+                        moves.push({row: newRow, col: newCol});
+                    }
+                }
+            }
+            // Reinas (combinación de torre y alfil)
+            else if (pieceType === 'q') {
+                const directions = [
+                    [-1,0], [1,0], [0,-1], [0,1],
+                    [-1,-1], [-1,1], [1,-1], [1,1]
+                ];
+                for (const [dr, dc] of directions) {
+                    for (let i = 1; i < 8; i++) {
+                        const newRow = row + dr * i;
+                        const newCol = col + dc * i;
+                        if (!canMoveTo(newRow, newCol)) break;
+                        
+                        moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
+                        if (boardState[newRow][newCol]) break;
+                    }
+                }
+            }
+            // Reyes
+            else if (pieceType === 'k') {
+                const kingMoves = [
+                    [-1,-1], [-1,0], [-1,1],
+                    [0,-1], [0,1],
+                    [1,-1], [1,0], [1,1]
+                ];
+                for (const [dr, dc] of kingMoves) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    if (canMoveTo(newRow, newCol)) {
+                        moves.push({row: newRow, col: newCol});
+                    }
+                }
+            }
+            
+            return moves;
+        }
+
+        // El resto del código permanece igual...
+        // [Aquí irían las funciones handleEditClick, algebraicToPosition, getMoveNotation, 
+        // makeBlackMove, findKing, isKingInCheck, isCheckmateForBlack, etc.
+        // que se mantienen igual que en la versión anterior]
+
         // Manejar clic en modo edición
         function handleEditClick(row, col) {
             const piece = boardState[row][col];
             if (piece && piece.startsWith('b')) {
-                // En modo edición, al hacer clic en una pieza negra, permitir configurar su movimiento
                 const lastWhiteMove = moveHistory[moveHistory.length - 1];
                 if (lastWhiteMove && lastWhiteMove.includes('.')) {
                     const moveKey = lastWhiteMove.split('. ')[1];
@@ -639,7 +818,6 @@
                         problem.blackResponses = {};
                     }
                     
-                    // Mostrar diálogo para configurar la respuesta
                     const responseFrom = prompt(`¿Desde dónde debe moverse la pieza negra para responder a ${moveKey}? (ejemplo: "e4")`, "e8");
                     const responseTo = prompt(`¿A dónde debe moverse? (ejemplo: "e5")`, "e7");
                     
@@ -696,7 +874,6 @@
             const moveKey = lastWhiteMove.split('. ')[1];
             const problem = problems[currentProblem];
             
-            // Buscar la respuesta predefinida para este movimiento
             if (problem.blackResponses && problem.blackResponses[moveKey]) {
                 const response = problem.blackResponses[moveKey];
                 const fromRow = response.from[0];
@@ -704,13 +881,27 @@
                 const toRow = response.to[0];
                 const toCol = response.to[1];
                 
-                // Verificar que el movimiento es válido
                 const piece = boardState[fromRow][fromCol];
                 if (piece && piece.startsWith('b')) {
                     const validMoves = calculateValidMoves(fromRow, fromCol, piece);
                     const isValid = validMoves.some(move => move.row === toRow && move.col === toCol);
                     
                     if (isValid) {
+                        // Verificar que no se está intentando capturar un rey
+                        const targetPiece = boardState[toRow][toCol];
+                        if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
+                            updateStatus("Error: Las negras no pueden capturar reyes.");
+                            moveHistory.push("--");
+                            moveCount++;
+                            isWhiteTurn = true;
+                            updateTurnIndicator();
+                            updateMoveCount();
+                            updateMoveHistory();
+                            updateStatus("Turno de las blancas. Las negras no pudieron mover.");
+                            renderBoard();
+                            return;
+                        }
+                        
                         // Mover la pieza negra
                         boardState[toRow][toCol] = piece;
                         boardState[fromRow][fromCol] = null;
@@ -719,26 +910,39 @@
                         moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
                         moveCount++;
                         
+                        // Verificar si es jaque mate después del movimiento negro
+                        if (isCheckmateForBlack()) {
+                            const jugadasCompletas = Math.ceil(moveCount / 2);
+                            if (jugadasCompletas < 4) {
+                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                                return;
+                            } else if (jugadasCompletas > 4) {
+                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                                return;
+                            }
+                        }
+                        
+                        // Verificar si se superó el límite de jugadas
+                        if (moveCount >= 8 && !isCheckmateForBlack()) {
+                            resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
+                            return;
+                        }
+                        
                         // Cambiar turno a blancas
                         isWhiteTurn = true;
                         updateTurnIndicator();
                         updateMoveCount();
                         updateMoveHistory();
                         
-                        // Verificar si es jaque mate
-                        if (isCheckmateForBlack()) {
-                            if (moveCount === 8) {
-                                updateStatus("¡Felicidades! ¡Has logrado el mate en 4 jugadas!");
-                            } else {
-                                updateStatus(`¡Jaque mate! Pero el objetivo era mate en 4 jugadas (hiciste mate en ${Math.ceil(moveCount/2)} jugadas).`);
-                            }
+                        // Verificar si es jaque mate exacto en 4 jugadas
+                        if (isCheckmateForBlack() && moveCount === 8) {
+                            updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
                             gameActive = false;
                         } else {
                             updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
                         }
                     } else {
                         updateStatus("Error: Movimiento predefinido de negras no es válido.");
-                        // Forzar el movimiento de todas formas
                         boardState[toRow][toCol] = piece;
                         boardState[fromRow][fromCol] = null;
                         moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
@@ -751,13 +955,11 @@
                     }
                 } else {
                     updateStatus("Error: No hay pieza negra en la posición predefinida.");
-                    // Cambiar turno a blancas de todas formas
                     isWhiteTurn = true;
                     updateTurnIndicator();
                     updateStatus("Error en respuesta predefinida. Turno de las blancas.");
                 }
             } else {
-                // Si no hay respuesta predefinida, hacer un movimiento aleatorio
                 updateStatus("No hay respuesta predefinida. Las negras pasan turno.");
                 moveHistory.push("--");
                 moveCount++;
@@ -769,65 +971,6 @@
             }
             
             renderBoard();
-        }
-
-        // Calcular movimientos válidos (versión simplificada)
-        function calculateValidMoves(row, col, piece) {
-            // Implementación simplificada - en una aplicación real esto sería más complejo
-            const moves = [];
-            const pieceType = piece.substring(1);
-            const isWhite = piece.startsWith('w');
-            
-            // Solo movimientos básicos para demostración
-            if (pieceType === 'p') {
-                // Peones
-                if (isWhite) {
-                    if (row > 0 && !boardState[row-1][col]) moves.push({row: row-1, col});
-                    if (row > 0 && col > 0 && boardState[row-1][col-1] && boardState[row-1][col-1].startsWith('b')) 
-                        moves.push({row: row-1, col: col-1});
-                    if (row > 0 && col < 7 && boardState[row-1][col+1] && boardState[row-1][col+1].startsWith('b')) 
-                        moves.push({row: row-1, col: col+1});
-                } else {
-                    if (row < 7 && !boardState[row+1][col]) moves.push({row: row+1, col});
-                    if (row < 7 && col > 0 && boardState[row+1][col-1] && boardState[row+1][col-1].startsWith('w')) 
-                        moves.push({row: row+1, col: col-1});
-                    if (row < 7 && col < 7 && boardState[row+1][col+1] && boardState[row+1][col+1].startsWith('w')) 
-                        moves.push({row: row+1, col: col+1});
-                }
-            } else if (pieceType === 'r') {
-                // Torres - movimientos horizontales y verticales
-                for (let i = row-1; i >= 0; i--) {
-                    if (!boardState[i][col]) moves.push({row: i, col});
-                    else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
-                        moves.push({row: i, col});
-                        break;
-                    } else break;
-                }
-                for (let i = row+1; i < 8; i++) {
-                    if (!boardState[i][col]) moves.push({row: i, col});
-                    else if ((isWhite && boardState[i][col].startsWith('b')) || (!isWhite && boardState[i][col].startsWith('w'))) {
-                        moves.push({row: i, col});
-                        break;
-                    } else break;
-                }
-                for (let j = col-1; j >= 0; j--) {
-                    if (!boardState[row][j]) moves.push({row, col: j});
-                    else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
-                        moves.push({row, col: j});
-                        break;
-                    } else break;
-                }
-                for (let j = col+1; j < 8; j++) {
-                    if (!boardState[row][j]) moves.push({row, col: j});
-                    else if ((isWhite && boardState[row][j].startsWith('b')) || (!isWhite && boardState[row][j].startsWith('w'))) {
-                        moves.push({row, col: j});
-                        break;
-                    } else break;
-                }
-            }
-            // ... (implementaciones similares para otras piezas)
-            
-            return moves;
         }
 
         // Encontrar la posición del rey
@@ -844,11 +987,9 @@
 
         // Verificar si el rey está en jaque
         function isKingInCheck(color) {
-            // Implementación simplificada
             const kingPos = findKing(color);
             if (!kingPos) return false;
             
-            // Verificar si alguna pieza del oponente puede capturar al rey
             const opponentColor = color === 'w' ? 'b' : 'w';
             
             for (let row = 0; row < 8; row++) {
@@ -868,10 +1009,8 @@
 
         // Verificar si es jaque mate para las negras
         function isCheckmateForBlack() {
-            // Primero verificar si el rey negro está en jaque
             if (!isKingInCheck('b')) return false;
             
-            // Verificar si hay algún movimiento legal para las negras
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     const piece = boardState[row][col];
@@ -882,7 +1021,6 @@
                 }
             }
             
-            // Si no hay movimientos legales y el rey está en jaque, es mate
             return true;
         }
 
@@ -928,7 +1066,6 @@
                 moveList.appendChild(li);
             }
             
-            // Desplazar hacia abajo para ver la última jugada
             moveList.scrollTop = moveList.scrollHeight;
         }
 
@@ -1014,10 +1151,8 @@
 
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', function() {
-            // Inicializar el primer problema
             initializeProblem(1);
             
-            // Configurar eventos de los botones
             document.getElementById('editMode').addEventListener('click', () => toggleMode('edit'));
             document.getElementById('playMode').addEventListener('click', () => toggleMode('play'));
             document.getElementById('resetProblem').addEventListener('click', () => initializeProblem(currentProblem));
