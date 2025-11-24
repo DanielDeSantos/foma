@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Problema 1</title>
+    <title>Ajedrez de Ataque - Problema 2</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,6 +18,24 @@
             text-align: center;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .problems-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .problem {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .problem h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
         }
         .container {
             display: flex;
@@ -29,15 +47,15 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #fff;
+            background-color: #f8f9fa;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 2px solid #ddd;
         }
         .board {
             display: grid;
-            grid-template-columns: repeat(8, 60px);
-            grid-template-rows: repeat(8, 60px);
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
             border: 2px solid #333;
             margin-bottom: 20px;
         }
@@ -45,7 +63,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 40px;
+            font-size: 30px;
             position: relative;
             cursor: pointer;
         }
@@ -67,30 +85,23 @@
         .file-coordinates {
             display: flex;
             justify-content: space-around;
-            width: 480px;
+            width: 400px;
             margin-bottom: 5px;
+            font-weight: bold;
         }
         .rank-coordinates {
             display: flex;
             flex-direction: column;
             justify-content: space-around;
-            height: 480px;
+            height: 400px;
             margin-right: 5px;
+            font-weight: bold;
         }
         .coords-container {
             display: flex;
         }
         .game-info {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
             width: 100%;
-        }
-        .game-info h2 {
-            color: #2c3e50;
-            border-bottom: 1px solid #3498db;
-            padding-bottom: 5px;
         }
         .controls {
             display: flex;
@@ -162,14 +173,6 @@
         .move-item:last-child {
             border-bottom: none;
         }
-        .fen-notation {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            margin: 10px 0;
-            text-align: center;
-        }
         .solution-text {
             background-color: #e8f4fd;
             padding: 15px;
@@ -198,64 +201,85 @@
             border-radius: 5px;
             margin: 10px 0;
         }
+        .problem-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .nav-btn {
+            padding: 8px 16px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .nav-btn:hover {
+            background-color: #8e44ad;
+        }
     </style>
 </head>
 <body>
-    <h1>Ajedrez de Ataque - Problema 1</h1>
+    <h1>Ajedrez de Ataque - Problemas de Mate</h1>
     
-    <div class="container">
-        <div class="board-container">
-            <div class="file-coordinates">
-                <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-            </div>
-            <div class="coords-container">
-                <div class="rank-coordinates">
-                    <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+    <div class="problems-container">
+        <!-- Problema 2 -->
+        <div class="problem" id="problem2">
+            <h2>Problema 2 - Mate con Caballos y Alfil</h2>
+            
+            <div class="container">
+                <div class="board-container">
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board2" class="board"></div>
+                    </div>
+                    
+                    <div class="position-summary">
+                        <h3>Posición Inicial:</h3>
+                        <p><strong>Blancas:</strong> Caballos en d5 y e4; Alfil en e5; Rey en e6</p>
+                        <p><strong>Negras:</strong> Rey en c8</p>
+                    </div>
+                    
+                    <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn2" class="btn">Pista</button>
+                        <button id="solution-btn2" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>Mayúsculas:</strong> Blancas</div>
+                        <div><strong>Minúsculas:</strong> Negras</div>
+                    </div>
                 </div>
-                <div id="board" class="board"></div>
-            </div>
-            
-            <div class="position-summary">
-                <h3>Posición Inicial:</h3>
-                <p><strong>Blancas:</strong> Alfiles en e7 y e2; Rey en e3; Peones en c2, g2, b4, d4, f4, h4, c5, g5</p>
-                <p><strong>Negras:</strong> Alfil en e8; Rey en e1; Peones en c3, g3, c4, g4, f5, d5, c7, g7</p>
-            </div>
-            
-            <div id="status" class="status">¡Selecciona una pieza blanca para comenzar!</div>
-            
-            <div class="controls">
-                <button id="reset-btn" class="btn btn-danger">Reiniciar</button>
-                <button id="hint-btn" class="btn">Pista</button>
-                <button id="solution-btn" class="btn">Ver Solución</button>
-            </div>
-            
-            <div class="legend">
-                <div><strong>Mayúsculas:</strong> Blancas</div>
-                <div><strong>Minúsculas:</strong> Negras</div>
-            </div>
-        </div>
-        
-        <div class="game-info">
-            <h2>Información del Juego</h2>
-            <p><strong>Objetivo:</strong> Lograr jaque mate en 4 jugadas.</p>
-            <p><strong>Reglas:</strong> Solo puedes mover piezas blancas. Las negras responderán automáticamente.</p>
-            
-            <div class="solution-text">
-                <h3>Solución del Problema:</h3>
-                <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
-                <div class="move-explanation">
-                    <p><strong>Explicación:</strong> 
-                        1. Peón g5-g6; Peón c7-c6<br>
-                        2. Peón h4-h5; Alfil e8-d7<br>
-                        3. Alfil e7-h4; Alfil d7-c8<br>
-                        4. Alfil h4xg3++ ¡Jaque mate!
-                    </p>
+                
+                <div class="game-info">
+                    <div class="solution-text">
+                        <h3>Solución del Problema 2:</h3>
+                        <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
+                        <div class="move-explanation">
+                            <p><strong>Explicación:</strong> 
+                                1. Caballo d5-c5; Rey c8-d8<br>
+                                2. Rey e6-f7; Rey d8-c8<br>
+                                3. Caballo c5-b6+ (jaque); Rey c8-d8<br>
+                                4. Caballo e4-e6++ ¡Jaque mate!
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container2"></div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="moves-list">
-                <h3>Movimientos realizados:</h3>
-                <div id="moves-container"></div>
             </div>
         </div>
     </div>
@@ -267,75 +291,77 @@
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
         };
 
-        // Crear posición inicial CORREGIDA con alfil blanco en e7
-        const initialPosition = [
+        // ========== PROBLEMA 2 ==========
+        // Posición inicial del Problema 2
+        const initialPosition2 = [
             // Fila 8 (a8-h8) - Índice 0
-            ['', '', '', '', 'b', '', '', ''],  // Alfil negro en e8
+            ['', '', 'k', '', '', '', '', ''],  // Rey negro en c8
             // Fila 7 (a7-h7) - Índice 1
-            ['', '', 'p', '', 'B', '', 'p', ''],  // Peones negros en c7, g7; Alfil blanco en e7
+            ['', '', '', '', '', '', '', ''],   // Vacía
             // Fila 6 (a6-h6) - Índice 2
-            ['', '', '', '', '', '', '', ''],    // Vacía
+            ['', '', '', '', 'K', '', '', ''],  // Rey blanco en e6
             // Fila 5 (a5-h5) - Índice 3
-            ['', '', 'P', '', '', 'p', 'P', ''], // Peones blancos c5, g5; negro f5
+            ['', '', '', 'N', 'B', '', '', ''], // Caballo en d5, Alfil en e5
             // Fila 4 (a4-h4) - Índice 4
-            ['', 'P', '', 'P', '', 'P', '', 'P'], // Peones blancos b4, d4, f4, h4
+            ['', '', '', '', 'N', '', '', ''],  // Caballo en e4
             // Fila 3 (a3-h3) - Índice 5
-            ['', '', 'p', '', 'K', '', 'p', ''],  // Peones negros c3, g3; Rey blanco e3
+            ['', '', '', '', '', '', '', ''],   // Vacía
             // Fila 2 (a2-h2) - Índice 6
-            ['', '', 'P', '', 'B', '', 'P', ''],  // Peones blancos c2, g2; Alfil blanco e2
+            ['', '', '', '', '', '', '', ''],   // Vacía
             // Fila 1 (a1-h1) - Índice 7
-            ['', '', '', '', 'k', '', '', '']     // Rey negro en e1
+            ['', '', '', '', '', '', '', '']    // Vacía
         ];
 
-        // Secuencia de movimientos CORREGIDA según la solución
-        const solution = [
+        // Secuencia de movimientos del Problema 2
+        const solution2 = [
             { 
-                // Movimiento 1: Peón blanco g5-g6
-                white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } }, // g5(3,6) -> g6(2,6)
-                // Respuesta negra: Peón negro c7-c6
-                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7(1,2) -> c6(2,2)
-                description: "Peón blanco avanza a g6, abriendo líneas de ataque."
+                // Movimiento 1: Caballo d5-c5
+                white: { from: { row: 3, col: 3 }, to: { row: 3, col: 2 } }, // d5(3,3) -> c5(3,2)
+                // Respuesta negra: Rey c8-d8
+                black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // c8(0,2) -> d8(0,3)
+                description: "Caballo se mueve a c5, atacando la casilla d7. Rey negro huye a d8."
             },
             { 
-                // Movimiento 2: Peón blanco h4-h5
-                white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } }, // h4(4,7) -> h5(3,7)
-                // Respuesta negra: Alfil negro e8-d7
-                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // e8(0,4) -> d7(1,3)
-                description: "Peón blanco avanza a h5, mientras el alfil negro se mueve a d7."
+                // Movimiento 2: Rey e6-f7
+                white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } }, // e6(2,4) -> f7(1,5)
+                // Respuesta negra: Rey d8-c8
+                black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } }, // d8(0,3) -> c8(0,2)
+                description: "Rey blanco avanza a f7, acercándose. Rey negro retrocede a c8."
             },
             { 
-                // Movimiento 3: Alfil blanco e7-h4
-                white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } }, // e7(1,4) -> h4(4,7)
-                // Respuesta negra: Alfil negro d7-c8
-                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // d7(1,3) -> c8(0,2)
-                description: "Alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
+                // Movimiento 3: Caballo c5-b6+ (jaque)
+                white: { from: { row: 3, col: 2 }, to: { row: 2, col: 1 } }, // c5(3,2) -> b6(2,1)
+                // Respuesta negra: Rey c8-d8
+                black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // c8(0,2) -> d8(0,3)
+                description: "Caballo da jaque en b6. Rey negro debe moverse a d8."
             },
             { 
-                // Movimiento 4: Alfil blanco h4xg3++ (captura y jaque mate)
-                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // h4(4,7) -> g3(5,6)
+                // Movimiento 4: Caballo e4-e6++ (jaque mate)
+                white: { from: { row: 4, col: 4 }, to: { row: 2, col: 4 } }, // e4(4,4) -> e6(2,4)
                 black: null, // Jaque mate, no hay respuesta
-                description: "¡Jaque mate! El alfil captura en g3 y el rey negro no puede escapar."
+                description: "¡Jaque mate! El caballo corta la retirada del rey negro."
             }
         ];
 
-        // Notación algebraica de los movimientos
-        const moveNotation = [
-            "1. g6 c6",
-            "2. h5 Ad7", 
-            "3. Ah4 Ac8",
-            "4. Axg3++"
+        // Notación algebraica de los movimientos del Problema 2
+        const moveNotation2 = [
+            "1. Cc5 Rd8",
+            "2. Rf7 Rc8", 
+            "3. Cb6+ Rd8",
+            "4. Ce6++"
         ];
 
-        let currentPosition = JSON.parse(JSON.stringify(initialPosition));
-        let selectedSquare = null;
-        let validMoves = [];
-        let currentMoveIndex = 0;
-        let playerMoves = [];
-        let gameCompleted = false;
+        // Estado del Problema 2
+        let currentPosition2 = JSON.parse(JSON.stringify(initialPosition2));
+        let selectedSquare2 = null;
+        let validMoves2 = [];
+        let currentMoveIndex2 = 0;
+        let playerMoves2 = [];
+        let gameCompleted2 = false;
 
-        // Crear tablero
-        function createBoard() {
-            const board = document.getElementById('board');
+        // Crear tablero del Problema 2
+        function createBoard2() {
+            const board = document.getElementById('board2');
             board.innerHTML = '';
             
             for (let row = 0; row < 8; row++) {
@@ -346,85 +372,85 @@
                     square.dataset.row = row;
                     square.dataset.col = col;
                     
-                    const piece = currentPosition[row][col];
+                    const piece = currentPosition2[row][col];
                     if (piece) {
                         square.textContent = pieces[piece];
                     }
                     
                     // Resaltar última jugada
-                    if (playerMoves.length > 0) {
-                        const lastMove = playerMoves[playerMoves.length - 1];
+                    if (playerMoves2.length > 0) {
+                        const lastMove = playerMoves2[playerMoves2.length - 1];
                         if ((row === lastMove.from.row && col === lastMove.from.col) || 
                             (row === lastMove.to.row && col === lastMove.to.col)) {
                             square.classList.add('last-move');
                         }
                     }
                     
-                    square.addEventListener('click', () => handleSquareClick(row, col));
+                    square.addEventListener('click', () => handleSquareClick2(row, col));
                     board.appendChild(square);
                 }
             }
             
-            updateStatus();
-            updateMovesList();
+            updateStatus2();
+            updateMovesList2();
         }
 
-        // Manejar clic en una casilla
-        function handleSquareClick(row, col) {
-            if (gameCompleted) return;
+        // Manejar clic en una casilla del Problema 2
+        function handleSquareClick2(row, col) {
+            if (gameCompleted2) return;
             
-            const piece = currentPosition[row][col];
+            const piece = currentPosition2[row][col];
             
             // Si hay una casilla seleccionada, intentar mover
-            if (selectedSquare) {
-                const fromRow = selectedSquare.row;
-                const fromCol = selectedSquare.col;
+            if (selectedSquare2) {
+                const fromRow = selectedSquare2.row;
+                const fromCol = selectedSquare2.col;
                 
                 // Verificar si el movimiento es válido
-                const isValidMove = validMoves.some(move => 
+                const isValidMove = validMoves2.some(move => 
                     move.to.row === row && move.to.col === col);
                 
                 if (isValidMove) {
                     // Realizar movimiento del jugador
-                    makeMove(fromRow, fromCol, row, col, true);
+                    makeMove2(fromRow, fromCol, row, col, true);
                 } else {
                     // Movimiento no válido, deseleccionar
-                    clearSelection();
+                    clearSelection2();
                     // Si se hizo clic en otra pieza blanca, seleccionarla
                     if (piece && isWhitePiece(piece)) {
-                        selectSquare(row, col);
+                        selectSquare2(row, col);
                     }
                 }
             } else {
                 // Si no hay casilla seleccionada, seleccionar si es una pieza blanca
                 if (piece && isWhitePiece(piece)) {
-                    selectSquare(row, col);
+                    selectSquare2(row, col);
                 }
             }
         }
 
-        // Seleccionar una casilla
-        function selectSquare(row, col) {
-            clearSelection();
+        // Seleccionar una casilla del Problema 2
+        function selectSquare2(row, col) {
+            clearSelection2();
             
-            selectedSquare = { row, col };
-            const squareElement = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+            selectedSquare2 = { row, col };
+            const squareElement = document.querySelector(`#board2 .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
             // Calcular movimientos válidos para la pieza seleccionada
-            calculateValidMoves(row, col);
+            calculateValidMoves2(row, col);
             
             // Resaltar movimientos válidos
-            validMoves.forEach(move => {
-                const targetSquare = document.querySelector(`.square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
+            validMoves2.forEach(move => {
+                const targetSquare = document.querySelector(`#board2 .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
                 targetSquare.classList.add('valid-move');
             });
         }
 
-        // Calcular movimientos válidos para una pieza
-        function calculateValidMoves(row, col) {
-            validMoves = [];
-            const piece = currentPosition[row][col];
+        // Calcular movimientos válidos para una pieza del Problema 2
+        function calculateValidMoves2(row, col) {
+            validMoves2 = [];
+            const piece = currentPosition2[row][col];
             
             if (!piece) return;
             
@@ -432,12 +458,12 @@
             if (!isWhitePiece(piece)) return;
             
             // Para este problema solo necesitamos los movimientos de la solución
-            if (currentMoveIndex < solution.length) {
-                const expectedMove = solution[currentMoveIndex].white;
+            if (currentMoveIndex2 < solution2.length) {
+                const expectedMove = solution2[currentMoveIndex2].white;
                 
                 // Solo permitir el movimiento esperado en la solución
                 if (row === expectedMove.from.row && col === expectedMove.from.col) {
-                    validMoves.push({
+                    validMoves2.push({
                         from: { row, col },
                         to: expectedMove.to
                     });
@@ -445,64 +471,64 @@
             }
         }
 
-        // Realizar un movimiento
-        function makeMove(fromRow, fromCol, toRow, toCol, isPlayerMove) {
-            const piece = currentPosition[fromRow][fromCol];
+        // Realizar un movimiento del Problema 2
+        function makeMove2(fromRow, fromCol, toRow, toCol, isPlayerMove) {
+            const piece = currentPosition2[fromRow][fromCol];
             
             // Mover la pieza
-            currentPosition[toRow][toCol] = piece;
-            currentPosition[fromRow][fromCol] = '';
+            currentPosition2[toRow][toCol] = piece;
+            currentPosition2[fromRow][fromCol] = '';
             
             if (isPlayerMove) {
                 // Registrar movimiento del jugador
-                playerMoves.push({
+                playerMoves2.push({
                     from: { row: fromRow, col: fromCol },
                     to: { row: toRow, col: toCol }
                 });
                 
                 // Verificar si el movimiento es correcto
-                const expectedMove = solution[currentMoveIndex].white;
+                const expectedMove = solution2[currentMoveIndex2].white;
                 if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
                     toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
                     
                     // Movimiento correcto
-                    currentMoveIndex++;
+                    currentMoveIndex2++;
                     
                     // Verificar si es jaque mate
-                    if (currentMoveIndex === solution.length) {
-                        gameCompleted = true;
-                        document.getElementById('status').innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
-                        document.getElementById('status').className = "status success";
+                    if (currentMoveIndex2 === solution2.length) {
+                        gameCompleted2 = true;
+                        document.getElementById('status2').innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                        document.getElementById('status2').className = "status success";
                     } else {
                         // Movimiento de las negras
-                        setTimeout(makeBlackMove, 500);
+                        setTimeout(makeBlackMove2, 500);
                     }
                 } else {
                     // Movimiento incorrecto
-                    document.getElementById('status').textContent = "Movimiento incorrecto. Intenta de nuevo.";
-                    document.getElementById('status').className = "status error";
+                    document.getElementById('status2').textContent = "Movimiento incorrecto. Intenta de nuevo.";
+                    document.getElementById('status2').className = "status error";
                     // Revertir movimiento
-                    currentPosition[fromRow][fromCol] = piece;
-                    currentPosition[toRow][toCol] = '';
-                    playerMoves.pop();
+                    currentPosition2[fromRow][fromCol] = piece;
+                    currentPosition2[toRow][toCol] = '';
+                    playerMoves2.pop();
                 }
             }
             
-            clearSelection();
-            createBoard();
+            clearSelection2();
+            createBoard2();
         }
 
-        // Realizar movimiento de las negras
-        function makeBlackMove() {
-            if (currentMoveIndex < solution.length) {
-                const blackMove = solution[currentMoveIndex].black;
+        // Realizar movimiento de las negras del Problema 2
+        function makeBlackMove2() {
+            if (currentMoveIndex2 < solution2.length) {
+                const blackMove = solution2[currentMoveIndex2].black;
                 if (blackMove) {
-                    const piece = currentPosition[blackMove.from.row][blackMove.from.col];
-                    currentPosition[blackMove.to.row][blackMove.to.col] = piece;
-                    currentPosition[blackMove.from.row][blackMove.from.col] = '';
+                    const piece = currentPosition2[blackMove.from.row][blackMove.from.col];
+                    currentPosition2[blackMove.to.row][blackMove.to.col] = piece;
+                    currentPosition2[blackMove.from.row][blackMove.from.col] = '';
                     
-                    createBoard();
-                    document.getElementById('status').textContent = "Las negras han jugado. Es tu turno.";
+                    createBoard2();
+                    document.getElementById('status2').textContent = "Las negras han jugado. Es tu turno.";
                 }
             }
         }
@@ -512,94 +538,94 @@
             return piece === piece.toUpperCase();
         }
 
-        // Limpiar selección
-        function clearSelection() {
-            selectedSquare = null;
-            validMoves = [];
+        // Limpiar selección del Problema 2
+        function clearSelection2() {
+            selectedSquare2 = null;
+            validMoves2 = [];
             
-            const squares = document.querySelectorAll('.square');
+            const squares = document.querySelectorAll('#board2 .square');
             squares.forEach(square => {
                 square.classList.remove('selected');
                 square.classList.remove('valid-move');
             });
         }
 
-        // Actualizar estado del juego
-        function updateStatus() {
-            const statusElement = document.getElementById('status');
+        // Actualizar estado del juego del Problema 2
+        function updateStatus2() {
+            const statusElement = document.getElementById('status2');
             
-            if (gameCompleted) {
+            if (gameCompleted2) {
                 statusElement.innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                 statusElement.className = "status success";
-            } else if (currentMoveIndex === 0) {
+            } else if (currentMoveIndex2 === 0) {
                 statusElement.textContent = "¡Selecciona una pieza blanca para comenzar!";
                 statusElement.className = "status";
             } else {
-                statusElement.textContent = `Movimiento ${currentMoveIndex}/4 completado. Es tu turno.`;
+                statusElement.textContent = `Movimiento ${currentMoveIndex2}/4 completado. Es tu turno.`;
                 statusElement.className = "status";
             }
         }
 
-        // Actualizar lista de movimientos
-        function updateMovesList() {
-            const movesContainer = document.getElementById('moves-container');
+        // Actualizar lista de movimientos del Problema 2
+        function updateMovesList2() {
+            const movesContainer = document.getElementById('moves-container2');
             movesContainer.innerHTML = '';
             
-            if (playerMoves.length === 0) {
+            if (playerMoves2.length === 0) {
                 movesContainer.innerHTML = '<p>No se han realizado movimientos aún.</p>';
             } else {
-                playerMoves.forEach((move, index) => {
+                playerMoves2.forEach((move, index) => {
                     const moveElement = document.createElement('div');
                     moveElement.className = 'move-item';
                     if (index === 3) {
-                        moveElement.innerHTML = `<strong class="checkmate">${moveNotation[index]}</strong>`;
+                        moveElement.innerHTML = `<strong class="checkmate">${moveNotation2[index]}</strong>`;
                     } else {
-                        moveElement.textContent = moveNotation[index];
+                        moveElement.textContent = moveNotation2[index];
                     }
                     movesContainer.appendChild(moveElement);
                 });
             }
         }
 
-        // Mostrar pista
-        function showHint() {
-            if (gameCompleted || currentMoveIndex >= solution.length) return;
+        // Mostrar pista del Problema 2
+        function showHint2() {
+            if (gameCompleted2 || currentMoveIndex2 >= solution2.length) return;
             
-            const expectedMove = solution[currentMoveIndex].white;
-            const fromSquare = document.querySelector(`.square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
-            const toSquare = document.querySelector(`.square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
+            const expectedMove = solution2[currentMoveIndex2].white;
+            const fromSquare = document.querySelector(`#board2 .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
+            const toSquare = document.querySelector(`#board2 .square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
             
             fromSquare.classList.add('selected');
             toSquare.classList.add('valid-move');
             
-            document.getElementById('status').textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
-            document.getElementById('status').className = "status";
+            document.getElementById('status2').textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
+            document.getElementById('status2').className = "status";
             
             setTimeout(() => {
-                clearSelection();
-                createBoard();
+                clearSelection2();
+                createBoard2();
             }, 2000);
         }
 
-        // Mostrar solución completa
-        function showSolution() {
-            resetGame();
+        // Mostrar solución completa del Problema 2
+        function showSolution2() {
+            resetGame2();
             
             // Ejecutar todos los movimientos de la solución
             const executeMove = (index) => {
-                if (index < solution.length) {
-                    const whiteMove = solution[index].white;
-                    makeMove(whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
+                if (index < solution2.length) {
+                    const whiteMove = solution2[index].white;
+                    makeMove2(whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
                     
-                    if (solution[index].black) {
+                    if (solution2[index].black) {
                         setTimeout(() => {
-                            const blackMove = solution[index].black;
-                            makeMove(blackMove.from.row, blackMove.from.col, blackMove.to.row, blackMove.to.col, false);
+                            const blackMove = solution2[index].black;
+                            makeMove2(blackMove.from.row, blackMove.from.col, blackMove.to.row, blackMove.to.col, false);
                             executeMove(index + 1);
                         }, 1000);
                     } else {
-                        gameCompleted = true;
-                        createBoard();
+                        gameCompleted2 = true;
+                        createBoard2();
                     }
                 }
             };
@@ -607,24 +633,24 @@
             executeMove(0);
         }
 
-        // Reiniciar juego
-        function resetGame() {
-            currentPosition = JSON.parse(JSON.stringify(initialPosition));
-            selectedSquare = null;
-            validMoves = [];
-            currentMoveIndex = 0;
-            playerMoves = [];
-            gameCompleted = false;
-            createBoard();
+        // Reiniciar juego del Problema 2
+        function resetGame2() {
+            currentPosition2 = JSON.parse(JSON.stringify(initialPosition2));
+            selectedSquare2 = null;
+            validMoves2 = [];
+            currentMoveIndex2 = 0;
+            playerMoves2 = [];
+            gameCompleted2 = false;
+            createBoard2();
         }
 
-        // Inicializar
-        createBoard();
+        // Inicializar Problema 2
+        createBoard2();
 
-        // Event listeners para los botones
-        document.getElementById('reset-btn').addEventListener('click', resetGame);
-        document.getElementById('hint-btn').addEventListener('click', showHint);
-        document.getElementById('solution-btn').addEventListener('click', showSolution);
+        // Event listeners para los botones del Problema 2
+        document.getElementById('reset-btn2').addEventListener('click', resetGame2);
+        document.getElementById('hint-btn2').addEventListener('click', showHint2);
+        document.getElementById('solution-btn2').addEventListener('click', showSolution2);
     </script>
 </body>
 </html>
