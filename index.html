@@ -1,23 +1,851 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Puzzles</title>
-    <link rel="stylesheet" href="css/styles.css">
-    <!-- Chessboard.js requires jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    <script src="https://unpkg.com/chess.js@0.12.0/chess.js"></script>
+    <title>Editor de Problemas de Ajedrez</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .board-section {
+            flex: 1;
+            min-width: 500px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .controls-section {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
+        }
+        
+        .chessboard {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border: 10px solid #5d4037;
+            border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .board-row {
+            display: flex;
+        }
+        
+        .board-cell {
+            width: 12.5%;
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .white-cell {
+            background-color: #f0d9b5;
+        }
+        
+        .black-cell {
+            background-color: #b58863;
+        }
+        
+        .board-cell:hover {
+            background-color: rgba(255, 215, 0, 0.3);
+        }
+        
+        .piece {
+            font-size: 2.5rem;
+            user-select: none;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .white-piece {
+            color: #ffffff;
+        }
+        
+        .black-piece {
+            color: #000000;
+        }
+        
+        .selected {
+            background-color: rgba(106, 190, 255, 0.7) !important;
+        }
+        
+        .valid-move {
+            position: relative;
+        }
+        
+        .valid-move::after {
+            content: '';
+            position: absolute;
+            width: 25%;
+            height: 25%;
+            border-radius: 50%;
+            background-color: rgba(0, 255, 0, 0.5);
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1a1a2e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        select option {
+            background: #1a1a2e;
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 5px;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .board-section, .controls-section {
+                min-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Chess Puzzle: Checkmate in 4 Moves</h1>
-    <p id="problem-desc">Solve this puzzle by checkmating the black king in exactly 4 moves. The black king will move automatically.</p>
-    <div id="board" style="width: 400px;"></div>
-    <p>Moves made: <span id="move-count">0</span>/4</p>
-    <button id="reset-btn">Reset Puzzle</button>
-    <button id="next-btn">Next Problem</button>
-    <script src="js/problems.js"></script>
-    <script src="js/script.js"></script>
+    <div class="container">
+        <header>
+            <h1>Editor de Problemas de Ajedrez</h1>
+            <p class="subtitle">Controla los movimientos de las piezas negras para crear problemas personalizados</p>
+        </header>
+        
+        <div class="main-content">
+            <section class="board-section">
+                <h2 class="section-title">Tablero de Ajedrez</h2>
+                <div class="chessboard" id="chessboard">
+                    <!-- El tablero se generará con JavaScript -->
+                </div>
+                <div class="status" id="status">
+                    Estado: Selecciona una pieza negra para mover
+                </div>
+            </section>
+            
+            <section class="controls-section">
+                <h2 class="section-title">Controles</h2>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Modo de Juego</h3>
+                    <div class="button-group">
+                        <button id="setupMode">Modo Configuración</button>
+                        <button id="playMode" class="active">Modo Juego</button>
+                    </div>
+                    <p>En Modo Configuración puedes colocar piezas. En Modo Juego controlas las piezas negras.</p>
+                </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Piezas para Colocar</h3>
+                    <select id="pieceSelector">
+                        <option value="empty">Vacío</option>
+                        <option value="bp">Peón Negro</option>
+                        <option value="br">Torre Negra</option>
+                        <option value="bn">Caballo Negro</option>
+                        <option value="bb">Alfil Negro</option>
+                        <option value="bq">Reina Negra</option>
+                        <option value="bk">Rey Negro</option>
+                        <option value="wp">Peón Blanco</option>
+                        <option value="wr">Torre Blanca</option>
+                        <option value="wn">Caballo Blanco</option>
+                        <option value="wb">Alfil Blanco</option>
+                        <option value="wq">Reina Blanca</option>
+                        <option value="wk">Rey Blanco</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Acciones</h3>
+                    <div class="button-group">
+                        <button id="clearBoard">Limpiar Tablero</button>
+                        <button id="resetBoard">Posición Inicial</button>
+                        <button id="saveProblem">Guardar Problema</button>
+                        <button id="loadProblem">Cargar Problema</button>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Problemas Guardados</h3>
+                    <select id="savedProblems">
+                        <option value="">Selecciona un problema guardado</option>
+                    </select>
+                </div>
+            </section>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instrucciones de Uso</h3>
+            <ol>
+                <li>En <strong>Modo Configuración</strong> puedes colocar piezas en el tablero usando el selector de piezas.</li>
+                <li>En <strong>Modo Juego</strong> puedes controlar las piezas negras para crear problemas personalizados.</li>
+                <li>Selecciona una pieza negra para ver sus movimientos válidos (marcados con puntos verdes).</li>
+                <li>Haz clic en una casilla válida para mover la pieza seleccionada.</li>
+                <li>Usa los botones para guardar y cargar tus problemas personalizados.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        // Representación del tablero
+        let boardState = Array(8).fill().map(() => Array(8).fill(null));
+        let selectedPiece = null;
+        let validMoves = [];
+        let isSetupMode = false;
+        let selectedPieceType = 'empty';
+
+        // Inicializar el tablero
+        function initializeBoard() {
+            const chessboard = document.getElementById('chessboard');
+            chessboard.innerHTML = '';
+            
+            // Posición inicial estándar
+            const initialPosition = [
+                ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+                ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+                ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
+            ];
+            
+            // Copiar la posición inicial al estado del tablero
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    boardState[row][col] = initialPosition[row][col];
+                }
+            }
+            
+            renderBoard();
+        }
+
+        // Renderizar el tablero
+        function renderBoard() {
+            const chessboard = document.getElementById('chessboard');
+            chessboard.innerHTML = '';
+            
+            for (let row = 0; row < 8; row++) {
+                const boardRow = document.createElement('div');
+                boardRow.className = 'board-row';
+                
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = `board-cell ${(row + col) % 2 === 0 ? 'white-cell' : 'black-cell'}`;
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    // Marcar si es un movimiento válido
+                    if (validMoves.some(move => move.row === row && move.col === col)) {
+                        cell.classList.add('valid-move');
+                    }
+                    
+                    // Marcar si está seleccionado
+                    if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
+                        cell.classList.add('selected');
+                    }
+                    
+                    // Añadir pieza si existe
+                    const piece = boardState[row][col];
+                    if (piece) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = `piece ${piece.startsWith('w') ? 'white-piece' : 'black-piece'}`;
+                        pieceElement.textContent = getPieceSymbol(piece);
+                        cell.appendChild(pieceElement);
+                    }
+                    
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    boardRow.appendChild(cell);
+                }
+                
+                chessboard.appendChild(boardRow);
+            }
+        }
+
+        // Obtener símbolo Unicode para la pieza
+        function getPieceSymbol(piece) {
+            const symbols = {
+                'wp': '♙', 'wr': '♖', 'wn': '♘', 'wb': '♗', 'wq': '♕', 'wk': '♔',
+                'bp': '♟', 'br': '♜', 'bn': '♞', 'bb': '♝', 'bq': '♛', 'bk': '♚'
+            };
+            return symbols[piece] || '';
+        }
+
+        // Manejar clic en una celda
+        function handleCellClick(row, col) {
+            if (isSetupMode) {
+                // En modo configuración, colocar la pieza seleccionada
+                boardState[row][col] = selectedPieceType === 'empty' ? null : selectedPieceType;
+                renderBoard();
+                return;
+            }
+            
+            // En modo juego, manejar movimiento de piezas negras
+            const piece = boardState[row][col];
+            
+            // Si ya hay una pieza seleccionada, intentar moverla
+            if (selectedPiece) {
+                // Verificar si el movimiento es válido
+                const isValidMove = validMoves.some(move => move.row === row && move.col === col);
+                
+                if (isValidMove) {
+                    // Mover la pieza
+                    boardState[row][col] = boardState[selectedPiece.row][selectedPiece.col];
+                    boardState[selectedPiece.row][selectedPiece.col] = null;
+                    
+                    // Actualizar estado
+                    selectedPiece = null;
+                    validMoves = [];
+                    updateStatus("Movimiento realizado. Selecciona otra pieza negra.");
+                } else if (piece && piece.startsWith('b')) {
+                    // Seleccionar una nueva pieza negra
+                    selectedPiece = { row, col };
+                    validMoves = calculateValidMoves(row, col, piece);
+                    updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
+                } else {
+                    // Deseleccionar si se hace clic en una celda vacía o pieza blanca
+                    selectedPiece = null;
+                    validMoves = [];
+                    updateStatus("Selecciona una pieza negra para mover.");
+                }
+            } else if (piece && piece.startsWith('b')) {
+                // Seleccionar una pieza negra
+                selectedPiece = { row, col };
+                validMoves = calculateValidMoves(row, col, piece);
+                updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
+            } else {
+                updateStatus("Selecciona una pieza negra para mover.");
+            }
+            
+            renderBoard();
+        }
+
+        // Calcular movimientos válidos (simplificado)
+        function calculateValidMoves(row, col, piece) {
+            const moves = [];
+            const pieceType = piece.substring(1); // Eliminar el color
+            
+            // Movimientos básicos para cada tipo de pieza (simplificado)
+            switch (pieceType) {
+                case 'p': // Peón
+                    // Peones negros se mueven hacia abajo (aumentando el índice de fila)
+                    if (row < 7 && !boardState[row + 1][col]) {
+                        moves.push({ row: row + 1, col });
+                    }
+                    // Primer movimiento: puede avanzar dos casillas
+                    if (row === 1 && !boardState[row + 1][col] && !boardState[row + 2][col]) {
+                        moves.push({ row: row + 2, col });
+                    }
+                    // Captura en diagonal
+                    if (row < 7 && col > 0 && boardState[row + 1][col - 1] && boardState[row + 1][col - 1].startsWith('w')) {
+                        moves.push({ row: row + 1, col: col - 1 });
+                    }
+                    if (row < 7 && col < 7 && boardState[row + 1][col + 1] && boardState[row + 1][col + 1].startsWith('w')) {
+                        moves.push({ row: row + 1, col: col + 1 });
+                    }
+                    break;
+                    
+                case 'r': // Torre
+                    // Movimientos horizontales y verticales
+                    for (let i = row - 1; i >= 0; i--) {
+                        if (!boardState[i][col]) {
+                            moves.push({ row: i, col });
+                        } else if (boardState[i][col].startsWith('w')) {
+                            moves.push({ row: i, col });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let i = row + 1; i < 8; i++) {
+                        if (!boardState[i][col]) {
+                            moves.push({ row: i, col });
+                        } else if (boardState[i][col].startsWith('w')) {
+                            moves.push({ row: i, col });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let j = col - 1; j >= 0; j--) {
+                        if (!boardState[row][j]) {
+                            moves.push({ row, col: j });
+                        } else if (boardState[row][j].startsWith('w')) {
+                            moves.push({ row, col: j });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let j = col + 1; j < 8; j++) {
+                        if (!boardState[row][j]) {
+                            moves.push({ row, col: j });
+                        } else if (boardState[row][j].startsWith('w')) {
+                            moves.push({ row, col: j });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    break;
+                    
+                case 'n': // Caballo
+                    // Movimientos en L
+                    const knightMoves = [
+                        { r: -2, c: -1 }, { r: -2, c: 1 },
+                        { r: -1, c: -2 }, { r: -1, c: 2 },
+                        { r: 1, c: -2 }, { r: 1, c: 2 },
+                        { r: 2, c: -1 }, { r: 2, c: 1 }
+                    ];
+                    
+                    for (const move of knightMoves) {
+                        const newRow = row + move.r;
+                        const newCol = col + move.c;
+                        
+                        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                            if (!boardState[newRow][newCol] || boardState[newRow][newCol].startsWith('w')) {
+                                moves.push({ row: newRow, col: newCol });
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'b': // Alfil
+                    // Movimientos diagonales
+                    for (let i = 1; i < 8; i++) {
+                        if (row - i >= 0 && col - i >= 0) {
+                            if (!boardState[row - i][col - i]) {
+                                moves.push({ row: row - i, col: col - i });
+                            } else if (boardState[row - i][col - i].startsWith('w')) {
+                                moves.push({ row: row - i, col: col - i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row - i >= 0 && col + i < 8) {
+                            if (!boardState[row - i][col + i]) {
+                                moves.push({ row: row - i, col: col + i });
+                            } else if (boardState[row - i][col + i].startsWith('w')) {
+                                moves.push({ row: row - i, col: col + i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row + i < 8 && col - i >= 0) {
+                            if (!boardState[row + i][col - i]) {
+                                moves.push({ row: row + i, col: col - i });
+                            } else if (boardState[row + i][col - i].startsWith('w')) {
+                                moves.push({ row: row + i, col: col - i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row + i < 8 && col + i < 8) {
+                            if (!boardState[row + i][col + i]) {
+                                moves.push({ row: row + i, col: col + i });
+                            } else if (boardState[row + i][col + i].startsWith('w')) {
+                                moves.push({ row: row + i, col: col + i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'q': // Reina
+                    // Combinación de torre y alfil
+                    // Movimientos horizontales y verticales (como torre)
+                    for (let i = row - 1; i >= 0; i--) {
+                        if (!boardState[i][col]) {
+                            moves.push({ row: i, col });
+                        } else if (boardState[i][col].startsWith('w')) {
+                            moves.push({ row: i, col });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let i = row + 1; i < 8; i++) {
+                        if (!boardState[i][col]) {
+                            moves.push({ row: i, col });
+                        } else if (boardState[i][col].startsWith('w')) {
+                            moves.push({ row: i, col });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let j = col - 1; j >= 0; j--) {
+                        if (!boardState[row][j]) {
+                            moves.push({ row, col: j });
+                        } else if (boardState[row][j].startsWith('w')) {
+                            moves.push({ row, col: j });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    for (let j = col + 1; j < 8; j++) {
+                        if (!boardState[row][j]) {
+                            moves.push({ row, col: j });
+                        } else if (boardState[row][j].startsWith('w')) {
+                            moves.push({ row, col: j });
+                            break;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    // Movimientos diagonales (como alfil)
+                    for (let i = 1; i < 8; i++) {
+                        if (row - i >= 0 && col - i >= 0) {
+                            if (!boardState[row - i][col - i]) {
+                                moves.push({ row: row - i, col: col - i });
+                            } else if (boardState[row - i][col - i].startsWith('w')) {
+                                moves.push({ row: row - i, col: col - i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row - i >= 0 && col + i < 8) {
+                            if (!boardState[row - i][col + i]) {
+                                moves.push({ row: row - i, col: col + i });
+                            } else if (boardState[row - i][col + i].startsWith('w')) {
+                                moves.push({ row: row - i, col: col + i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row + i < 8 && col - i >= 0) {
+                            if (!boardState[row + i][col - i]) {
+                                moves.push({ row: row + i, col: col - i });
+                            } else if (boardState[row + i][col - i].startsWith('w')) {
+                                moves.push({ row: row + i, col: col - i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    for (let i = 1; i < 8; i++) {
+                        if (row + i < 8 && col + i < 8) {
+                            if (!boardState[row + i][col + i]) {
+                                moves.push({ row: row + i, col: col + i });
+                            } else if (boardState[row + i][col + i].startsWith('w')) {
+                                moves.push({ row: row + i, col: col + i });
+                                break;
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'k': // Rey
+                    // Movimientos adyacentes
+                    const kingMoves = [
+                        { r: -1, c: -1 }, { r: -1, c: 0 }, { r: -1, c: 1 },
+                        { r: 0, c: -1 }, { r: 0, c: 1 },
+                        { r: 1, c: -1 }, { r: 1, c: 0 }, { r: 1, c: 1 }
+                    ];
+                    
+                    for (const move of kingMoves) {
+                        const newRow = row + move.r;
+                        const newCol = col + move.c;
+                        
+                        if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                            if (!boardState[newRow][newCol] || boardState[newRow][newCol].startsWith('w')) {
+                                moves.push({ row: newRow, col: newCol });
+                            }
+                        }
+                    }
+                    break;
+            }
+            
+            return moves;
+        }
+
+        // Obtener nombre de la pieza
+        function getPieceName(piece) {
+            const names = {
+                'wp': 'Peón Blanco', 'wr': 'Torre Blanca', 'wn': 'Caballo Blanco', 
+                'wb': 'Alfil Blanco', 'wq': 'Reina Blanca', 'wk': 'Rey Blanco',
+                'bp': 'Peón Negro', 'br': 'Torre Negra', 'bn': 'Caballo Negro', 
+                'bb': 'Alfil Negro', 'bq': 'Reina Negra', 'bk': 'Rey Negro'
+            };
+            return names[piece] || 'Pieza';
+        }
+
+        // Actualizar el estado
+        function updateStatus(message) {
+            document.getElementById('status').textContent = `Estado: ${message}`;
+        }
+
+        // Guardar problema
+        function saveProblem() {
+            const problemName = prompt("Ingresa un nombre para el problema:");
+            if (!problemName) return;
+            
+            // Convertir el estado del tablero a una cadena JSON
+            const problemData = JSON.stringify(boardState);
+            
+            // Guardar en localStorage
+            localStorage.setItem(`chessProblem_${problemName}`, problemData);
+            
+            // Actualizar la lista de problemas guardados
+            updateSavedProblemsList();
+            
+            updateStatus(`Problema "${problemName}" guardado correctamente.`);
+        }
+
+        // Cargar problema
+        function loadProblem() {
+            const problemSelect = document.getElementById('savedProblems');
+            const selectedProblem = problemSelect.value;
+            
+            if (!selectedProblem) return;
+            
+            // Cargar desde localStorage
+            const problemData = localStorage.getItem(`chessProblem_${selectedProblem}`);
+            
+            if (problemData) {
+                boardState = JSON.parse(problemData);
+                selectedPiece = null;
+                validMoves = [];
+                renderBoard();
+                updateStatus(`Problema "${selectedProblem}" cargado correctamente.`);
+            } else {
+                updateStatus("Error al cargar el problema.");
+            }
+        }
+
+        // Actualizar lista de problemas guardados
+        function updateSavedProblemsList() {
+            const savedProblemsSelect = document.getElementById('savedProblems');
+            savedProblemsSelect.innerHTML = '<option value="">Selecciona un problema guardado</option>';
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('chessProblem_')) {
+                    const problemName = key.substring('chessProblem_'.length);
+                    const option = document.createElement('option');
+                    option.value = problemName;
+                    option.textContent = problemName;
+                    savedProblemsSelect.appendChild(option);
+                }
+            }
+        }
+
+        // Cambiar modo
+        function toggleMode(mode) {
+            isSetupMode = mode === 'setup';
+            
+            const setupBtn = document.getElementById('setupMode');
+            const playBtn = document.getElementById('playMode');
+            
+            if (isSetupMode) {
+                setupBtn.classList.add('active');
+                playBtn.classList.remove('active');
+                updateStatus("Modo Configuración: Selecciona una pieza y haz clic en el tablero para colocarla.");
+            } else {
+                playBtn.classList.add('active');
+                setupBtn.classList.remove('active');
+                updateStatus("Modo Juego: Selecciona una pieza negra para mover.");
+            }
+            
+            selectedPiece = null;
+            validMoves = [];
+            renderBoard();
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar el tablero
+            initializeBoard();
+            
+            // Configurar eventos de los botones
+            document.getElementById('setupMode').addEventListener('click', () => toggleMode('setup'));
+            document.getElementById('playMode').addEventListener('click', () => toggleMode('play'));
+            document.getElementById('clearBoard').addEventListener('click', () => {
+                // Limpiar el tablero
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        boardState[row][col] = null;
+                    }
+                }
+                selectedPiece = null;
+                validMoves = [];
+                renderBoard();
+                updateStatus("Tablero limpiado.");
+            });
+            document.getElementById('resetBoard').addEventListener('click', () => {
+                initializeBoard();
+                updateStatus("Tablero restablecido a la posición inicial.");
+            });
+            document.getElementById('saveProblem').addEventListener('click', saveProblem);
+            document.getElementById('loadProblem').addEventListener('click', loadProblem);
+            
+            // Configurar selector de piezas
+            document.getElementById('pieceSelector').addEventListener('change', function() {
+                selectedPieceType = this.value;
+            });
+            
+            // Actualizar lista de problemas guardados
+            updateSavedProblemsList();
+            
+            // Iniciar en modo juego
+            toggleMode('play');
+        });
+    </script>
 </body>
 </html>
