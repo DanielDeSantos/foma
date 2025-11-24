@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -269,6 +269,13 @@
             <div class="problem-preview">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</div>
             <button class="btn-select">Seleccionar Problema</button>
         </div>
+
+        <div class="problem-card" data-problem="3">
+            <h2>Problema 3</h2>
+            <p>Mate en 4 jugadas con sacrificios</p>
+            <div class="problem-preview">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</div>
+            <button class="btn-select">Seleccionar Problema</button>
+        </div>
     </div>
 
     <!-- Contenedor del Juego -->
@@ -386,6 +393,62 @@
                 </div>
             </div>
         </div>
+
+        <!-- Problema 3 -->
+        <div id="problem3-game" class="problem-game">
+            <h2>Problema 3 - Mate con Sacrificios</h2>
+            
+            <div class="board-container">
+                <div class="file-coordinates">
+                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                </div>
+                <div class="coords-container">
+                    <div class="rank-coordinates">
+                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                    </div>
+                    <div id="board3" class="board"></div>
+                </div>
+                
+                <div class="position-summary">
+                    <h3>Posición Inicial:</h3>
+                    <p><strong>Blancas:</strong> Rey en h2, Dama en h6, Torres en d5 y e3, Alfiles en e4 y f4, Peones en d3, g3, g4, g2</p>
+                    <p><strong>Negras:</strong> Rey en g8, Torre en f8, Caballo en b8, Alfil en d8, Peones en c7, d7, d6, f5, g6, h7</p>
+                </div>
+                
+                <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                
+                <div class="controls">
+                    <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
+                    <button id="hint-btn3" class="btn">Pista</button>
+                    <button id="solution-btn3" class="btn">Ver Solución</button>
+                </div>
+                
+                <div class="legend">
+                    <div><strong>Mayúsculas:</strong> Blancas</div>
+                    <div><strong>Minúsculas:</strong> Negras</div>
+                </div>
+            </div>
+            
+            <div class="game-info">
+                <div class="solution-text">
+                    <h3>Solución del Problema 3:</h3>
+                    <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
+                    <div class="move-explanation">
+                        <p><strong>Explicación:</strong> 
+                            1. Torre d5xf5; Torre f8xf5 (captura)<br>
+                            2. Alfil e4-d5+ (jaque); Torre f5xd5 (captura)<br>
+                            3. Torre e3-e8+ (jaque); Rey g8-f7<br>
+                            4. Dama h6-f8++ ¡Jaque mate!
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="moves-list">
+                    <h3>Movimientos realizados:</h3>
+                    <div id="moves-container3"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -493,6 +556,55 @@
                     "2. Rf7 Rc8", 
                     "3. Cb6+ Rd8",
                     "4. Ce6++"
+                ]
+            },
+            3: {
+                name: "Mate con Sacrificios",
+                initialPosition: [
+                    // Fila 0 (8 en ajedrez)
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],  // Caballo b8, Alfil d8, Rey g8, Torre f8
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', 'p', 'p', '', '', '', 'p'], // Peones c7, d7, g6, h7
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', 'p', '', '', 'p', 'Q'],  // Peón d6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', '', 'R', '', 'p', '', ''],  // Peón f5
+                    // Fila 4 (4 en ajedrez)
+                    ['', '', '', '', 'B', 'B', 'P', ''], // Alfiles e4, f4; Peón g4
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', '', 'P', 'R', '', 'P', ''], // Peón d3; Torre e3; Peón g3
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', '', '', '', '', 'P', 'K'], // Peón g2; Rey h2
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', '', '', '', '']  // Torre d5; Dama h6
+                ],
+                solution: [
+                    { 
+                        white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, // Ae4-d5+
+                        black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } }, // Tf8xf5
+                        description: "Torre blanca captura peón en f5"
+                    },
+                    { 
+                        white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, // Ae4-d5+
+                        black: { from: { row: 3, col: 5 }, to: { row: 3, col: 3 } }, // Tf5xd5
+                        description: "Alfil a d5 con jaque, torre captura alfil"
+                    },
+                    { 
+                        white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } }, // Te3-e8+
+                        black: { from: { row: 0, col: 4 }, to: { row: 1, col: 5 } }, // Rg8-f7
+                        description: "Torre a e8 con jaque, rey escapa a f7"
+                    },
+                    { 
+                        white: { from: { row: 7, col: 6 }, to: { row: 0, col: 5 } }, // Dh6-f8++
+                        black: null,
+                        description: "¡Jaque mate con la dama!"
+                    }
+                ],
+                moveNotation: [
+                    "1. Txf5 Txf5",
+                    "2. Ad5+ Txd5", 
+                    "3. Te8+ Rf7",
+                    "4. Df8++"
                 ]
             }
         };
@@ -866,7 +978,7 @@
         document.getElementById('back-btn').addEventListener('click', showProblemSelection);
 
         // Event listeners para los controles de cada problema
-        for (let i = 1; i <= 2; i++) {
+        for (let i = 1; i <= 3; i++) {
             document.getElementById(`reset-btn${i}`).addEventListener('click', () => resetGame(i));
             document.getElementById(`hint-btn${i}`).addEventListener('click', () => showHint(i));
             document.getElementById(`solution-btn${i}`).addEventListener('click', () => showSolution(i));
@@ -877,3 +989,4 @@
     </script>
 </body>
 </html>
+
