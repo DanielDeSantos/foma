@@ -3,33 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mate en 4 Jugadas - Finales</title>
+    <title>Ajedrez de Ataque - Problema 1</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f0f0f0;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
             padding: 20px;
-        }
-        h1 {
+            background-color: #f5f5f5;
             color: #333;
         }
-        #board {
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .board {
             display: grid;
-            grid-template-columns: repeat(8, 50px);
-            grid-template-rows: repeat(8, 50px);
-            margin: 20px auto;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
             border: 2px solid #333;
-            width: 400px;
-            height: 400px;
+            margin-bottom: 20px;
         }
         .square {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
-            cursor: pointer;
+            font-size: 40px;
+            position: relative;
         }
         .light {
             background-color: #f0d9b5;
@@ -37,78 +54,125 @@
         .dark {
             background-color: #b58863;
         }
-        .selected {
-            background-color: yellow;
+        .coordinates {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            text-align: center;
+            font-weight: bold;
         }
-        .valid-move {
-            background-color: rgba(144, 238, 144, 0.5);
+        .file-coordinates {
+            display: flex;
+            justify-content: space-around;
+            width: 480px;
+            margin-bottom: 5px;
         }
-        #status {
-            margin: 10px 0;
-            font-size: 18px;
-            color: #d9534f;
+        .rank-coordinates {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 480px;
+            margin-right: 5px;
         }
-        #solution {
-            margin: 10px 0;
-            font-size: 16px;
-            color: #333;
-            display: none; /* Oculto por defecto */
+        .coords-container {
+            display: flex;
         }
-        button {
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #5cb85c;
-            color: white;
-            border: none;
-            cursor: pointer;
+        .solution {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 100%;
         }
-        button:hover {
-            background-color: #4cae4c;
+        .solution h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #3498db;
+            padding-bottom: 5px;
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .puzzle-navigation {
+        .moves {
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin: 15px 0;
+            gap: 10px;
+            margin: 20px 0;
         }
-        .puzzle-counter {
-            margin: 0 15px;
+        .move-btn {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
             font-weight: bold;
+            transition: background-color 0.3s;
         }
-        .move-counter {
+        .move-btn:hover {
+            background-color: #2980b9;
+        }
+        .move-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        .move-text {
+            font-size: 18px;
+            text-align: center;
             margin: 10px 0;
-            font-size: 16px;
+            min-height: 24px;
         }
-        .success-message {
-            color: #5cb85c;
-            font-weight: bold;
+        .last-move {
+            background-color: rgba(52, 152, 219, 0.3);
+        }
+        .move-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            font-size: 12px;
+            color: #333;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 3px;
+            padding: 1px 3px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 10px;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <h1>Mate en 4 Jugadas - Finales</h1>
-    <p>Resuelve el final moviendo la dama blanca. Solo hay una secuencia posible para mate real en 4 jugadas. El rey negro se moverá automáticamente.</p>
+    <h1>Ajedrez de Ataque - Problema 1</h1>
     
-    <div class="puzzle-navigation">
-        <button id="prev-puzzle">← Anterior</button>
-        <div class="puzzle-counter" id="puzzle-counter">Problema 1 de 4</div>
-        <button id="next-puzzle">Siguiente →</button>
+    <div class="container">
+        <div class="board-container">
+            <div class="file-coordinates">
+                <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+            </div>
+            <div class="coords-container">
+                <div class="rank-coordinates">
+                    <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                </div>
+                <div id="board" class="board"></div>
+            </div>
+            
+            <div class="moves">
+                <button id="prev-move" class="move-btn">← Anterior</button>
+                <button id="next-move" class="move-btn">Siguiente →</button>
+            </div>
+            <div id="move-text" class="move-text"></div>
+            
+            <div class="legend">
+                <div><strong>Mayúsculas:</strong> Blancas</div>
+                <div><strong>Minúsculas:</strong> Negras</div>
+            </div>
+        </div>
+        
+        <div class="solution">
+            <h2>Solución del Problema</h2>
+            <p><strong>1.g6 c6 2.h5 Ad7 3.Ah4 Ac8 4.Axg3#</strong></p>
+            <p>Esta secuencia de movimientos lleva a un jaque mate en 4 jugadas. Utiliza los botones para ver cada movimiento paso a paso.</p>
+        </div>
     </div>
-    
-    <div id="board"></div>
-    <div class="move-counter" id="move-counter">Movimiento: 0/4</div>
-    <div id="status">¡Comienza el problema! Selecciona la dama blanca.</div>
-    <div id="solution"></div>
-    
-    <div>
-        <button id="reset">Reiniciar Problema</button>
-        <button id="show-solution">Mostrar Solución</button>
-    </div>
-    
+
     <script>
         // Piezas representadas con emojis
         const pieces = {
@@ -116,84 +180,81 @@
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
         };
 
-        // Múltiples puzzles: Mate real con dama en 4 jugadas
-        const puzzles = [
-            {
-                id: 1,
-                positions: [
-                    ['', '', '', '', '', '', '', 'k'], // Fila 0 (8) - Rey negro en h8
-                    ['', '', '', '', '', '', '', ''], // Fila 1 (7)
-                    ['', '', '', '', '', '', '', ''], // Fila 2 (6)
-                    ['', '', '', '', '', '', '', ''], // Fila 3 (5)
-                    ['', '', '', '', '', '', '', ''], // Fila 4 (4)
-                    ['', '', '', '', '', '', '', ''], // Fila 5 (3)
-                    ['', '', '', '', '', '', '', ''], // Fila 6 (2)
-                    ['', '', '', '', 'Q', 'K', '', ''] // Fila 7 (1) - Dama en d1, rey blanco en e1
-                ],
-                whiteMoves: ['d1h5', 'h5f7', 'f7g7', 'g7h8'], // Secuencia única para mate real
-                blackKingMoves: ['h8g8', 'g8h8', 'h8h8', 'h8h8'], // Movimientos prefijados del rey negro
-                solutionText: "1. Dd1-h5 Rg8 2. Dh5-f7 Rh8 3. Df7-g7 Rh8 4. Dg7-h8#"
+        // Posición inicial del problema
+        const initialPosition = [
+            // Fila 8 (índice 0)
+            ['', '', '', '', 'b', '', '', ''],  // a8-h8
+            // Fila 7 (índice 1)
+            ['', 'p', '', 'B', '', 'p', '', ''],  // a7-h7
+            // Fila 6 (índice 2)
+            ['', '', '', '', '', '', '', ''],  // a6-h6
+            // Fila 5 (índice 3)
+            ['p', '', 'p', 'p', 'p', '', 'p', 'p'],  // a5-h5
+            // Fila 4 (índice 4)
+            ['p', 'p', '', 'p', 'p', '', 'p', 'p'],  // a4-h4
+            // Fila 3 (índice 5)
+            ['', '', 'p', 'K', 'p', '', '', ''],  // a3-h3
+            // Fila 2 (índice 6)
+            ['', 'p', '', 'B', '', '', '', ''],  // a2-h2
+            // Fila 1 (índice 7)
+            ['', '', '', '', 'k', '', '', '']   // a1-h1
+        ];
+
+        // Secuencia de movimientos
+        const moves = [
+            { 
+                move: "1.g6", 
+                description: "Las blancas avanzan el peón de g2 a g6",
+                from: { row: 6, col: 6 }, // g2
+                to: { row: 2, col: 6 }    // g6
             },
-            {
-                id: 2,
-                positions: [
-                    ['', '', '', '', '', '', '', ''], // Fila 0 (8)
-                    ['', '', '', '', '', '', '', ''], // Fila 1 (7)
-                    ['', '', '', '', '', '', '', ''], // Fila 2 (6)
-                    ['', '', '', '', 'k', '', '', ''], // Fila 3 (5) - Rey negro en e5
-                    ['', '', '', '', '', '', '', ''], // Fila 4 (4)
-                    ['', '', '', '', '', '', '', ''], // Fila 5 (3)
-                    ['', '', '', '', '', '', '', ''], // Fila 6 (2)
-                    ['', '', 'Q', 'K', '', '', '', ''] // Fila 7 (1) - Dama en c1, rey blanco en d1
-                ],
-                whiteMoves: ['c1c5', 'c5e7', 'e7f7', 'f7e5'], // Secuencia única para mate real
-                blackKingMoves: ['e5d4', 'd4c4', 'c4d4', 'd4e5'], // Movimientos prefijados del rey negro
-                solutionText: "1. Dc1-c5 Rd4 2. Dc5-e7 Rc4 3. De7-f7 Rd4 4. Df7-e5#"
+            { 
+                move: "c6", 
+                description: "Las negras responden con c7-c6",
+                from: { row: 1, col: 2 }, // c7
+                to: { row: 2, col: 2 }    // c6
             },
-            {
-                id: 3,
-                positions: [
-                    ['', '', '', '', '', '', '', ''], // Fila 0 (8)
-                    ['', '', '', '', '', '', '', ''], // Fila 1 (7)
-                    ['', '', '', '', '', '', '', ''], // Fila 2 (6)
-                    ['', '', '', '', '', '', '', ''], // Fila 3 (5)
-                    ['', '', '', '', '', '', '', ''], // Fila 4 (4)
-                    ['', '', '', '', '', '', '', ''], // Fila 5 (3)
-                    ['', '', '', '', '', '', '', ''], // Fila 6 (2)
-                    ['', '', '', '', '', 'K', '', 'k'] // Fila 7 (1) - Rey blanco en f1, rey negro en h1
-                ],
-                whiteMoves: ['f1g1', 'g1h2', 'h2g3', 'g3h4'], // Secuencia única para mate real
-                blackKingMoves: ['h1h2', 'h2h1', 'h1h2', 'h2h1'], // Movimientos prefijados del rey negro
-                solutionText: "1. Rf1-g1 Rh2 2. Rg1-h2 Rh1 3. Rh2-g3 Rh2 4. Rg3-h4#"
+            { 
+                move: "2.h5", 
+                description: "Las blancas continúan con h2-h5",
+                from: { row: 6, col: 7 }, // h2
+                to: { row: 3, col: 7 }    // h5
             },
-            {
-                id: 4,
-                positions: [
-                    ['', '', '', '', '', '', '', ''], // Fila 0 (8)
-                    ['', '', '', '', '', '', '', ''], // Fila 1 (7)
-                    ['', '', '', '', '', '', '', ''], // Fila 2 (6)
-                    ['', '', '', '', '', '', '', ''], // Fila 3 (5)
-                    ['', '', '', '', '', '', '', ''], // Fila 4 (4)
-                    ['', '', '', '', '', '', '', ''], // Fila 5 (3)
-                    ['', '', '', '', '', '', '', ''], // Fila 6 (2)
-                    ['', '', '', '', '', 'K', '', 'k'] // Fila 7 (1) - Rey blanco en f1, rey negro en h1
-                ],
-                whiteMoves: ['f1g1', 'g1h2', 'h2g3', 'g3h4'], // Secuencia única para mate real
-                blackKingMoves: ['h1h2', 'h2h1', 'h1h2', 'h2h1'], // Movimientos prefijados del rey negro
-                solutionText: "1. Rf1-g1 Rh2 2. Rg1-h2 Rh1 3. Rh2-g3 Rh2 4. Rg3-h4#"
+            { 
+                move: "Ad7", 
+                description: "Las negras mueven el alfil a d7",
+                from: { row: 0, col: 4 }, // e8 (alfil negro)
+                to: { row: 1, col: 3 }    // d7
+            },
+            { 
+                move: "3.Ah4", 
+                description: "Las blancas mueven el alfil a h4",
+                from: { row: 6, col: 3 }, // d2 (alfil blanco)
+                to: { row: 4, col: 7 }    // h4
+            },
+            { 
+                move: "Ac8", 
+                description: "Las negras retroceden el alfil a c8",
+                from: { row: 1, col: 3 }, // d7 (alfil negro)
+                to: { row: 0, col: 2 }    // c8
+            },
+            { 
+                move: "4.Axg3#", 
+                description: "¡Jaque mate! El alfil blanco captura en g3",
+                from: { row: 4, col: 7 }, // h4 (alfil blanco)
+                to: { row: 5, col: 6 }    // g3
             }
         ];
 
-        let currentPuzzleIndex = 0;
-        let moveIndex = 0;
-        let selectedSquare = null;
-        let currentPositions = JSON.parse(JSON.stringify(puzzles[0].positions));
-        let validMoves = [];
+        let currentPosition = JSON.parse(JSON.stringify(initialPosition));
+        let currentMoveIndex = -1;
+        let lastMove = null;
 
         // Crear tablero
         function createBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
+            
             for (let row = 0; row < 8; row++) {
                 for (let col = 0; col < 8; col++) {
                     const square = document.createElement('div');
@@ -201,236 +262,90 @@
                     square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
                     square.dataset.row = row;
                     square.dataset.col = col;
-                    square.textContent = pieces[currentPositions[row][col]] || '';
-                    square.addEventListener('click', handleSquareClick);
+                    
+                    const piece = currentPosition[row][col];
+                    if (piece) {
+                        square.textContent = pieces[piece];
+                        
+                        // Añadir indicador de última jugada
+                        if (lastMove && 
+                            ((row === lastMove.from.row && col === lastMove.from.col) || 
+                             (row === lastMove.to.row && col === lastMove.to.col))) {
+                            square.classList.add('last-move');
+                            
+                            const indicator = document.createElement('span');
+                            indicator.classList.add('move-indicator');
+                            indicator.textContent = (row === lastMove.from.row && col === lastMove.from.col) ? 'Desde' : 'Hasta';
+                            square.appendChild(indicator);
+                        }
+                    }
+                    
                     board.appendChild(square);
                 }
             }
-            updateMoveCounter();
-        }
-
-        // Actualizar contador de movimientos
-        function updateMoveCounter() {
-            document.getElementById('move-counter').textContent = `Movimiento: ${moveIndex}/4`;
-        }
-
-        // Actualizar contador de puzzles
-        function updatePuzzleCounter() {
-            document.getElementById('puzzle-counter').textContent = `Problema ${currentPuzzleIndex + 1} de ${puzzles.length}`;
-        }
-
-        // Verificar si una posición está atacada por blancas (dama)
-        function isSquareAttacked(row, col) {
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    const piece = currentPositions[i][j];
-                    if (piece && piece === 'Q') { // Solo dama blanca
-                        if ((i === row && j !== col) || (j === col && i !== row)) { // Líneas rectas
-                            if (!isPathBlocked(i, j, row, col)) return true;
-                        }
-                        if (Math.abs(i - row) === Math.abs(j - col) && (i !== row || j !== col)) { // Diagonales
-                            if (!isPathBlocked(i, j, row, col)) return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-
-        // Verificar si el camino está bloqueado
-        function isPathBlocked(fromRow, fromCol, toRow, toCol) {
-            const dRow = toRow > fromRow ? 1 : toRow < fromRow ? -1 : 0;
-            const dCol = toCol > fromCol ? 1 : toCol < fromCol ? -1 : 0;
-            let r = fromRow + dRow;
-            let c = fromCol + dCol;
-            while (r !== toRow || c !== toCol) {
-                if (currentPositions[r][c]) return true; // Bloqueado
-                r += dRow;
-                c += dCol;
-            }
-            return false;
-        }
-
-        // Verificar si es mate (rey negro en jaque y sin movimientos legales)
-        function isCheckmate() {
-            // Encontrar posición del rey negro
-            let kingRow, kingCol;
-            for (let i = 0; i < 8; i++) {
-                for (let j = 0; j < 8; j++) {
-                    if (currentPositions[i][j] === 'k') {
-                        kingRow = i;
-                        kingCol = j;
-                        break;
-                    }
-                }
-            }
-            // Verificar si está en jaque
-            if (!isSquareAttacked(kingRow, kingCol)) return false;
-
-            // Verificar movimientos legales del rey (casillas adyacentes vacías y no atacadas)
-            const directions = [
-                [-1, -1], [-1, 0], [-1, 1],
-                [0, -1],           [0, 1],
-                [1, -1],  [1, 0],  [1, 1]
-            ];
-            for (const [dr, dc] of directions) {
-                const nr = kingRow + dr;
-                const nc = kingCol + dc;
-                if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                    if (!currentPositions[nr][nc] && !isSquareAttacked(nr, nc)) {
-                        return false; // Puede escapar
-                    }
-                }
-            }
-            return true; // Mate
-        }
-
-        // Mostrar movimientos válidos
-        function showValidMoves(fromRow, fromCol) {
-            clearValidMoves();
             
-            // Obtener el movimiento esperado
-            const expectedMove = puzzles[currentPuzzleIndex].whiteMoves[moveIndex];
-            if (!expectedMove) return;
+            updateMoveText();
+            updateButtons();
+        }
+
+        // Actualizar texto del movimiento
+        function updateMoveText() {
+            const moveText = document.getElementById('move-text');
             
-            // Convertir a coordenadas
-            const toCol = expectedMove.charCodeAt(2) - 97;
-            const toRow = 8 - parseInt(expectedMove[3]);
-            
-            // Resaltar el cuadrado de destino
-            const squares = document.querySelectorAll('.square');
-            squares.forEach(square => {
-                const row = parseInt(square.dataset.row);
-                const col = parseInt(square.dataset.col);
-                if (row === toRow && col === toCol) {
-                    square.classList.add('valid-move');
-                }
-            });
-        }
-
-        // Limpiar resaltado de movimientos válidos
-        function clearValidMoves() {
-            const squares = document.querySelectorAll('.square');
-            squares.forEach(square => {
-                square.classList.remove('valid-move');
-            });
-        }
-
-        // Manejar clic en cuadrado
-        function handleSquareClick(event) {
-            const square = event.target;
-            const row = parseInt(square.dataset.row);
-            const col = parseInt(square.dataset.col);
-            const piece = currentPositions[row][col];
-
-            if (selectedSquare) {
-                // Intentar mover
-                const fromRow = parseInt(selectedSquare.dataset.row);
-                const fromCol = parseInt(selectedSquare.dataset.col);
-                const toRow = row;
-                const toCol = col;
-                const move = String.fromCharCode(97 + fromCol) + (8 - fromRow) + String.fromCharCode(97 + toCol) + (8 - toRow);
-
-                if (move === puzzles[currentPuzzleIndex].whiteMoves[moveIndex]) {
-                    // Movimiento correcto: actualizar posiciones
-                    currentPositions[toRow][toCol] = currentPositions[fromRow][fromCol];
-                    currentPositions[fromRow][fromCol] = '';
-                    moveIndex++;
-
-                    // Mover rey negro automáticamente
-                    const blackMove = puzzles[currentPuzzleIndex].blackKingMoves[moveIndex - 1];
-                    if (blackMove) {
-                        const from = blackMove.slice(0, 2);
-                        const to = blackMove.slice(2, 4);
-                        const fromColB = from.charCodeAt(0) - 97;
-                        const fromRowB = 8 - parseInt(from[1]);
-                        const toColB = to.charCodeAt(0) - 97;
-                        const toRowB = 8 - parseInt(to[1]);
-                        currentPositions[toRowB][toColB] = currentPositions[fromRowB][fromColB];
-                        currentPositions[fromRowB][fromColB] = '';
-                    }
-
-                    createBoard();
-
-                    // Verificar mate después de cada jugada blanca
-                    if (isCheckmate()) {
-                        updateStatus('¡Mate real en 4! El rey negro no tiene movimientos legales.', true);
-                    } else if (moveIndex === 4) {
-                        updateStatus('No es mate. Reinicia el problema.');
-                        loadPuzzle(currentPuzzleIndex);
-                    } else {
-                        updateStatus(`Movimiento ${moveIndex}/4 correcto. Sigue.`);
-                    }
-                } else {
-                    // Movimiento incorrecto: reiniciar puzzle
-                    updateStatus('Movimiento incorrecto. Solo hay una secuencia posible. Reinicia el problema.');
-                    loadPuzzle(currentPuzzleIndex);
-                }
-                selectedSquare.classList.remove('selected');
-                selectedSquare = null;
-                clearValidMoves();
-            } else if (piece && piece === 'Q') { // Solo permitir seleccionar la dama blanca
-                selectedSquare = square;
-                square.classList.add('selected');
-                showValidMoves(row, col);
-            }
-        }
-
-        // Mostrar solución
-        function showSolution() {
-            const solutionDiv = document.getElementById('solution');
-            solutionDiv.textContent = puzzles[currentPuzzleIndex].solutionText;
-            solutionDiv.style.display = 'block';
-            updateStatus('Solución mostrada abajo.');
-        }
-
-        // Cargar puzzle
-        function loadPuzzle(index) {
-            currentPositions = JSON.parse(JSON.stringify(puzzles[index].positions));
-            moveIndex = 0;
-            selectedSquare = null;
-            createBoard();
-            document.getElementById('solution').style.display = 'none';
-            updateStatus('¡Comienza el problema! Selecciona la dama blanca.');
-            updatePuzzleCounter();
-            clearValidMoves();
-        }
-
-        // Actualizar status
-        function updateStatus(message, isSuccess = false) {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            if (isSuccess) {
-                statusDiv.classList.add('success-message');
+            if (currentMoveIndex === -1) {
+                moveText.textContent = "Posición inicial del problema";
+            } else if (currentMoveIndex < moves.length) {
+                moveText.textContent = `${moves[currentMoveIndex].move} - ${moves[currentMoveIndex].description}`;
             } else {
-                statusDiv.classList.remove('success-message');
+                moveText.textContent = "¡Jaque mate! La partida ha terminado.";
             }
         }
 
-        // Navegar entre puzzles
-        function nextPuzzle() {
-            if (currentPuzzleIndex < puzzles.length - 1) {
-                currentPuzzleIndex++;
-                loadPuzzle(currentPuzzleIndex);
+        // Actualizar estado de los botones
+        function updateButtons() {
+            document.getElementById('prev-move').disabled = currentMoveIndex <= -1;
+            document.getElementById('next-move').disabled = currentMoveIndex >= moves.length - 1;
+        }
+
+        // Aplicar siguiente movimiento
+        function nextMove() {
+            if (currentMoveIndex < moves.length - 1) {
+                currentMoveIndex++;
+                const move = moves[currentMoveIndex];
+                
+                // Mover la pieza
+                currentPosition[move.to.row][move.to.col] = currentPosition[move.from.row][move.from.col];
+                currentPosition[move.from.row][move.from.col] = '';
+                
+                lastMove = move;
+                createBoard();
             }
         }
 
-        function prevPuzzle() {
-            if (currentPuzzleIndex > 0) {
-                currentPuzzleIndex--;
-                loadPuzzle(currentPuzzleIndex);
+        // Revertir al movimiento anterior
+        function prevMove() {
+            if (currentMoveIndex >= 0) {
+                const move = moves[currentMoveIndex];
+                
+                // Revertir el movimiento
+                currentPosition[move.from.row][move.from.col] = currentPosition[move.to.row][move.to.col];
+                currentPosition[move.to.row][move.to.col] = '';
+                
+                currentMoveIndex--;
+                
+                // Actualizar último movimiento
+                lastMove = currentMoveIndex >= 0 ? moves[currentMoveIndex] : null;
+                
+                createBoard();
             }
         }
 
         // Inicializar
         createBoard();
-        updatePuzzleCounter();
 
-        // Botones
-        document.getElementById('reset').addEventListener('click', () => loadPuzzle(currentPuzzleIndex));
-        document.getElementById('show-solution').addEventListener('click', showSolution);
-        document.getElementById('next-puzzle').addEventListener('click', nextPuzzle);
-        document.getElementById('prev-puzzle').addEventListener('click', prevPuzzle);
+        // Event listeners para los botones
+        document.getElementById('next-move').addEventListener('click', nextMove);
+        document.getElementById('prev-move').addEventListener('click', prevMove);
     </script>
 </body>
 </html>
