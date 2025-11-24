@@ -141,16 +141,6 @@
         .error {
             color: #e74c3c;
         }
-        .move-indicator {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            font-size: 12px;
-            color: #333;
-            background-color: rgba(255, 255, 255, 0.7);
-            border-radius: 3px;
-            padding: 1px 3px;
-        }
         .legend {
             display: flex;
             justify-content: center;
@@ -172,14 +162,6 @@
         }
         .move-item:last-child {
             border-bottom: none;
-        }
-        .fen-notation {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            font-family: monospace;
-            margin: 10px 0;
-            text-align: center;
         }
         .solution-text {
             background-color: #e8f4fd;
@@ -211,6 +193,14 @@
         }
         .knight-highlight {
             background-color: rgba(155, 89, 182, 0.3);
+        }
+        .debug-info {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -270,6 +260,11 @@
             <div class="moves-list">
                 <h3>Movimientos realizados:</h3>
                 <div id="moves-container"></div>
+            </div>
+
+            <div class="debug-info">
+                <h4>Información de Depuración:</h4>
+                <div id="debug-info"></div>
             </div>
         </div>
     </div>
@@ -348,6 +343,17 @@
         let playerMoves = [];
         let gameCompleted = false;
 
+        // Función para debug
+        function debugLog(message) {
+            const debugDiv = document.getElementById('debug-info');
+            debugDiv.innerHTML += `<div>${new Date().toLocaleTimeString()}: ${message}</div>`;
+            // Mantener solo los últimos 10 mensajes
+            const messages = debugDiv.querySelectorAll('div');
+            if (messages.length > 10) {
+                messages[0].remove();
+            }
+        }
+
         // Crear tablero
         function createBoard() {
             const board = document.getElementById('board');
@@ -387,6 +393,12 @@
             
             updateStatus();
             updateMovesList();
+            
+            // Debug: mostrar estado actual del tablero
+            debugLog(`Tablero actual - Movimiento: ${currentMoveIndex}`);
+            for (let row = 0; row < 8; row++) {
+                debugLog(`Fila ${row}: ${currentPosition[row].map(p => p || '.').join(' ')}`);
+            }
         }
 
         // Manejar clic en una casilla
@@ -394,11 +406,14 @@
             if (gameCompleted) return;
             
             const piece = currentPosition[row][col];
+            debugLog(`Clic en: fila=${row}, col=${col}, pieza=${piece || 'vacía'}`);
             
             // Si hay una casilla seleccionada, intentar mover
             if (selectedSquare) {
                 const fromRow = selectedSquare.row;
                 const fromCol = selectedSquare.col;
+                
+                debugLog(`Intentando mover de (${fromRow},${fromCol}) a (${row},${col})`);
                 
                 // Verificar si el movimiento es válido
                 const isValidMove = validMoves.some(move => 
@@ -409,6 +424,7 @@
                     makeMove(fromRow, fromCol, row, col, true);
                 } else {
                     // Movimiento no válido, deseleccionar
+                    debugLog("Movimiento no válido");
                     clearSelection();
                     // Si se hizo clic en otra pieza blanca, seleccionarla
                     if (piece && isWhitePiece(piece)) {
@@ -419,6 +435,8 @@
                 // Si no hay casilla seleccionada, seleccionar si es una pieza blanca
                 if (piece && isWhitePiece(piece)) {
                     selectSquare(row, col);
+                } else {
+                    debugLog("No es una pieza blanca o está vacía");
                 }
             }
         }
@@ -431,6 +449,8 @@
             const squareElement = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
+            debugLog(`Seleccionada pieza en: fila=${row}, col=${col}`);
+            
             // Calcular movimientos válidos para la pieza seleccionada
             calculateValidMoves(row, col);
             
@@ -438,6 +458,7 @@
             validMoves.forEach(move => {
                 const targetSquare = document.querySelector(`.square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
                 targetSquare.classList.add('valid-move');
+                debugLog(`Movimiento válido a: fila=${move.to.row}, col=${move.to.col}`);
             });
         }
 
@@ -451,9 +472,13 @@
             // Solo permitir movimientos de piezas blancas
             if (!isWhitePiece(piece)) return;
             
+            debugLog(`Calculando movimientos para pieza ${piece} en (${row},${col})`);
+            debugLog(`Movimiento actual: ${currentMoveIndex}`);
+            
             // Para este problema solo necesitamos los movimientos de la solución
             if (currentMoveIndex < solution.length) {
                 const expectedMove = solution[currentMoveIndex].white;
+                debugLog(`Movimiento esperado: de (${expectedMove.from.row},${expectedMove.from.col}) a (${expectedMove.to.row},${expectedMove.to.col})`);
                 
                 // Solo permitir el movimiento esperado en la solución
                 if (row === expectedMove.from.row && col === expectedMove.from.col) {
@@ -461,6 +486,9 @@
                         from: { row, col },
                         to: expectedMove.to
                     });
+                    debugLog("¡Movimiento válido encontrado!");
+                } else {
+                    debugLog("Esta pieza no es la esperada para este movimiento");
                 }
             }
         }
@@ -468,6 +496,8 @@
         // Realizar un movimiento
         function makeMove(fromRow, fromCol, toRow, toCol, isPlayerMove) {
             const piece = currentPosition[fromRow][fromCol];
+            
+            debugLog(`Realizando movimiento: ${piece} de (${fromRow},${fromCol}) a (${toRow},${toCol})`);
             
             // Mover la pieza
             currentPosition[toRow][toCol] = piece;
@@ -485,6 +515,7 @@
                 if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
                     toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
                     
+                    debugLog("¡Movimiento correcto!");
                     // Movimiento correcto
                     currentMoveIndex++;
                     
@@ -495,10 +526,11 @@
                         document.getElementById('status').className = "status success";
                     } else {
                         // Movimiento de las negras
-                        setTimeout(makeBlackMove, 500);
+                        setTimeout(() => makeBlackMove(), 500);
                     }
                 } else {
                     // Movimiento incorrecto
+                    debugLog("Movimiento incorrecto");
                     document.getElementById('status').textContent = "Movimiento incorrecto. Intenta de nuevo.";
                     document.getElementById('status').className = "status error";
                     // Revertir movimiento
@@ -512,17 +544,16 @@
             createBoard();
         }
 
-        // Realizar movimiento de las negras
+        // Realizar movimiento de las negras - FUNCIÓN CORREGIDA
         function makeBlackMove() {
             if (currentMoveIndex < solution.length) {
                 const blackMove = solution[currentMoveIndex].black;
                 if (blackMove) {
                     const piece = currentPosition[blackMove.from.row][blackMove.from.col];
-                    currentPosition[blackMove.to.row][blackMove.to.col] = piece;
-                    currentPosition[blackMove.from.row][blackMove.from.col] = '';
+                    debugLog(`Negras mueven: ${piece} de (${blackMove.from.row},${blackMove.from.col}) a (${blackMove.to.row},${blackMove.to.col})`);
                     
-                    createBoard();
-                    document.getElementById('status').textContent = "Las negras han jugado. Es tu turno.";
+                    // CORRECCIÓN: Usar makeMove para que el movimiento se registre correctamente
+                    makeMove(blackMove.from.row, blackMove.from.col, blackMove.to.row, blackMove.to.col, false);
                 }
             }
         }
@@ -637,6 +668,7 @@
             currentMoveIndex = 0;
             playerMoves = [];
             gameCompleted = false;
+            document.getElementById('debug-info').innerHTML = '';
             createBoard();
         }
 
