@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Problema 1 (Notación FEN)</title>
+    <title>Ajedrez de Ataque - Problema 1 (Notación FEN Corregida)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -186,10 +186,17 @@
             margin: 10px 0;
             text-align: center;
         }
+        .solution-text {
+            background-color: #e8f4fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #3498db;
+        }
     </style>
 </head>
 <body>
-    <h1>Ajedrez de Ataque - Problema 1 (Notación FEN)</h1>
+    <h1>Ajedrez de Ataque - Problema 1 (Notación FEN Corregida)</h1>
     
     <div class="container">
         <div class="board-container">
@@ -204,7 +211,7 @@
             </div>
             
             <div class="fen-notation">
-                <strong>Notación FEN:</strong> 4b3/1p1B1p2/8/p1ppp1pp/pp1pp1pp/2p1K3/1p2B3/4k3
+                <strong>Notación FEN:</strong> 4b3/1p2Bp1p/8/p1ppppp1/pp1pp1pp/2p1K1p1/1p1B2p1/4k3
             </div>
             
             <div id="status" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -226,6 +233,11 @@
             <p><strong>Objetivo:</strong> Lograr jaque mate en 4 jugadas.</p>
             <p><strong>Reglas:</strong> Solo puedes mover piezas blancas. Las negras responderán automáticamente.</p>
             
+            <div class="solution-text">
+                <h3>Solución del Problema:</h3>
+                <p><strong>1.g6 c6 2.h5 Ad7 3.Ah4 Ac8 4.Axg3#</strong></p>
+            </div>
+            
             <div class="moves-list">
                 <h3>Movimientos realizados:</h3>
                 <div id="moves-container"></div>
@@ -242,7 +254,9 @@
 
         // Función para convertir notación FEN a matriz de posiciones
         function fenToPosition(fen) {
-            const rows = fen.split('/');
+            // Tomar solo la parte de la posición (antes del primer espacio)
+            const fenPosition = fen.split(' ')[0];
+            const rows = fenPosition.split('/');
             const position = [];
             
             for (let row of rows) {
@@ -264,25 +278,25 @@
         }
 
         // Posición inicial del problema en notación FEN
-        const fenString = "4b3/1p1B1p2/8/p1ppp1pp/pp1pp1pp/2p1K3/1p2B3/4k3";
+        const fenString = "4b3/1p2Bp1p/8/p1ppppp1/pp1pp1pp/2p1K1p1/1p1B2p1/4k3";
         const initialPosition = fenToPosition(fenString);
 
         // Secuencia de movimientos correcta
         const solution = [
             { 
-                white: { from: { row: 6, col: 4 }, to: { row: 2, col: 6 } }, // e2-g6
+                white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2-g6
                 black: { from: { row: 1, col: 1 }, to: { row: 2, col: 2 } }  // b7-c6
             },
             { 
-                white: { from: { row: 7, col: 4 }, to: { row: 4, col: 7 } }, // e1-h5
-                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }  // e8-d7
+                white: { from: { row: 6, col: 7 }, to: { row: 3, col: 7 } }, // h2-h5
+                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }  // Ae8-d7
             },
             { 
-                white: { from: { row: 6, col: 3 }, to: { row: 4, col: 7 } }, // d2-h4
-                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }  // d7-c8
+                white: { from: { row: 6, col: 3 }, to: { row: 4, col: 7 } }, // Ad2-h4
+                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }  // Ad7-c8
             },
             { 
-                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // h4xg3#
+                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3#
                 black: null // Jaque mate, no hay respuesta
             }
         ];
@@ -590,6 +604,18 @@
         document.getElementById('reset-btn').addEventListener('click', resetGame);
         document.getElementById('hint-btn').addEventListener('click', showHint);
         document.getElementById('solution-btn').addEventListener('click', showSolution);
+
+        // Mostrar la posición inicial en la consola para verificación
+        console.log("Posición inicial del tablero:");
+        console.log("8 | " + initialPosition[0].map(p => p || '.').join('  '));
+        console.log("7 | " + initialPosition[1].map(p => p || '.').join('  '));
+        console.log("6 | " + initialPosition[2].map(p => p || '.').join('  '));
+        console.log("5 | " + initialPosition[3].map(p => p || '.').join('  '));
+        console.log("4 | " + initialPosition[4].map(p => p || '.').join('  '));
+        console.log("3 | " + initialPosition[5].map(p => p || '.').join('  '));
+        console.log("2 | " + initialPosition[6].map(p => p || '.').join('  '));
+        console.log("1 | " + initialPosition[7].map(p => p || '.').join('  '));
+        console.log("    a  b  c  d  e  f  g  h");
     </script>
 </body>
 </html>
