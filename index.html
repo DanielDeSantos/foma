@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Problema 2</title>
+    <title>Ajedrez de Ataque - Selección de Problemas</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -20,28 +20,80 @@
             padding-bottom: 10px;
             margin-bottom: 30px;
         }
-        .problems-container {
+        .problem-selection {
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
         }
-        .problem {
+        .problem-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 300px;
+            border: 3px solid transparent;
+        }
+        .problem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        .problem-card.active {
+            border-color: #3498db;
+            background-color: #e8f4fd;
+        }
+        .problem-card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        .problem-card p {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .problem-preview {
+            font-size: 24px;
+            margin: 15px 0;
+            min-height: 40px;
+        }
+        .btn-select {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .btn-select:hover {
+            background-color: #2980b9;
+        }
+        .game-container {
+            display: none;
             background-color: #fff;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .problem h2 {
-            color: #2c3e50;
-            border-bottom: 2px solid #e74c3c;
-            padding-bottom: 8px;
+        .game-container.active {
+            display: block;
+        }
+        .back-btn {
+            padding: 8px 16px;
+            background-color: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
             margin-bottom: 20px;
         }
-        .container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
+        .back-btn:hover {
+            background-color: #7f8c8d;
         }
         .board-container {
             display: flex;
@@ -51,6 +103,7 @@
             padding: 20px;
             border-radius: 10px;
             border: 2px solid #ddd;
+            margin-bottom: 20px;
         }
         .board {
             display: grid;
@@ -201,84 +254,140 @@
             border-radius: 5px;
             margin: 10px 0;
         }
-        .problem-navigation {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .nav-btn {
-            padding: 8px 16px;
-            background-color: #9b59b6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .nav-btn:hover {
-            background-color: #8e44ad;
-        }
     </style>
 </head>
 <body>
-    <h1>Ajedrez de Ataque - Problemas de Mate</h1>
+    <h1>Ajedrez de Ataque - Selección de Problemas</h1>
     
-    <div class="problems-container">
-        <!-- Problema 2 -->
-        <div class="problem" id="problem2">
-            <h2>Problema 2 - Mate con Caballos y Alfil</h2>
+    <!-- Selección de Problemas -->
+    <div class="problem-selection">
+        <div class="problem-card" data-problem="1">
+            <h2>Problema 1</h2>
+            <p>Mate en 4 jugadas con peones y alfiles</p>
+            <div class="problem-preview">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</div>
+            <button class="btn-select">Seleccionar Problema</button>
+        </div>
+        
+        <div class="problem-card" data-problem="2">
+            <h2>Problema 2</h2>
+            <p>Mate en 4 jugadas con caballos y alfil</p>
+            <div class="problem-preview">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</div>
+            <button class="btn-select">Seleccionar Problema</button>
+        </div>
+    </div>
+
+    <!-- Contenedor del Juego (se muestra cuando se selecciona un problema) -->
+    <div id="game-container" class="game-container">
+        <button class="back-btn" id="back-btn">← Volver a la selección</button>
+        
+        <!-- Problema 1 -->
+        <div id="problem1-game" class="problem-game">
+            <h2>Problema 1 - Mate con Peones y Alfiles</h2>
             
-            <div class="container">
-                <div class="board-container">
-                    <div class="file-coordinates">
-                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+            <div class="board-container">
+                <div class="file-coordinates">
+                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                </div>
+                <div class="coords-container">
+                    <div class="rank-coordinates">
+                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                     </div>
-                    <div class="coords-container">
-                        <div class="rank-coordinates">
-                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-                        </div>
-                        <div id="board2" class="board"></div>
-                    </div>
-                    
-                    <div class="position-summary">
-                        <h3>Posición Inicial:</h3>
-                        <p><strong>Blancas:</strong> Caballos en d5 y e4; Alfil en e5; Rey en e6</p>
-                        <p><strong>Negras:</strong> Rey en c8</p>
-                    </div>
-                    
-                    <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
-                    
-                    <div class="controls">
-                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
-                        <button id="hint-btn2" class="btn">Pista</button>
-                        <button id="solution-btn2" class="btn">Ver Solución</button>
-                    </div>
-                    
-                    <div class="legend">
-                        <div><strong>Mayúsculas:</strong> Blancas</div>
-                        <div><strong>Minúsculas:</strong> Negras</div>
+                    <div id="board1" class="board"></div>
+                </div>
+                
+                <div class="position-summary">
+                    <h3>Posición Inicial:</h3>
+                    <p><strong>Blancas:</strong> Alfiles en e7 y e2; Rey en e3; Peones en c2, g2, b4, d4, f4, h4, c5, g5</p>
+                    <p><strong>Negras:</strong> Alfil en e8; Rey en e1; Peones en c3, g3, c4, g4, f5, d5, c7, g7</p>
+                </div>
+                
+                <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                
+                <div class="controls">
+                    <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
+                    <button id="hint-btn1" class="btn">Pista</button>
+                    <button id="solution-btn1" class="btn">Ver Solución</button>
+                </div>
+                
+                <div class="legend">
+                    <div><strong>Mayúsculas:</strong> Blancas</div>
+                    <div><strong>Minúsculas:</strong> Negras</div>
+                </div>
+            </div>
+            
+            <div class="game-info">
+                <div class="solution-text">
+                    <h3>Solución del Problema 1:</h3>
+                    <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
+                    <div class="move-explanation">
+                        <p><strong>Explicación:</strong> 
+                            1. Peón g5-g6; Peón c7-c6<br>
+                            2. Peón h4-h5; Alfil e8-d7<br>
+                            3. Alfil e7-h4; Alfil d7-c8<br>
+                            4. Alfil h4xg3++ ¡Jaque mate!
+                        </p>
                     </div>
                 </div>
                 
-                <div class="game-info">
-                    <div class="solution-text">
-                        <h3>Solución del Problema 2:</h3>
-                        <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
-                        <div class="move-explanation">
-                            <p><strong>Explicación:</strong> 
-                                1. Caballo d5-c5; Rey c8-d8<br>
-                                2. Rey e6-f7; Rey d8-c8<br>
-                                3. Caballo c5-b6+ (jaque); Rey c8-d8<br>
-                                4. Caballo e4-e6++ ¡Jaque mate!
-                            </p>
-                        </div>
+                <div class="moves-list">
+                    <h3>Movimientos realizados:</h3>
+                    <div id="moves-container1"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Problema 2 -->
+        <div id="problem2-game" class="problem-game">
+            <h2>Problema 2 - Mate con Caballos y Alfil</h2>
+            
+            <div class="board-container">
+                <div class="file-coordinates">
+                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                </div>
+                <div class="coords-container">
+                    <div class="rank-coordinates">
+                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                     </div>
-                    
-                    <div class="moves-list">
-                        <h3>Movimientos realizados:</h3>
-                        <div id="moves-container2"></div>
+                    <div id="board2" class="board"></div>
+                </div>
+                
+                <div class="position-summary">
+                    <h3>Posición Inicial:</h3>
+                    <p><strong>Blancas:</strong> Caballos en d5 y e4; Alfil en e5; Rey en e6</p>
+                    <p><strong>Negras:</strong> Rey en c8</p>
+                </div>
+                
+                <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                
+                <div class="controls">
+                    <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
+                    <button id="hint-btn2" class="btn">Pista</button>
+                    <button id="solution-btn2" class="btn">Ver Solución</button>
+                </div>
+                
+                <div class="legend">
+                    <div><strong>Mayúsculas:</strong> Blancas</div>
+                    <div><strong>Minúsculas:</strong> Negras</div>
+                </div>
+            </div>
+            
+            <div class="game-info">
+                <div class="solution-text">
+                    <h3>Solución del Problema 2:</h3>
+                    <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
+                    <div class="move-explanation">
+                        <p><strong>Explicación:</strong> 
+                            1. Caballo d5-c5; Rey c8-d8<br>
+                            2. Rey e6-f7; Rey d8-c8<br>
+                            3. Caballo c5-b6+ (jaque); Rey c8-d8<br>
+                            4. Caballo e4-e6++ ¡Jaque mate!
+                        </p>
                     </div>
+                </div>
+                
+                <div class="moves-list">
+                    <h3>Movimientos realizados:</h3>
+                    <div id="moves-container2"></div>
                 </div>
             </div>
         </div>
@@ -291,77 +400,150 @@
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
         };
 
-        // ========== PROBLEMA 2 ==========
-        // Posición inicial del Problema 2
-        const initialPosition2 = [
-            // Fila 8 (a8-h8) - Índice 0
-            ['', '', 'k', '', '', '', '', ''],  // Rey negro en c8
-            // Fila 7 (a7-h7) - Índice 1
-            ['', '', '', '', '', '', '', ''],   // Vacía
-            // Fila 6 (a6-h6) - Índice 2
-            ['', '', '', '', 'K', '', '', ''],  // Rey blanco en e6
-            // Fila 5 (a5-h5) - Índice 3
-            ['', '', '', 'N', 'B', '', '', ''], // Caballo en d5, Alfil en e5
-            // Fila 4 (a4-h4) - Índice 4
-            ['', '', '', '', 'N', '', '', ''],  // Caballo en e4
-            // Fila 3 (a3-h3) - Índice 5
-            ['', '', '', '', '', '', '', ''],   // Vacía
-            // Fila 2 (a2-h2) - Índice 6
-            ['', '', '', '', '', '', '', ''],   // Vacía
-            // Fila 1 (a1-h1) - Índice 7
-            ['', '', '', '', '', '', '', '']    // Vacía
-        ];
-
-        // Secuencia de movimientos del Problema 2
-        const solution2 = [
-            { 
-                // Movimiento 1: Caballo d5-c5
-                white: { from: { row: 3, col: 3 }, to: { row: 3, col: 2 } }, // d5(3,3) -> c5(3,2)
-                // Respuesta negra: Rey c8-d8
-                black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // c8(0,2) -> d8(0,3)
-                description: "Caballo se mueve a c5, atacando la casilla d7. Rey negro huye a d8."
+        // ========== CONFIGURACIÓN DE PROBLEMAS ==========
+        const problems = {
+            1: {
+                name: "Mate con Peones y Alfiles",
+                initialPosition: [
+                    ['', '', '', '', 'b', '', '', ''],
+                    ['', '', 'p', '', 'B', '', 'p', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', 'P', '', '', 'p', 'P', ''],
+                    ['', 'P', '', 'P', '', 'P', '', 'P'],
+                    ['', '', 'p', '', 'K', '', 'p', ''],
+                    ['', '', 'P', '', 'B', '', 'P', ''],
+                    ['', '', '', '', 'k', '', '', '']
+                ],
+                solution: [
+                    { 
+                        white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } },
+                        black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } },
+                        description: "Peón blanco avanza a g6, abriendo líneas de ataque."
+                    },
+                    { 
+                        white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } },
+                        black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } },
+                        description: "Peón blanco avanza a h5, mientras el alfil negro se mueve a d7."
+                    },
+                    { 
+                        white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } },
+                        black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } },
+                        description: "Alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
+                    },
+                    { 
+                        white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } },
+                        black: null,
+                        description: "¡Jaque mate! El alfil captura en g3 y el rey negro no puede escapar."
+                    }
+                ],
+                moveNotation: [
+                    "1. g6 c6",
+                    "2. h5 Ad7", 
+                    "3. Ah4 Ac8",
+                    "4. Axg3++"
+                ]
             },
-            { 
-                // Movimiento 2: Rey e6-f7
-                white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } }, // e6(2,4) -> f7(1,5)
-                // Respuesta negra: Rey d8-c8
-                black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } }, // d8(0,3) -> c8(0,2)
-                description: "Rey blanco avanza a f7, acercándose. Rey negro retrocede a c8."
-            },
-            { 
-                // Movimiento 3: Caballo c5-b6+ (jaque)
-                white: { from: { row: 3, col: 2 }, to: { row: 2, col: 1 } }, // c5(3,2) -> b6(2,1)
-                // Respuesta negra: Rey c8-d8
-                black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // c8(0,2) -> d8(0,3)
-                description: "Caballo da jaque en b6. Rey negro debe moverse a d8."
-            },
-            { 
-                // Movimiento 4: Caballo e4-e6++ (jaque mate)
-                white: { from: { row: 4, col: 4 }, to: { row: 2, col: 4 } }, // e4(4,4) -> e6(2,4)
-                black: null, // Jaque mate, no hay respuesta
-                description: "¡Jaque mate! El caballo corta la retirada del rey negro."
+            2: {
+                name: "Mate con Caballos y Alfil",
+                initialPosition: [
+                    ['', '', 'k', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', 'K', '', '', ''],
+                    ['', '', '', 'N', 'B', '', '', ''],
+                    ['', '', '', '', 'N', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                solution: [
+                    { 
+                        white: { from: { row: 3, col: 3 }, to: { row: 3, col: 2 } },
+                        black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } },
+                        description: "Caballo se mueve a c5, atacando la casilla d7. Rey negro huye a d8."
+                    },
+                    { 
+                        white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } },
+                        black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } },
+                        description: "Rey blanco avanza a f7, acercándose. Rey negro retrocede a c8."
+                    },
+                    { 
+                        white: { from: { row: 3, col: 2 }, to: { row: 2, col: 1 } },
+                        black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } },
+                        description: "Caballo da jaque en b6. Rey negro debe moverse a d8."
+                    },
+                    { 
+                        white: { from: { row: 4, col: 4 }, to: { row: 2, col: 4 } },
+                        black: null,
+                        description: "¡Jaque mate! El caballo corta la retirada del rey negro."
+                    }
+                ],
+                moveNotation: [
+                    "1. Cc5 Rd8",
+                    "2. Rf7 Rc8", 
+                    "3. Cb6+ Rd8",
+                    "4. Ce6++"
+                ]
             }
-        ];
+        };
 
-        // Notación algebraica de los movimientos del Problema 2
-        const moveNotation2 = [
-            "1. Cc5 Rd8",
-            "2. Rf7 Rc8", 
-            "3. Cb6+ Rd8",
-            "4. Ce6++"
-        ];
+        // ========== ESTADO GLOBAL ==========
+        let currentProblem = null;
+        let gameStates = {};
 
-        // Estado del Problema 2
-        let currentPosition2 = JSON.parse(JSON.stringify(initialPosition2));
-        let selectedSquare2 = null;
-        let validMoves2 = [];
-        let currentMoveIndex2 = 0;
-        let playerMoves2 = [];
-        let gameCompleted2 = false;
+        // ========== FUNCIONES DE INTERFAZ ==========
+        function showProblemSelection() {
+            document.getElementById('game-container').classList.remove('active');
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('active');
+            });
+        }
 
-        // Crear tablero del Problema 2
-        function createBoard2() {
-            const board = document.getElementById('board2');
+        function showProblem(problemNumber) {
+            currentProblem = problemNumber;
+            
+            // Actualizar selección visual
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`.problem-card[data-problem="${problemNumber}"]`).classList.add('active');
+            
+            // Mostrar contenedor del juego
+            document.getElementById('game-container').classList.add('active');
+            
+            // Ocultar todos los juegos y mostrar el seleccionado
+            document.querySelectorAll('.problem-game').forEach(game => {
+                game.style.display = 'none';
+            });
+            document.getElementById(`problem${problemNumber}-game`).style.display = 'block';
+            
+            // Inicializar el juego si no está inicializado
+            if (!gameStates[problemNumber]) {
+                initializeGame(problemNumber);
+            } else {
+                // Si ya estaba inicializado, solo mostrar el tablero actual
+                createBoard(problemNumber);
+            }
+        }
+
+        // ========== FUNCIONES DEL JUEGO ==========
+        function initializeGame(problemNumber) {
+            const problem = problems[problemNumber];
+            
+            gameStates[problemNumber] = {
+                currentPosition: JSON.parse(JSON.stringify(problem.initialPosition)),
+                selectedSquare: null,
+                validMoves: [],
+                currentMoveIndex: 0,
+                playerMoves: [],
+                gameCompleted: false
+            };
+            
+            createBoard(problemNumber);
+        }
+
+        function createBoard(problemNumber) {
+            const state = gameStates[problemNumber];
+            const board = document.getElementById(`board${problemNumber}`);
             board.innerHTML = '';
             
             for (let row = 0; row < 8; row++) {
@@ -372,98 +554,87 @@
                     square.dataset.row = row;
                     square.dataset.col = col;
                     
-                    const piece = currentPosition2[row][col];
+                    const piece = state.currentPosition[row][col];
                     if (piece) {
                         square.textContent = pieces[piece];
                     }
                     
                     // Resaltar última jugada
-                    if (playerMoves2.length > 0) {
-                        const lastMove = playerMoves2[playerMoves2.length - 1];
+                    if (state.playerMoves.length > 0) {
+                        const lastMove = state.playerMoves[state.playerMoves.length - 1];
                         if ((row === lastMove.from.row && col === lastMove.from.col) || 
                             (row === lastMove.to.row && col === lastMove.to.col)) {
                             square.classList.add('last-move');
                         }
                     }
                     
-                    square.addEventListener('click', () => handleSquareClick2(row, col));
+                    square.addEventListener('click', () => handleSquareClick(problemNumber, row, col));
                     board.appendChild(square);
                 }
             }
             
-            updateStatus2();
-            updateMovesList2();
+            updateStatus(problemNumber);
+            updateMovesList(problemNumber);
         }
 
-        // Manejar clic en una casilla del Problema 2
-        function handleSquareClick2(row, col) {
-            if (gameCompleted2) return;
+        function handleSquareClick(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            if (state.gameCompleted) return;
             
-            const piece = currentPosition2[row][col];
+            const piece = state.currentPosition[row][col];
             
-            // Si hay una casilla seleccionada, intentar mover
-            if (selectedSquare2) {
-                const fromRow = selectedSquare2.row;
-                const fromCol = selectedSquare2.col;
+            if (state.selectedSquare) {
+                const fromRow = state.selectedSquare.row;
+                const fromCol = state.selectedSquare.col;
                 
-                // Verificar si el movimiento es válido
-                const isValidMove = validMoves2.some(move => 
+                const isValidMove = state.validMoves.some(move => 
                     move.to.row === row && move.to.col === col);
                 
                 if (isValidMove) {
-                    // Realizar movimiento del jugador
-                    makeMove2(fromRow, fromCol, row, col, true);
+                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
-                    // Movimiento no válido, deseleccionar
-                    clearSelection2();
-                    // Si se hizo clic en otra pieza blanca, seleccionarla
+                    clearSelection(problemNumber);
                     if (piece && isWhitePiece(piece)) {
-                        selectSquare2(row, col);
+                        selectSquare(problemNumber, row, col);
                     }
                 }
             } else {
-                // Si no hay casilla seleccionada, seleccionar si es una pieza blanca
                 if (piece && isWhitePiece(piece)) {
-                    selectSquare2(row, col);
+                    selectSquare(problemNumber, row, col);
                 }
             }
         }
 
-        // Seleccionar una casilla del Problema 2
-        function selectSquare2(row, col) {
-            clearSelection2();
+        function selectSquare(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            clearSelection(problemNumber);
             
-            selectedSquare2 = { row, col };
-            const squareElement = document.querySelector(`#board2 .square[data-row="${row}"][data-col="${col}"]`);
+            state.selectedSquare = { row, col };
+            const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
-            // Calcular movimientos válidos para la pieza seleccionada
-            calculateValidMoves2(row, col);
+            calculateValidMoves(problemNumber, row, col);
             
-            // Resaltar movimientos válidos
-            validMoves2.forEach(move => {
-                const targetSquare = document.querySelector(`#board2 .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
+            state.validMoves.forEach(move => {
+                const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
                 targetSquare.classList.add('valid-move');
             });
         }
 
-        // Calcular movimientos válidos para una pieza del Problema 2
-        function calculateValidMoves2(row, col) {
-            validMoves2 = [];
-            const piece = currentPosition2[row][col];
+        function calculateValidMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            if (!piece) return;
+            state.validMoves = [];
+            const piece = state.currentPosition[row][col];
             
-            // Solo permitir movimientos de piezas blancas
-            if (!isWhitePiece(piece)) return;
+            if (!piece || !isWhitePiece(piece)) return;
             
-            // Para este problema solo necesitamos los movimientos de la solución
-            if (currentMoveIndex2 < solution2.length) {
-                const expectedMove = solution2[currentMoveIndex2].white;
+            if (state.currentMoveIndex < problem.solution.length) {
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
                 
-                // Solo permitir el movimiento esperado en la solución
                 if (row === expectedMove.from.row && col === expectedMove.from.col) {
-                    validMoves2.push({
+                    state.validMoves.push({
                         from: { row, col },
                         to: expectedMove.to
                     });
@@ -471,161 +642,159 @@
             }
         }
 
-        // Realizar un movimiento del Problema 2
-        function makeMove2(fromRow, fromCol, toRow, toCol, isPlayerMove) {
-            const piece = currentPosition2[fromRow][fromCol];
+        function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            // Mover la pieza
-            currentPosition2[toRow][toCol] = piece;
-            currentPosition2[fromRow][fromCol] = '';
+            const piece = state.currentPosition[fromRow][fromCol];
+            state.currentPosition[toRow][toCol] = piece;
+            state.currentPosition[fromRow][fromCol] = '';
             
             if (isPlayerMove) {
-                // Registrar movimiento del jugador
-                playerMoves2.push({
+                state.playerMoves.push({
                     from: { row: fromRow, col: fromCol },
                     to: { row: toRow, col: toCol }
                 });
                 
-                // Verificar si el movimiento es correcto
-                const expectedMove = solution2[currentMoveIndex2].white;
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
                 if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
                     toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
                     
-                    // Movimiento correcto
-                    currentMoveIndex2++;
+                    state.currentMoveIndex++;
                     
-                    // Verificar si es jaque mate
-                    if (currentMoveIndex2 === solution2.length) {
-                        gameCompleted2 = true;
-                        document.getElementById('status2').innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
-                        document.getElementById('status2').className = "status success";
+                    if (state.currentMoveIndex === problem.solution.length) {
+                        state.gameCompleted = true;
+                        document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                        document.getElementById(`status${problemNumber}`).className = "status success";
                     } else {
-                        // Movimiento de las negras
-                        setTimeout(makeBlackMove2, 500);
+                        setTimeout(() => makeBlackMove(problemNumber), 500);
                     }
                 } else {
-                    // Movimiento incorrecto
-                    document.getElementById('status2').textContent = "Movimiento incorrecto. Intenta de nuevo.";
-                    document.getElementById('status2').className = "status error";
-                    // Revertir movimiento
-                    currentPosition2[fromRow][fromCol] = piece;
-                    currentPosition2[toRow][toCol] = '';
-                    playerMoves2.pop();
+                    document.getElementById(`status${problemNumber}`).textContent = "Movimiento incorrecto. Intenta de nuevo.";
+                    document.getElementById(`status${problemNumber}`).className = "status error";
+                    state.currentPosition[fromRow][fromCol] = piece;
+                    state.currentPosition[toRow][toCol] = '';
+                    state.playerMoves.pop();
                 }
             }
             
-            clearSelection2();
-            createBoard2();
+            clearSelection(problemNumber);
+            createBoard(problemNumber);
         }
 
-        // Realizar movimiento de las negras del Problema 2
-        function makeBlackMove2() {
-            if (currentMoveIndex2 < solution2.length) {
-                const blackMove = solution2[currentMoveIndex2].black;
+        function makeBlackMove(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            if (state.currentMoveIndex < problem.solution.length) {
+                const blackMove = problem.solution[state.currentMoveIndex].black;
                 if (blackMove) {
-                    const piece = currentPosition2[blackMove.from.row][blackMove.from.col];
-                    currentPosition2[blackMove.to.row][blackMove.to.col] = piece;
-                    currentPosition2[blackMove.from.row][blackMove.from.col] = '';
+                    const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
+                    state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
+                    state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
                     
-                    createBoard2();
-                    document.getElementById('status2').textContent = "Las negras han jugado. Es tu turno.";
+                    createBoard(problemNumber);
+                    document.getElementById(`status${problemNumber}`).textContent = "Las negras han jugado. Es tu turno.";
                 }
             }
         }
 
-        // Verificar si una pieza es blanca
         function isWhitePiece(piece) {
             return piece === piece.toUpperCase();
         }
 
-        // Limpiar selección del Problema 2
-        function clearSelection2() {
-            selectedSquare2 = null;
-            validMoves2 = [];
+        function clearSelection(problemNumber) {
+            const state = gameStates[problemNumber];
+            state.selectedSquare = null;
+            state.validMoves = [];
             
-            const squares = document.querySelectorAll('#board2 .square');
+            const squares = document.querySelectorAll(`#board${problemNumber} .square`);
             squares.forEach(square => {
                 square.classList.remove('selected');
                 square.classList.remove('valid-move');
             });
         }
 
-        // Actualizar estado del juego del Problema 2
-        function updateStatus2() {
-            const statusElement = document.getElementById('status2');
+        function updateStatus(problemNumber) {
+            const state = gameStates[problemNumber];
+            const statusElement = document.getElementById(`status${problemNumber}`);
             
-            if (gameCompleted2) {
+            if (state.gameCompleted) {
                 statusElement.innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                 statusElement.className = "status success";
-            } else if (currentMoveIndex2 === 0) {
+            } else if (state.currentMoveIndex === 0) {
                 statusElement.textContent = "¡Selecciona una pieza blanca para comenzar!";
                 statusElement.className = "status";
             } else {
-                statusElement.textContent = `Movimiento ${currentMoveIndex2}/4 completado. Es tu turno.`;
+                statusElement.textContent = `Movimiento ${state.currentMoveIndex}/4 completado. Es tu turno.`;
                 statusElement.className = "status";
             }
         }
 
-        // Actualizar lista de movimientos del Problema 2
-        function updateMovesList2() {
-            const movesContainer = document.getElementById('moves-container2');
+        function updateMovesList(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            const movesContainer = document.getElementById(`moves-container${problemNumber}`);
             movesContainer.innerHTML = '';
             
-            if (playerMoves2.length === 0) {
+            if (state.playerMoves.length === 0) {
                 movesContainer.innerHTML = '<p>No se han realizado movimientos aún.</p>';
             } else {
-                playerMoves2.forEach((move, index) => {
+                state.playerMoves.forEach((move, index) => {
                     const moveElement = document.createElement('div');
                     moveElement.className = 'move-item';
                     if (index === 3) {
-                        moveElement.innerHTML = `<strong class="checkmate">${moveNotation2[index]}</strong>`;
+                        moveElement.innerHTML = `<strong class="checkmate">${problem.moveNotation[index]}</strong>`;
                     } else {
-                        moveElement.textContent = moveNotation2[index];
+                        moveElement.textContent = problem.moveNotation[index];
                     }
                     movesContainer.appendChild(moveElement);
                 });
             }
         }
 
-        // Mostrar pista del Problema 2
-        function showHint2() {
-            if (gameCompleted2 || currentMoveIndex2 >= solution2.length) return;
+        function showHint(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            const expectedMove = solution2[currentMoveIndex2].white;
-            const fromSquare = document.querySelector(`#board2 .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
-            const toSquare = document.querySelector(`#board2 .square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
+            if (state.gameCompleted || state.currentMoveIndex >= problem.solution.length) return;
+            
+            const expectedMove = problem.solution[state.currentMoveIndex].white;
+            const fromSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
+            const toSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
             
             fromSquare.classList.add('selected');
             toSquare.classList.add('valid-move');
             
-            document.getElementById('status2').textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
-            document.getElementById('status2').className = "status";
+            document.getElementById(`status${problemNumber}`).textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
+            document.getElementById(`status${problemNumber}`).className = "status";
             
             setTimeout(() => {
-                clearSelection2();
-                createBoard2();
+                clearSelection(problemNumber);
+                createBoard(problemNumber);
             }, 2000);
         }
 
-        // Mostrar solución completa del Problema 2
-        function showSolution2() {
-            resetGame2();
+        function showSolution(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            // Ejecutar todos los movimientos de la solución
+            resetGame(problemNumber);
+            
             const executeMove = (index) => {
-                if (index < solution2.length) {
-                    const whiteMove = solution2[index].white;
-                    makeMove2(whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
+                if (index < problem.solution.length) {
+                    const whiteMove = problem.solution[index].white;
+                    makeMove(problemNumber, whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
                     
-                    if (solution2[index].black) {
+                    if (problem.solution[index].black) {
                         setTimeout(() => {
-                            const blackMove = solution2[index].black;
-                            makeMove2(blackMove.from.row, blackMove.from.col, blackMove.to.row, blackMove.to.col, false);
+                            const blackMove = problem.solution[index].black;
+                            makeMove(problemNumber, blackMove.from.row, blackMove.from.col, blackMove.to.row, blackMove.to.col, false);
                             executeMove(index + 1);
                         }, 1000);
                     } else {
-                        gameCompleted2 = true;
-                        createBoard2();
+                        state.gameCompleted = true;
+                        createBoard(problemNumber);
                     }
                 }
             };
@@ -633,24 +802,38 @@
             executeMove(0);
         }
 
-        // Reiniciar juego del Problema 2
-        function resetGame2() {
-            currentPosition2 = JSON.parse(JSON.stringify(initialPosition2));
-            selectedSquare2 = null;
-            validMoves2 = [];
-            currentMoveIndex2 = 0;
-            playerMoves2 = [];
-            gameCompleted2 = false;
-            createBoard2();
+        function resetGame(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            state.currentPosition = JSON.parse(JSON.stringify(problem.initialPosition));
+            state.selectedSquare = null;
+            state.validMoves = [];
+            state.currentMoveIndex = 0;
+            state.playerMoves = [];
+            state.gameCompleted = false;
+            createBoard(problemNumber);
         }
 
-        // Inicializar Problema 2
-        createBoard2();
+        // ========== EVENT LISTENERS ==========
+        document.querySelectorAll('.btn-select').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const problemNumber = this.closest('.problem-card').dataset.problem;
+                showProblem(problemNumber);
+            });
+        });
 
-        // Event listeners para los botones del Problema 2
-        document.getElementById('reset-btn2').addEventListener('click', resetGame2);
-        document.getElementById('hint-btn2').addEventListener('click', showHint2);
-        document.getElementById('solution-btn2').addEventListener('click', showSolution2);
+        document.getElementById('back-btn').addEventListener('click', showProblemSelection);
+
+        // Event listeners para los controles de cada problema
+        for (let i = 1; i <= 2; i++) {
+            document.getElementById(`reset-btn${i}`).addEventListener('click', () => resetGame(i));
+            document.getElementById(`hint-btn${i}`).addEventListener('click', () => showHint(i));
+            document.getElementById(`solution-btn${i}`).addEventListener('click', () => showSolution(i));
+        }
+
+        // Inicializar mostrando la selección de problemas
+        showProblemSelection();
     </script>
 </body>
 </html>
