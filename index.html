@@ -184,6 +184,11 @@
             transform: translateY(0);
         }
         
+        button.active {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            color: white;
+        }
+        
         select {
             width: 100%;
             padding: 10px;
@@ -329,9 +334,6 @@
 
         // Inicializar el tablero
         function initializeBoard() {
-            const chessboard = document.getElementById('chessboard');
-            chessboard.innerHTML = '';
-            
             // Posición inicial estándar
             const initialPosition = [
                 ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
