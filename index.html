@@ -198,14 +198,6 @@
             border-radius: 5px;
             margin: 10px 0;
         }
-        .debug-info {
-            background-color: #fff3cd;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            font-family: monospace;
-            font-size: 12px;
-        }
     </style>
 </head>
 <body>
@@ -260,11 +252,6 @@
                 <h3>Movimientos realizados:</h3>
                 <div id="moves-container"></div>
             </div>
-
-            <div class="debug-info">
-                <h4>Información de Depuración:</h4>
-                <div id="debug-info"></div>
-            </div>
         </div>
     </div>
 
@@ -277,50 +264,43 @@
 
         // Crear posición inicial basada en la descripción
         const initialPosition = [
-            // Fila 8 (a8-h8) - Índice 0
+            // Fila 8 (a8-h8)
             ['', '', '', '', 'b', '', '', ''],  // Alfil negro en e8
-            // Fila 7 (a7-h7) - Índice 1
+            // Fila 7 (a7-h7)
             ['', '', 'p', '', '', '', 'p', ''],  // Peones negros en c7, g7
-            // Fila 6 (a6-h6) - Índice 2
+            // Fila 6 (a6-h6)
             ['', '', '', '', '', '', '', ''],    // Vacía
-            // Fila 5 (a5-h5) - Índice 3
+            // Fila 5 (a5-h5)
             ['', '', 'P', '', '', 'p', 'P', ''], // Peones blancos c5, g5; negro f5
-            // Fila 4 (a4-h4) - Índice 4
+            // Fila 4 (a4-h4)
             ['', 'P', '', 'P', '', 'P', '', 'P'], // Peones blancos b4, d4, f4, h4
-            // Fila 3 (a3-h3) - Índice 5
+            // Fila 3 (a3-h3)
             ['', '', 'p', '', 'K', '', 'p', ''],  // Peones negros c3, g3; Rey blanco e3
-            // Fila 2 (a2-h2) - Índice 6
+            // Fila 2 (a2-h2)
             ['', '', 'P', '', 'B', '', 'P', ''],  // Peones blancos c2, g2; Alfil blanco e2
-            // Fila 1 (a1-h1) - Índice 7
+            // Fila 1 (a1-h1)
             ['', '', '', '', 'k', '', '', '']     // Rey negro en e1
         ];
 
-        // Secuencia de movimientos correcta - COORDENADAS CORREGIDAS
+        // Secuencia de movimientos correcta
         const solution = [
             { 
-                // Movimiento 1: g2-g6 (peón blanco)
-                white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2(6,6) -> g6(2,6)
-                // Respuesta negra: c7-c6 (peón negro)
-                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7(1,2) -> c6(2,2)
+                white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2-g6
+                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7-c6
                 description: "Las blancas avanzan el peón a g6, amenazando abrir líneas de ataque."
             },
             { 
-                // Movimiento 2: h2-h5 (peón blanco)
-                white: { from: { row: 6, col: 7 }, to: { row: 3, col: 7 } }, // h2(6,7) -> h5(3,7)
-                // Respuesta negra: Ae8-d7 (alfil negro)
-                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // e8(0,4) -> d7(1,3)
+                white: { from: { row: 6, col: 7 }, to: { row: 3, col: 7 } }, // h2-h5
+                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // Ae8-d7
                 description: "Las blancas continúan con h5, mientras las negras mueven su alfil a d7."
             },
             { 
-                // Movimiento 3: Ae2-h4 (alfil blanco)
-                white: { from: { row: 6, col: 4 }, to: { row: 4, col: 7 } }, // e2(6,4) -> h4(4,7)
-                // Respuesta negra: Ad7-c8 (alfil negro)
-                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // d7(1,3) -> c8(0,2)
+                white: { from: { row: 6, col: 4 }, to: { row: 4, col: 7 } }, // Ae2-h4
+                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // Ad7-c8
                 description: "El alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
             },
             { 
-                // Movimiento 4: Ah4xg3++ (alfil blanco captura peón y da jaque mate)
-                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // h4(4,7) -> g3(5,6)
+                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3++
                 black: null, // Jaque mate, no hay respuesta
                 description: "¡Jaque mate! El alfil captura en g3 y el rey negro no puede escapar."
             }
@@ -340,12 +320,6 @@
         let currentMoveIndex = 0;
         let playerMoves = [];
         let gameCompleted = false;
-
-        // Función para debug
-        function debugLog(message) {
-            const debugDiv = document.getElementById('debug-info');
-            debugDiv.innerHTML += `<div>${message}</div>`;
-        }
 
         // Crear tablero
         function createBoard() {
@@ -388,14 +362,11 @@
             if (gameCompleted) return;
             
             const piece = currentPosition[row][col];
-            debugLog(`Clic en: fila=${row}, col=${col}, pieza=${piece || 'vacía'}`);
             
             // Si hay una casilla seleccionada, intentar mover
             if (selectedSquare) {
                 const fromRow = selectedSquare.row;
                 const fromCol = selectedSquare.col;
-                
-                debugLog(`Intentando mover de (${fromRow},${fromCol}) a (${row},${col})`);
                 
                 // Verificar si el movimiento es válido
                 const isValidMove = validMoves.some(move => 
@@ -406,7 +377,6 @@
                     makeMove(fromRow, fromCol, row, col, true);
                 } else {
                     // Movimiento no válido, deseleccionar
-                    debugLog("Movimiento no válido");
                     clearSelection();
                     // Si se hizo clic en otra pieza blanca, seleccionarla
                     if (piece && isWhitePiece(piece)) {
@@ -417,8 +387,6 @@
                 // Si no hay casilla seleccionada, seleccionar si es una pieza blanca
                 if (piece && isWhitePiece(piece)) {
                     selectSquare(row, col);
-                } else {
-                    debugLog("No es una pieza blanca o está vacía");
                 }
             }
         }
@@ -431,8 +399,6 @@
             const squareElement = document.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
-            debugLog(`Seleccionada pieza en: fila=${row}, col=${col}`);
-            
             // Calcular movimientos válidos para la pieza seleccionada
             calculateValidMoves(row, col);
             
@@ -440,7 +406,6 @@
             validMoves.forEach(move => {
                 const targetSquare = document.querySelector(`.square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
                 targetSquare.classList.add('valid-move');
-                debugLog(`Movimiento válido a: fila=${move.to.row}, col=${move.to.col}`);
             });
         }
 
@@ -454,13 +419,9 @@
             // Solo permitir movimientos de piezas blancas
             if (!isWhitePiece(piece)) return;
             
-            debugLog(`Calculando movimientos para pieza ${piece} en (${row},${col})`);
-            debugLog(`Movimiento actual: ${currentMoveIndex}`);
-            
             // Para simplificar, en este problema solo necesitamos los movimientos de la solución
             if (currentMoveIndex < solution.length) {
                 const expectedMove = solution[currentMoveIndex].white;
-                debugLog(`Movimiento esperado: de (${expectedMove.from.row},${expectedMove.from.col}) a (${expectedMove.to.row},${expectedMove.to.col})`);
                 
                 // Solo permitir el movimiento esperado en la solución
                 if (row === expectedMove.from.row && col === expectedMove.from.col) {
@@ -468,9 +429,6 @@
                         from: { row, col },
                         to: expectedMove.to
                     });
-                    debugLog("¡Movimiento válido encontrado!");
-                } else {
-                    debugLog("Esta pieza no es la esperada para este movimiento");
                 }
             }
         }
@@ -478,8 +436,6 @@
         // Realizar un movimiento
         function makeMove(fromRow, fromCol, toRow, toCol, isPlayerMove) {
             const piece = currentPosition[fromRow][fromCol];
-            
-            debugLog(`Realizando movimiento: ${piece} de (${fromRow},${fromCol}) a (${toRow},${toCol})`);
             
             // Mover la pieza
             currentPosition[toRow][toCol] = piece;
@@ -497,7 +453,6 @@
                 if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
                     toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
                     
-                    debugLog("¡Movimiento correcto!");
                     // Movimiento correcto
                     currentMoveIndex++;
                     
@@ -512,7 +467,6 @@
                     }
                 } else {
                     // Movimiento incorrecto
-                    debugLog("Movimiento incorrecto");
                     document.getElementById('status').textContent = "Movimiento incorrecto. Intenta de nuevo.";
                     document.getElementById('status').className = "status error";
                     // Revertir movimiento
@@ -532,8 +486,6 @@
                 const blackMove = solution[currentMoveIndex].black;
                 if (blackMove) {
                     const piece = currentPosition[blackMove.from.row][blackMove.from.col];
-                    debugLog(`Negras mueven: ${piece} de (${blackMove.from.row},${blackMove.from.col}) a (${blackMove.to.row},${blackMove.to.col})`);
-                    
                     currentPosition[blackMove.to.row][blackMove.to.col] = piece;
                     currentPosition[blackMove.from.row][blackMove.from.col] = '';
                     
@@ -651,7 +603,6 @@
             currentMoveIndex = 0;
             playerMoves = [];
             gameCompleted = false;
-            document.getElementById('debug-info').innerHTML = '';
             createBoard();
         }
 
