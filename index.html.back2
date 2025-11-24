@@ -244,7 +244,12 @@
                 <h3>Solución del Problema:</h3>
                 <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
                 <div class="move-explanation">
-                    <p><strong>Explicación:</strong> Esta secuencia fuerza al rey negro a una posición de mate donde no puede escapar del ataque del alfil blanco.</p>
+                    <p><strong>Explicación:</strong> 
+                        1. Peón g5-g6; Peón c7-c6<br>
+                        2. Peón h4-h5; Alfil e8-d7<br>
+                        3. Alfil e7-h4; Alfil d7-c8<br>
+                        4. Alfil h4xg3++ ¡Jaque mate!
+                    </p>
                 </div>
             </div>
             
@@ -262,51 +267,58 @@
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
         };
 
-        // Crear posición inicial basada en la descripción
+        // Crear posición inicial CORREGIDA con alfil blanco en e7
         const initialPosition = [
-            // Fila 8 (a8-h8)
+            // Fila 8 (a8-h8) - Índice 0
             ['', '', '', '', 'b', '', '', ''],  // Alfil negro en e8
-            // Fila 7 (a7-h7)
-            ['', '', 'p', '', '', '', 'p', ''],  // Peones negros en c7, g7
-            // Fila 6 (a6-h6)
+            // Fila 7 (a7-h7) - Índice 1
+            ['', '', 'p', '', 'B', '', 'p', ''],  // Peones negros en c7, g7; Alfil blanco en e7
+            // Fila 6 (a6-h6) - Índice 2
             ['', '', '', '', '', '', '', ''],    // Vacía
-            // Fila 5 (a5-h5)
+            // Fila 5 (a5-h5) - Índice 3
             ['', '', 'P', '', '', 'p', 'P', ''], // Peones blancos c5, g5; negro f5
-            // Fila 4 (a4-h4)
+            // Fila 4 (a4-h4) - Índice 4
             ['', 'P', '', 'P', '', 'P', '', 'P'], // Peones blancos b4, d4, f4, h4
-            // Fila 3 (a3-h3)
+            // Fila 3 (a3-h3) - Índice 5
             ['', '', 'p', '', 'K', '', 'p', ''],  // Peones negros c3, g3; Rey blanco e3
-            // Fila 2 (a2-h2)
+            // Fila 2 (a2-h2) - Índice 6
             ['', '', 'P', '', 'B', '', 'P', ''],  // Peones blancos c2, g2; Alfil blanco e2
-            // Fila 1 (a1-h1)
+            // Fila 1 (a1-h1) - Índice 7
             ['', '', '', '', 'k', '', '', '']     // Rey negro en e1
         ];
 
-        // Secuencia de movimientos correcta
+        // Secuencia de movimientos CORREGIDA según la solución
         const solution = [
             { 
-                white: { from: { row: 6, col: 6 }, to: { row: 2, col: 6 } }, // g2-g6
-                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7-c6
-                description: "Las blancas avanzan el peón a g6, amenazando abrir líneas de ataque."
+                // Movimiento 1: Peón blanco g5-g6
+                white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } }, // g5(3,6) -> g6(2,6)
+                // Respuesta negra: Peón negro c7-c6
+                black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7(1,2) -> c6(2,2)
+                description: "Peón blanco avanza a g6, abriendo líneas de ataque."
             },
             { 
-                white: { from: { row: 6, col: 7 }, to: { row: 3, col: 7 } }, // h2-h5
-                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // Ae8-d7
-                description: "Las blancas continúan con h5, mientras las negras mueven su alfil a d7."
+                // Movimiento 2: Peón blanco h4-h5
+                white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } }, // h4(4,7) -> h5(3,7)
+                // Respuesta negra: Alfil negro e8-d7
+                black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // e8(0,4) -> d7(1,3)
+                description: "Peón blanco avanza a h5, mientras el alfil negro se mueve a d7."
             },
             { 
-                white: { from: { row: 6, col: 4 }, to: { row: 4, col: 7 } }, // Ae2-h4
-                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // Ad7-c8
-                description: "El alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
+                // Movimiento 3: Alfil blanco e7-h4
+                white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } }, // e7(1,4) -> h4(4,7)
+                // Respuesta negra: Alfil negro d7-c8
+                black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // d7(1,3) -> c8(0,2)
+                description: "Alfil blanco se mueve a h4, forzando al alfil negro a retroceder."
             },
             { 
-                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3++
+                // Movimiento 4: Alfil blanco h4xg3++ (captura y jaque mate)
+                white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // h4(4,7) -> g3(5,6)
                 black: null, // Jaque mate, no hay respuesta
                 description: "¡Jaque mate! El alfil captura en g3 y el rey negro no puede escapar."
             }
         ];
 
-        // Notación algebraica de los movimientos (con ++ para jaque mate)
+        // Notación algebraica de los movimientos
         const moveNotation = [
             "1. g6 c6",
             "2. h5 Ad7", 
@@ -419,7 +431,7 @@
             // Solo permitir movimientos de piezas blancas
             if (!isWhitePiece(piece)) return;
             
-            // Para simplificar, en este problema solo necesitamos los movimientos de la solución
+            // Para este problema solo necesitamos los movimientos de la solución
             if (currentMoveIndex < solution.length) {
                 const expectedMove = solution[currentMoveIndex].white;
                 
@@ -613,18 +625,6 @@
         document.getElementById('reset-btn').addEventListener('click', resetGame);
         document.getElementById('hint-btn').addEventListener('click', showHint);
         document.getElementById('solution-btn').addEventListener('click', showSolution);
-
-        // Mostrar la posición inicial en la consola para verificación
-        console.log("Posición inicial del tablero:");
-        console.log("8 | " + initialPosition[0].map(p => p || '.').join('  '));
-        console.log("7 | " + initialPosition[1].map(p => p || '.').join('  '));
-        console.log("6 | " + initialPosition[2].map(p => p || '.').join('  '));
-        console.log("5 | " + initialPosition[3].map(p => p || '.').join('  '));
-        console.log("4 | " + initialPosition[4].map(p => p || '.').join('  '));
-        console.log("3 | " + initialPosition[5].map(p => p || '.').join('  '));
-        console.log("2 | " + initialPosition[6].map(p => p || '.').join('  '));
-        console.log("1 | " + initialPosition[7].map(p => p || '.').join('  '));
-        console.log("    a  b  c  d  e  f  g  h");
     </script>
 </body>
 </html>
