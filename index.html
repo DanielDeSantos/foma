@@ -800,10 +800,115 @@
             return moves;
         }
 
-        // El resto del código permanece igual...
-        // [Aquí irían las funciones handleEditClick, algebraicToPosition, getMoveNotation, 
-        // makeBlackMove, findKing, isKingInCheck, isCheckmateForBlack, etc.
-        // que se mantienen igual que en la versión anterior]
+        // Hacer movimiento automático de las negras - CORREGIDA
+        function makeBlackMove() {
+            if (!gameActive) return;
+            
+            const lastWhiteMove = moveHistory[moveHistory.length - 1];
+            if (!lastWhiteMove) return;
+            
+            // Extraer la notación del movimiento blanco (sin el número de jugada)
+            const moveParts = lastWhiteMove.split('. ');
+            const moveKey = moveParts.length > 1 ? moveParts[1] : moveParts[0];
+            
+            const problem = problems[currentProblem];
+            
+            console.log("Buscando respuesta para:", moveKey);
+            console.log("Respuestas disponibles:", problem.blackResponses);
+            
+            if (problem.blackResponses && problem.blackResponses[moveKey]) {
+                const response = problem.blackResponses[moveKey];
+                const fromRow = response.from[0];
+                const fromCol = response.from[1];
+                const toRow = response.to[0];
+                const toCol = response.to[1];
+                
+                console.log("Respuesta encontrada:", response);
+                
+                const piece = boardState[fromRow][fromCol];
+                if (piece && piece.startsWith('b')) {
+                    // Verificar que no se está intentando capturar un rey
+                    const targetPiece = boardState[toRow][toCol];
+                    if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
+                        updateStatus("Error: Las negras no pueden capturar reyes.");
+                        moveHistory.push("--");
+                        moveCount++;
+                        isWhiteTurn = true;
+                        updateTurnIndicator();
+                        updateMoveCount();
+                        updateMoveHistory();
+                        updateStatus("Turno de las blancas. Las negras no pudieron mover.");
+                        renderBoard();
+                        return;
+                    }
+                    
+                    // Mover la pieza negra directamente (sin verificar movimientos válidos para simplificar)
+                    boardState[toRow][toCol] = piece;
+                    boardState[fromRow][fromCol] = null;
+                    
+                    // Añadir al historial
+                    const blackMoveNotation = getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol});
+                    moveHistory.push(blackMoveNotation);
+                    moveCount++;
+                    
+                    console.log("Movimiento negro realizado:", blackMoveNotation);
+                    
+                    // Verificar si es jaque mate después del movimiento negro
+                    if (isCheckmateForBlack()) {
+                        const jugadasCompletas = Math.ceil(moveCount / 2);
+                        if (jugadasCompletas < 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        } else if (jugadasCompletas > 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        }
+                    }
+                    
+                    // Verificar si se superó el límite de jugadas
+                    if (moveCount >= 8 && !isCheckmateForBlack()) {
+                        resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
+                        return;
+                    }
+                    
+                    // Cambiar turno a blancas
+                    isWhiteTurn = true;
+                    updateTurnIndicator();
+                    updateMoveCount();
+                    updateMoveHistory();
+                    
+                    // Verificar si es jaque mate exacto en 4 jugadas
+                    if (isCheckmateForBlack() && moveCount === 8) {
+                        updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
+                        gameActive = false;
+                    } else {
+                        updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
+                    }
+                } else {
+                    console.log("Error: No hay pieza negra en la posición", fromRow, fromCol);
+                    updateStatus("Error: No hay pieza negra en la posición predefinida.");
+                    isWhiteTurn = true;
+                    updateTurnIndicator();
+                    updateStatus("Error en respuesta predefinida. Turno de las blancas.");
+                }
+            } else {
+                console.log("No hay respuesta predefinida para:", moveKey);
+                updateStatus("No hay respuesta predefinida. Las negras pasan turno.");
+                moveHistory.push("--");
+                moveCount++;
+                isWhiteTurn = true;
+                updateTurnIndicator();
+                updateMoveCount();
+                updateMoveHistory();
+                updateStatus("Turno de las blancas. Las negras no respondieron.");
+            }
+            
+            renderBoard();
+        }
+
+        // El resto de funciones se mantienen igual...
+        // [Aquí irían handleEditClick, algebraicToPosition, getMoveNotation, 
+        // findKing, isKingInCheck, isCheckmateForBlack, etc.]
 
         // Manejar clic en modo edición
         function handleEditClick(row, col) {
@@ -862,115 +967,6 @@
             } else {
                 return `${pieceType}${toCol}${toRow}`;
             }
-        }
-
-        // Hacer movimiento automático de las negras
-        function makeBlackMove() {
-            if (!gameActive) return;
-            
-            const lastWhiteMove = moveHistory[moveHistory.length - 1];
-            if (!lastWhiteMove) return;
-            
-            const moveKey = lastWhiteMove.split('. ')[1];
-            const problem = problems[currentProblem];
-            
-            if (problem.blackResponses && problem.blackResponses[moveKey]) {
-                const response = problem.blackResponses[moveKey];
-                const fromRow = response.from[0];
-                const fromCol = response.from[1];
-                const toRow = response.to[0];
-                const toCol = response.to[1];
-                
-                const piece = boardState[fromRow][fromCol];
-                if (piece && piece.startsWith('b')) {
-                    const validMoves = calculateValidMoves(fromRow, fromCol, piece);
-                    const isValid = validMoves.some(move => move.row === toRow && move.col === toCol);
-                    
-                    if (isValid) {
-                        // Verificar que no se está intentando capturar un rey
-                        const targetPiece = boardState[toRow][toCol];
-                        if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
-                            updateStatus("Error: Las negras no pueden capturar reyes.");
-                            moveHistory.push("--");
-                            moveCount++;
-                            isWhiteTurn = true;
-                            updateTurnIndicator();
-                            updateMoveCount();
-                            updateMoveHistory();
-                            updateStatus("Turno de las blancas. Las negras no pudieron mover.");
-                            renderBoard();
-                            return;
-                        }
-                        
-                        // Mover la pieza negra
-                        boardState[toRow][toCol] = piece;
-                        boardState[fromRow][fromCol] = null;
-                        
-                        // Añadir al historial
-                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
-                        moveCount++;
-                        
-                        // Verificar si es jaque mate después del movimiento negro
-                        if (isCheckmateForBlack()) {
-                            const jugadasCompletas = Math.ceil(moveCount / 2);
-                            if (jugadasCompletas < 4) {
-                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                                return;
-                            } else if (jugadasCompletas > 4) {
-                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                                return;
-                            }
-                        }
-                        
-                        // Verificar si se superó el límite de jugadas
-                        if (moveCount >= 8 && !isCheckmateForBlack()) {
-                            resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
-                            return;
-                        }
-                        
-                        // Cambiar turno a blancas
-                        isWhiteTurn = true;
-                        updateTurnIndicator();
-                        updateMoveCount();
-                        updateMoveHistory();
-                        
-                        // Verificar si es jaque mate exacto en 4 jugadas
-                        if (isCheckmateForBlack() && moveCount === 8) {
-                            updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                            gameActive = false;
-                        } else {
-                            updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
-                        }
-                    } else {
-                        updateStatus("Error: Movimiento predefinido de negras no es válido.");
-                        boardState[toRow][toCol] = piece;
-                        boardState[fromRow][fromCol] = null;
-                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
-                        moveCount++;
-                        isWhiteTurn = true;
-                        updateTurnIndicator();
-                        updateMoveCount();
-                        updateMoveHistory();
-                        updateStatus("Movimiento forzado. Turno de las blancas.");
-                    }
-                } else {
-                    updateStatus("Error: No hay pieza negra en la posición predefinida.");
-                    isWhiteTurn = true;
-                    updateTurnIndicator();
-                    updateStatus("Error en respuesta predefinida. Turno de las blancas.");
-                }
-            } else {
-                updateStatus("No hay respuesta predefinida. Las negras pasan turno.");
-                moveHistory.push("--");
-                moveCount++;
-                isWhiteTurn = true;
-                updateTurnIndicator();
-                updateMoveCount();
-                updateMoveHistory();
-                updateStatus("Turno de las blancas. Las negras no respondieron.");
-            }
-            
-            renderBoard();
         }
 
         // Encontrar la posición del rey
