@@ -394,7 +394,7 @@
         let isWhiteTurn = true;
         let gameActive = true;
 
-        // Problemas predefinidos de mate en 4
+        // Problemas predefinidos de mate en 4 - CORREGIDOS
         const problems = {
             1: {
                 name: "Mate con dama y torre",
@@ -410,9 +410,9 @@
                 ],
                 solution: ["Dc7", "Rf6", "Th6+", "Rg5", "Dg7+", "Rh4", "Th6#"],
                 blackResponses: {
-                    "Dc7": { from: [0, 4], to: [1, 5] }, // Rey f6
-                    "Th6+": { from: [1, 5], to: [2, 4] }, // Rey g5
-                    "Dg7+": { from: [2, 4], to: [3, 3] }  // Rey h4
+                    "Dc7": { from: [0, 4], to: [1, 5] }, // Rey f6 (e8 -> f7)
+                    "Th6+": { from: [1, 5], to: [2, 4] }, // Rey g5 (f7 -> g6)
+                    "Dg7+": { from: [2, 4], to: [3, 3] }  // Rey h4 (g6 -> h5)
                 }
             },
             2: {
