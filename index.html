@@ -278,52 +278,6 @@
             margin: 0 5px;
             text-align: center;
         }
-
-        /* Modal para coronación */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            background: #1a1a2e;
-            padding: 30px;
-            border-radius: 10px;
-            text-align: center;
-            border: 2px solid #ffd700;
-        }
-
-        .modal h3 {
-            margin-bottom: 20px;
-            color: #ffd700;
-        }
-
-        .promotion-options {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .promotion-piece {
-            font-size: 3rem;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-
-        .promotion-piece:hover {
-            background: rgba(255, 215, 0, 0.3);
-            transform: scale(1.1);
-        }
         
         @media (max-width: 768px) {
             .main-content {
@@ -337,10 +291,6 @@
             .problem-info {
                 flex-direction: column;
                 gap: 10px;
-            }
-
-            .promotion-options {
-                flex-wrap: wrap;
             }
         }
     </style>
@@ -398,34 +348,36 @@
                         <button id="showSolution">Mostrar Solución</button>
                     </div>
                 </div>
-            </section>
-        </div>
-        
-        <!-- Modal para coronación de peones -->
-        <div id="promotionModal" class="modal">
-            <div class="modal-content">
-                <h3>Selecciona una pieza para coronar</h3>
-                <div class="promotion-options">
-                    <div class="promotion-piece white-piece" data-piece="wq">♕</div>
-                    <div class="promotion-piece white-piece" data-piece="wr">♖</div>
-                    <div class="promotion-piece white-piece" data-piece="wb">♗</div>
-                    <div class="promotion-piece white-piece" data-piece="wn">♘</div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Editor de Respuestas Negras</h3>
+                    <div class="button-group">
+                        <button id="editMode">Editar Respuestas</button>
+                        <button id="playMode" class="active">Modo Juego</button>
+                    </div>
+                    <p>En modo edición puedes definir cómo responderán las negras.</p>
                 </div>
-            </div>
+                
+                <div class="control-group">
+                    <h3 class="control-title">Configurar Respuesta Negra</h3>
+                    <div id="blackResponseConfig">
+                        <!-- Se generará dinámicamente -->
+                    </div>
+                </div>
+            </section>
         </div>
         
         <div class="instructions">
             <h3>Instrucciones de Uso</h3>
             <ol>
                 <li>Las BLANCAS juegan primero y son controladas por TI</li>
-                <li>El REY NEGRO responde automáticamente después de cada movimiento blanco</li>
+                <li>Las NEGRAS responden automáticamente según movimientos predefinidos</li>
                 <li>Selecciona una pieza blanca para ver sus movimientos válidos (puntos verdes)</li>
                 <li>Haz clic en una casilla verde para mover la pieza blanca seleccionada</li>
-                <li>El rey negro se moverá automáticamente después de tu movimiento</li>
+                <li>Las negras responderán automáticamente después de tu movimiento</li>
                 <li>El objetivo es dar MATE en exactamente 4 JUGADAS (8 movimientos en total)</li>
                 <li>Si das mate antes o después de 4 jugadas, el problema se reiniciará</li>
                 <li>Los reyes NO pueden ser capturados - solo se puede dar jaque mate</li>
-                <li>Los peones pueden coronar al llegar al final del tablero</li>
             </ol>
         </div>
     </div>
@@ -435,12 +387,12 @@
         let boardState = Array(8).fill().map(() => Array(8).fill(null));
         let selectedPiece = null;
         let validMoves = [];
+        let isEditMode = false;
         let moveHistory = [];
         let currentProblem = 1;
         let moveCount = 0;
         let isWhiteTurn = true;
         let gameActive = true;
-        let pendingPromotion = null;
 
         // Problemas predefinidos de mate en 4
         const problems = {
@@ -456,7 +408,12 @@
                     [null, null, 'wp', null, null, null, null, null],
                     [null, null, null, null, 'wk', 'wr', null, null]
                 ],
-                solution: ["Dc7", "Rf6", "Th6+", "Rg5", "Dg7+", "Rh4", "Th6#"]
+                solution: ["Dc7", "Rf6", "Th6+", "Rg5", "Dg7+", "Rh4", "Th6#"],
+                blackResponses: {
+                    "Dc7": { from: [0, 4], to: [1, 5] }, // Rey f6
+                    "Th6+": { from: [1, 5], to: [2, 4] }, // Rey g5
+                    "Dg7+": { from: [2, 4], to: [3, 3] }  // Rey h4
+                }
             },
             2: {
                 name: "Mate con dos alfiles",
@@ -470,7 +427,12 @@
                     [null, null, null, null, null, null, null, null],
                     [null, null, null, null, 'wk', null, null, null]
                 ],
-                solution: ["Ae5", "Rd7", "Ad6", "Rc8", "Ae6+", "Rb8", "Ab7#"]
+                solution: ["Ae5", "Rd7", "Ad6", "Rc8", "Ae6+", "Rb8", "Ab7#"],
+                blackResponses: {
+                    "Ae5": { from: [0, 4], to: [1, 3] }, // Rey d7
+                    "Ad6": { from: [1, 3], to: [0, 2] }, // Rey c8
+                    "Ae6+": { from: [0, 2], to: [0, 1] } // Rey b8
+                }
             },
             3: {
                 name: "Mate con caballo y alfil",
@@ -484,7 +446,12 @@
                     [null, null, null, null, null, null, 'wp', null],
                     [null, null, null, null, 'wk', null, null, null]
                 ],
-                solution: ["Cc6", "Ra7", "Ab5", "Rb8", "Ca7", "Ra8", "Cc8#"]
+                solution: ["Cc6", "Ra7", "Ab5", "Rb8", "Ca7", "Ra8", "Cc8#"],
+                blackResponses: {
+                    "Cc6": { from: [0, 4], to: [1, 0] }, // Rey a7
+                    "Ab5": { from: [1, 0], to: [0, 1] }, // Rey b8
+                    "Ca7": { from: [0, 1], to: [0, 0] }  // Rey a8
+                }
             }
         };
 
@@ -507,13 +474,13 @@
             moveCount = 0;
             isWhiteTurn = true;
             gameActive = true;
-            pendingPromotion = null;
             
             // Actualizar la interfaz
             updateMoveCount();
             updateTurnIndicator();
             updateProblemNumber();
             updateMoveHistory();
+            updateBlackResponseConfig();
             updateStatus(`Problema ${problemNumber}: ${problem.name}. Las blancas juegan primero.`);
             
             renderBoard();
@@ -573,9 +540,10 @@
                         cell.appendChild(pieceElement);
                     }
                     
-                    // Solo permitir clics durante el turno de las blancas y cuando no hay coronación pendiente
-                    if (gameActive && isWhiteTurn && !pendingPromotion) {
+                    if (gameActive && isWhiteTurn && !isEditMode) {
                         cell.addEventListener('click', () => handleCellClick(row, col));
+                    } else if (isEditMode) {
+                        cell.addEventListener('click', () => handleEditClick(row, col));
                     }
                     
                     boardRow.appendChild(cell);
@@ -594,9 +562,9 @@
             return symbols[piece] || '';
         }
 
-        // Manejar clic en una celda - VERSIÓN COMPLETAMENTE CORREGIDA
+        // Manejar clic en una celda en modo juego
         function handleCellClick(row, col) {
-            if (!gameActive || !isWhiteTurn || pendingPromotion) return;
+            if (!gameActive || !isWhiteTurn) return;
             
             const piece = boardState[row][col];
             
@@ -613,277 +581,79 @@
                         return;
                     }
                     
+                    // Registrar la jugada blanca
+                    const moveNotation = getMoveNotation(selectedPiece, {row, col});
+                    
                     // Mover la pieza blanca
-                    const movedPiece = boardState[selectedPiece.row][selectedPiece.col];
-                    boardState[row][col] = movedPiece;
+                    boardState[row][col] = boardState[selectedPiece.row][selectedPiece.col];
                     boardState[selectedPiece.row][selectedPiece.col] = null;
                     
-                    // Verificar coronación de peón
-                    if (movedPiece === 'wp' && row === 0) {
-                        pendingPromotion = { row, col, from: {...selectedPiece} };
-                        showPromotionModal();
+                    // Añadir al historial
+                    moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
+                    moveCount++;
+                    
+                    // Verificar si es jaque mate prematuro
+                    if (isCheckmateForBlack()) {
+                        const jugadasCompletas = Math.ceil(moveCount / 2);
+                        if (jugadasCompletas < 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        } else if (jugadasCompletas > 4) {
+                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                            return;
+                        }
+                    }
+                    
+                    // Verificar si se superó el límite de jugadas
+                    if (moveCount >= 8 && !isCheckmateForBlack()) {
+                        resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
                         return;
                     }
                     
-                    // Registrar la jugada blanca
-                    const moveNotation = getMoveNotation(selectedPiece, {row, col});
-                    const moveNumber = Math.floor(moveCount/2) + 1;
-                    moveHistory.push(`${moveNumber}. ${moveNotation}`);
-                    moveCount++;
+                    // Actualizar estado
+                    selectedPiece = null;
+                    validMoves = [];
                     
-                    updateMoveHistory();
-                    processMoveAftermath();
-                    
-                } else {
-                    // Si se hace clic en otra pieza blanca, seleccionarla
-                    if (piece && piece.startsWith('w')) {
-                        selectedPiece = { row, col };
-                        validMoves = calculateValidMoves(row, col, piece);
-                        updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
-                    } else {
-                        // Deseleccionar si se hace clic en una celda vacía o pieza negra
-                        selectedPiece = null;
-                        validMoves = [];
-                        updateStatus("Selecciona una pieza blanca para mover.");
+                    // Verificar si es jaque mate exacto en 4 jugadas
+                    if (isCheckmateForBlack() && moveCount === 7) {
+                        updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
+                        gameActive = false;
+                        renderBoard();
+                        return;
                     }
-                    renderBoard();
-                }
-            } else {
-                // Seleccionar una pieza blanca
-                if (piece && piece.startsWith('w')) {
+                    
+                    // Cambiar turno a negras
+                    isWhiteTurn = false;
+                    updateTurnIndicator();
+                    updateMoveCount();
+                    updateMoveHistory();
+                    
+                    // Las negras responden automáticamente
+                    setTimeout(makeBlackMove, 800);
+                } else if (piece && piece.startsWith('w')) {
+                    // Seleccionar una nueva pieza blanca
                     selectedPiece = { row, col };
                     validMoves = calculateValidMoves(row, col, piece);
                     updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
-                    renderBoard();
                 } else {
+                    // Deseleccionar si se hace clic en una celda vacía o pieza negra
+                    selectedPiece = null;
+                    validMoves = [];
                     updateStatus("Selecciona una pieza blanca para mover.");
                 }
-            }
-        }
-
-        // Procesar las consecuencias después de un movimiento - CORREGIDA
-        function processMoveAftermath() {
-            // Actualizar estado inmediatamente
-            selectedPiece = null;
-            validMoves = [];
-            
-            // Verificar si es jaque mate prematuro
-            if (isCheckmateForBlack()) {
-                const jugadasCompletas = Math.ceil(moveCount / 2);
-                if (jugadasCompletas < 4) {
-                    resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                    return;
-                } else if (jugadasCompletas > 4) {
-                    resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                    return;
-                }
-            }
-            
-            // Verificar si se superó el límite de jugadas
-            if (moveCount >= 8 && !isCheckmateForBlack()) {
-                resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
-                return;
-            }
-            
-            // Verificar si es jaque mate exacto en 4 jugadas
-            if (isCheckmateForBlack() && moveCount === 7) {
-                updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                gameActive = false;
-                renderBoard();
-                return;
-            }
-            
-            // Cambiar turno a negras
-            isWhiteTurn = false;
-            updateTurnIndicator();
-            updateMoveCount();
-            
-            renderBoard();
-            
-            // El rey negro responde automáticamente después de un breve delay
-            setTimeout(() => {
-                makeBlackKingMove();
-            }, 600);
-        }
-
-        // Mostrar modal de coronación
-        function showPromotionModal() {
-            const modal = document.getElementById('promotionModal');
-            modal.style.display = 'flex';
-            
-            // Configurar event listeners para las opciones de coronación
-            const promotionPieces = document.querySelectorAll('.promotion-piece');
-            promotionPieces.forEach(piece => {
-                piece.onclick = () => {
-                    const selectedPieceType = piece.getAttribute('data-piece');
-                    completePromotion(selectedPieceType);
-                    modal.style.display = 'none';
-                };
-            });
-        }
-
-        // Completar la coronación
-        function completePromotion(pieceType) {
-            if (!pendingPromotion) return;
-            
-            const { row, col, from } = pendingPromotion;
-            boardState[row][col] = pieceType;
-            pendingPromotion = null;
-            
-            // Registrar la jugada blanca con coronación
-            const moveNotation = getMoveNotation(from, {row, col}) + "=" + pieceType.substring(1).toUpperCase();
-            const moveNumber = Math.floor(moveCount/2) + 1;
-            moveHistory.push(`${moveNumber}. ${moveNotation}`);
-            moveCount++;
-            
-            updateMoveHistory();
-            processMoveAftermath();
-        }
-
-        // Hacer movimiento automático del rey negro - COMPLETAMENTE CORREGIDA
-        function makeBlackKingMove() {
-            if (!gameActive || isWhiteTurn) return;
-            
-            const kingPos = findKing('b');
-            if (!kingPos) {
-                console.log("No se encontró el rey negro");
-                forceTurnToWhite();
-                return;
-            }
-            
-            const kingMoves = calculateValidMoves(kingPos.row, kingPos.col, 'bk');
-            
-            console.log("Movimientos disponibles para el rey negro:", kingMoves);
-            
-            if (kingMoves.length > 0) {
-                // Elegir el mejor movimiento
-                const bestMove = findBestKingMove(kingPos, kingMoves);
-                
-                // Mover el rey
-                boardState[bestMove.row][bestMove.col] = 'bk';
-                boardState[kingPos.row][kingPos.col] = null;
-                
-                // Registrar la jugada negra
-                const blackMoveNotation = getMoveNotation(kingPos, bestMove);
-                moveHistory.push(blackMoveNotation);
-                moveCount++;
-                
-                console.log("Rey negro se movió de", kingPos, "a", bestMove, "Notación:", blackMoveNotation);
-                
-                // Actualizar interfaz
-                updateMoveHistory();
-                updateMoveCount();
-                
-                // Procesar consecuencias del movimiento negro
-                processBlackMoveAftermath();
-                
+            } else if (piece && piece.startsWith('w')) {
+                // Seleccionar una pieza blanca
+                selectedPiece = { row, col };
+                validMoves = calculateValidMoves(row, col, piece);
+                updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
             } else {
-                console.log("El rey negro no puede moverse");
-                // Si el rey no puede moverse, verificar si es jaque mate
-                if (isKingInCheck('b')) {
-                    const jugadasCompletas = Math.ceil(moveCount / 2);
-                    if (jugadasCompletas === 4) {
-                        updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                        gameActive = false;
-                    } else {
-                        resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas.`);
-                    }
-                } else {
-                    // Ahogado
-                    resetWithAlert("¡Tablas por ahogado! El rey negro no puede moverse pero no está en jaque.");
-                }
+                updateStatus("Selecciona una pieza blanca para mover.");
             }
             
             renderBoard();
         }
 
-        // Forzar cambio a turno blanco (en caso de error)
-        function forceTurnToWhite() {
-            moveHistory.push("--");
-            moveCount++;
-            isWhiteTurn = true;
-            updateTurnIndicator();
-            updateMoveCount();
-            updateMoveHistory();
-            updateStatus("Error en movimiento negro. Turno de las blancas.");
-            renderBoard();
-        }
-
-        // Encontrar el mejor movimiento para el rey negro
-        function findBestKingMove(kingPos, moves) {
-            // Calcular la distancia a las piezas blancas
-            const whitePieces = [];
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    if (boardState[row][col] && boardState[row][col].startsWith('w')) {
-                        whitePieces.push({row, col});
-                    }
-                }
-            }
-            
-            // Ordenar movimientos por seguridad
-            const scoredMoves = moves.map(move => {
-                let score = 0;
-                
-                // Distancia a la pieza blanca más cercana
-                if (whitePieces.length > 0) {
-                    const minDistance = Math.min(...whitePieces.map(piece => 
-                        Math.max(Math.abs(move.row - piece.row), Math.abs(move.col - piece.col))
-                    ));
-                    score += minDistance * 10; // Preferir alejarse
-                }
-                
-                // Evitar bordes
-                const centerDistance = Math.max(
-                    Math.abs(move.row - 3.5),
-                    Math.abs(move.col - 3.5)
-                );
-                score -= centerDistance * 2;
-                
-                return { move, score };
-            });
-            
-            // Elegir el movimiento con mayor puntuación
-            scoredMoves.sort((a, b) => b.score - a.score);
-            return scoredMoves[0].move;
-        }
-
-        // Procesar consecuencias después del movimiento negro
-        function processBlackMoveAftermath() {
-            // Verificar si es jaque mate después del movimiento negro
-            if (isCheckmateForBlack()) {
-                const jugadasCompletas = Math.ceil(moveCount / 2);
-                if (jugadasCompletas < 4) {
-                    resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                    return;
-                } else if (jugadasCompletas > 4) {
-                    resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                    return;
-                }
-            }
-            
-            // Verificar si se superó el límite de jugadas
-            if (moveCount >= 8 && !isCheckmateForBlack()) {
-                resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
-                return;
-            }
-            
-            // Cambiar turno a blancas
-            isWhiteTurn = true;
-            updateTurnIndicator();
-            
-            // Verificar si es jaque mate exacto en 4 jugadas
-            if (isCheckmateForBlack() && moveCount === 8) {
-                updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                gameActive = false;
-            } else {
-                updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
-            }
-            
-            renderBoard();
-        }
-
-        // Calcular movimientos válidos
+        // Calcular movimientos válidos CORREGIDA
         function calculateValidMoves(row, col, piece) {
             const moves = [];
             const pieceType = piece.substring(1);
@@ -891,6 +661,7 @@
             
             // Función auxiliar para verificar si se puede mover a una casilla
             const canMoveTo = (r, c) => {
+                // No se puede mover fuera del tablero
                 if (r < 0 || r >= 8 || c < 0 || c >= 8) return false;
                 
                 const targetPiece = boardState[r][c];
@@ -912,12 +683,15 @@
             // Peones
             if (pieceType === 'p') {
                 if (isWhite) {
+                    // Movimiento hacia adelante
                     if (row > 0 && !boardState[row-1][col]) {
                         moves.push({row: row-1, col});
+                        // Primer movimiento (2 casillas)
                         if (row === 6 && !boardState[row-2][col]) {
                             moves.push({row: row-2, col});
                         }
                     }
+                    // Capturas diagonales
                     if (row > 0 && col > 0 && boardState[row-1][col-1] && boardState[row-1][col-1].startsWith('b')) {
                         moves.push({row: row-1, col: col-1});
                     }
@@ -925,12 +699,15 @@
                         moves.push({row: row-1, col: col+1});
                     }
                 } else {
+                    // Movimiento hacia adelante (negras)
                     if (row < 7 && !boardState[row+1][col]) {
                         moves.push({row: row+1, col});
+                        // Primer movimiento (2 casillas)
                         if (row === 1 && !boardState[row+2][col]) {
                             moves.push({row: row+2, col});
                         }
                     }
+                    // Capturas diagonales
                     if (row < 7 && col > 0 && boardState[row+1][col-1] && boardState[row+1][col-1].startsWith('w')) {
                         moves.push({row: row+1, col: col-1});
                     }
@@ -947,7 +724,10 @@
                         const newRow = row + dr * i;
                         const newCol = col + dc * i;
                         if (!canMoveTo(newRow, newCol)) break;
+                        
                         moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
                         if (boardState[newRow][newCol]) break;
                     }
                 }
@@ -960,7 +740,10 @@
                         const newRow = row + dr * i;
                         const newCol = col + dc * i;
                         if (!canMoveTo(newRow, newCol)) break;
+                        
                         moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
                         if (boardState[newRow][newCol]) break;
                     }
                 }
@@ -979,7 +762,7 @@
                     }
                 }
             }
-            // Reinas
+            // Reinas (combinación de torre y alfil)
             else if (pieceType === 'q') {
                 const directions = [
                     [-1,0], [1,0], [0,-1], [0,1],
@@ -990,7 +773,10 @@
                         const newRow = row + dr * i;
                         const newCol = col + dc * i;
                         if (!canMoveTo(newRow, newCol)) break;
+                        
                         moves.push({row: newRow, col: newCol});
+                        
+                        // Si hay una pieza enemiga, no podemos continuar
                         if (boardState[newRow][newCol]) break;
                     }
                 }
@@ -1014,20 +800,177 @@
             return moves;
         }
 
+        // El resto del código permanece igual...
+        // [Aquí irían las funciones handleEditClick, algebraicToPosition, getMoveNotation, 
+        // makeBlackMove, findKing, isKingInCheck, isCheckmateForBlack, etc.
+        // que se mantienen igual que en la versión anterior]
+
+        // Manejar clic en modo edición
+        function handleEditClick(row, col) {
+            const piece = boardState[row][col];
+            if (piece && piece.startsWith('b')) {
+                const lastWhiteMove = moveHistory[moveHistory.length - 1];
+                if (lastWhiteMove && lastWhiteMove.includes('.')) {
+                    const moveKey = lastWhiteMove.split('. ')[1];
+                    const problem = problems[currentProblem];
+                    
+                    if (!problem.blackResponses) {
+                        problem.blackResponses = {};
+                    }
+                    
+                    const responseFrom = prompt(`¿Desde dónde debe moverse la pieza negra para responder a ${moveKey}? (ejemplo: "e4")`, "e8");
+                    const responseTo = prompt(`¿A dónde debe moverse? (ejemplo: "e5")`, "e7");
+                    
+                    if (responseFrom && responseTo) {
+                        const fromPos = algebraicToPosition(responseFrom);
+                        const toPos = algebraicToPosition(responseTo);
+                        
+                        if (fromPos && toPos) {
+                            problem.blackResponses[moveKey] = {
+                                from: [fromPos.row, fromPos.col],
+                                to: [toPos.row, toPos.col]
+                            };
+                            updateStatus(`Respuesta configurada: ${responseFrom} -> ${responseTo} para ${moveKey}`);
+                            updateBlackResponseConfig();
+                        }
+                    }
+                } else {
+                    updateStatus("Primero haz un movimiento con blancas para configurar la respuesta.");
+                }
+            }
+        }
+
+        // Convertir notación algebraica a posición
+        function algebraicToPosition(alg) {
+            if (alg.length !== 2) return null;
+            const col = alg.charCodeAt(0) - 97;
+            const row = 8 - parseInt(alg[1]);
+            return (col >= 0 && col < 8 && row >= 0 && row < 8) ? { row, col } : null;
+        }
+
         // Obtener notación algebraica del movimiento
         function getMoveNotation(from, to) {
             const piece = boardState[from.row][from.col];
             const pieceType = piece.substring(1).toUpperCase();
+            const fromCol = String.fromCharCode(97 + from.col);
+            const fromRow = 8 - from.row;
             const toCol = String.fromCharCode(97 + to.col);
             const toRow = 8 - to.row;
             
             if (pieceType === 'P') {
                 return `${toCol}${toRow}`;
-            } else if (pieceType === 'K') {
-                return `R${toCol}${toRow}`;
             } else {
                 return `${pieceType}${toCol}${toRow}`;
             }
+        }
+
+        // Hacer movimiento automático de las negras
+        function makeBlackMove() {
+            if (!gameActive) return;
+            
+            const lastWhiteMove = moveHistory[moveHistory.length - 1];
+            if (!lastWhiteMove) return;
+            
+            const moveKey = lastWhiteMove.split('. ')[1];
+            const problem = problems[currentProblem];
+            
+            if (problem.blackResponses && problem.blackResponses[moveKey]) {
+                const response = problem.blackResponses[moveKey];
+                const fromRow = response.from[0];
+                const fromCol = response.from[1];
+                const toRow = response.to[0];
+                const toCol = response.to[1];
+                
+                const piece = boardState[fromRow][fromCol];
+                if (piece && piece.startsWith('b')) {
+                    const validMoves = calculateValidMoves(fromRow, fromCol, piece);
+                    const isValid = validMoves.some(move => move.row === toRow && move.col === toCol);
+                    
+                    if (isValid) {
+                        // Verificar que no se está intentando capturar un rey
+                        const targetPiece = boardState[toRow][toCol];
+                        if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
+                            updateStatus("Error: Las negras no pueden capturar reyes.");
+                            moveHistory.push("--");
+                            moveCount++;
+                            isWhiteTurn = true;
+                            updateTurnIndicator();
+                            updateMoveCount();
+                            updateMoveHistory();
+                            updateStatus("Turno de las blancas. Las negras no pudieron mover.");
+                            renderBoard();
+                            return;
+                        }
+                        
+                        // Mover la pieza negra
+                        boardState[toRow][toCol] = piece;
+                        boardState[fromRow][fromCol] = null;
+                        
+                        // Añadir al historial
+                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
+                        moveCount++;
+                        
+                        // Verificar si es jaque mate después del movimiento negro
+                        if (isCheckmateForBlack()) {
+                            const jugadasCompletas = Math.ceil(moveCount / 2);
+                            if (jugadasCompletas < 4) {
+                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                                return;
+                            } else if (jugadasCompletas > 4) {
+                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
+                                return;
+                            }
+                        }
+                        
+                        // Verificar si se superó el límite de jugadas
+                        if (moveCount >= 8 && !isCheckmateForBlack()) {
+                            resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
+                            return;
+                        }
+                        
+                        // Cambiar turno a blancas
+                        isWhiteTurn = true;
+                        updateTurnIndicator();
+                        updateMoveCount();
+                        updateMoveHistory();
+                        
+                        // Verificar si es jaque mate exacto en 4 jugadas
+                        if (isCheckmateForBlack() && moveCount === 8) {
+                            updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
+                            gameActive = false;
+                        } else {
+                            updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
+                        }
+                    } else {
+                        updateStatus("Error: Movimiento predefinido de negras no es válido.");
+                        boardState[toRow][toCol] = piece;
+                        boardState[fromRow][fromCol] = null;
+                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
+                        moveCount++;
+                        isWhiteTurn = true;
+                        updateTurnIndicator();
+                        updateMoveCount();
+                        updateMoveHistory();
+                        updateStatus("Movimiento forzado. Turno de las blancas.");
+                    }
+                } else {
+                    updateStatus("Error: No hay pieza negra en la posición predefinida.");
+                    isWhiteTurn = true;
+                    updateTurnIndicator();
+                    updateStatus("Error en respuesta predefinida. Turno de las blancas.");
+                }
+            } else {
+                updateStatus("No hay respuesta predefinida. Las negras pasan turno.");
+                moveHistory.push("--");
+                moveCount++;
+                isWhiteTurn = true;
+                updateTurnIndicator();
+                updateMoveCount();
+                updateMoveHistory();
+                updateStatus("Turno de las blancas. Las negras no respondieron.");
+            }
+            
+            renderBoard();
         }
 
         // Encontrar la posición del rey
@@ -1123,8 +1066,35 @@
                 moveList.appendChild(li);
             }
             
-            // Desplazar hacia abajo para ver la última jugada
             moveList.scrollTop = moveList.scrollHeight;
+        }
+
+        // Actualizar configuración de respuestas negras
+        function updateBlackResponseConfig() {
+            const configDiv = document.getElementById('blackResponseConfig');
+            const problem = problems[currentProblem];
+            
+            let html = '';
+            if (problem.blackResponses) {
+                html += '<p>Respuestas configuradas:</p><ul>';
+                for (const [whiteMove, blackResponse] of Object.entries(problem.blackResponses)) {
+                    const fromPos = positionToAlgebraic(blackResponse.from[0], blackResponse.from[1]);
+                    const toPos = positionToAlgebraic(blackResponse.to[0], blackResponse.to[1]);
+                    html += `<li>${whiteMove} → ${fromPos}${toPos}</li>`;
+                }
+                html += '</ul>';
+            } else {
+                html = '<p>No hay respuestas configuradas. Usa el modo edición para definirlas.</p>';
+            }
+            
+            configDiv.innerHTML = html;
+        }
+
+        // Convertir posición a notación algebraica
+        function positionToAlgebraic(row, col) {
+            const colChar = String.fromCharCode(97 + col);
+            const rowNum = 8 - row;
+            return `${colChar}${rowNum}`;
         }
 
         // Mostrar pista
@@ -1155,10 +1125,36 @@
             updateStatus(solutionText);
         }
 
+        // Cambiar modo
+        function toggleMode(mode) {
+            isEditMode = mode === 'edit';
+            
+            const editBtn = document.getElementById('editMode');
+            const playBtn = document.getElementById('playMode');
+            
+            if (isEditMode) {
+                editBtn.classList.add('active');
+                playBtn.classList.remove('active');
+                updateStatus("Modo Edición: Haz clic en piezas negras para configurar sus respuestas.");
+                gameActive = false;
+            } else {
+                playBtn.classList.add('active');
+                editBtn.classList.remove('active');
+                updateStatus("Modo Juego: Las blancas juegan primero. Encuentra el mate en 4 jugadas.");
+                gameActive = true;
+            }
+            
+            selectedPiece = null;
+            validMoves = [];
+            renderBoard();
+        }
+
         // Inicializar la aplicación
         document.addEventListener('DOMContentLoaded', function() {
             initializeProblem(1);
             
+            document.getElementById('editMode').addEventListener('click', () => toggleMode('edit'));
+            document.getElementById('playMode').addEventListener('click', () => toggleMode('play'));
             document.getElementById('resetProblem').addEventListener('click', () => initializeProblem(currentProblem));
             document.getElementById('hint').addEventListener('click', showHint);
             document.getElementById('showSolution').addEventListener('click', showSolution);
