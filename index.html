@@ -594,7 +594,7 @@
             return symbols[piece] || '';
         }
 
-        // Manejar clic en una celda - VERSIÓN CORREGIDA
+        // Manejar clic en una celda - VERSIÓN COMPLETAMENTE CORREGIDA
         function handleCellClick(row, col) {
             if (!gameActive || !isWhiteTurn || pendingPromotion) return;
             
@@ -620,31 +620,33 @@
                     
                     // Verificar coronación de peón
                     if (movedPiece === 'wp' && row === 0) {
-                        pendingPromotion = { row, col, from: selectedPiece };
+                        pendingPromotion = { row, col, from: {...selectedPiece} };
                         showPromotionModal();
                         return;
                     }
                     
                     // Registrar la jugada blanca
                     const moveNotation = getMoveNotation(selectedPiece, {row, col});
-                    moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
+                    const moveNumber = Math.floor(moveCount/2) + 1;
+                    moveHistory.push(`${moveNumber}. ${moveNotation}`);
                     moveCount++;
                     
-                    processMoveAftermath(moveNotation);
+                    updateMoveHistory();
+                    processMoveAftermath();
+                    
                 } else {
                     // Si se hace clic en otra pieza blanca, seleccionarla
                     if (piece && piece.startsWith('w')) {
                         selectedPiece = { row, col };
                         validMoves = calculateValidMoves(row, col, piece);
                         updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
-                        renderBoard();
                     } else {
                         // Deseleccionar si se hace clic en una celda vacía o pieza negra
                         selectedPiece = null;
                         validMoves = [];
                         updateStatus("Selecciona una pieza blanca para mover.");
-                        renderBoard();
                     }
+                    renderBoard();
                 }
             } else {
                 // Seleccionar una pieza blanca
@@ -659,8 +661,12 @@
             }
         }
 
-        // Procesar las consecuencias después de un movimiento
-        function processMoveAftermath(moveNotation) {
+        // Procesar las consecuencias después de un movimiento - CORREGIDA
+        function processMoveAftermath() {
+            // Actualizar estado inmediatamente
+            selectedPiece = null;
+            validMoves = [];
+            
             // Verificar si es jaque mate prematuro
             if (isCheckmateForBlack()) {
                 const jugadasCompletas = Math.ceil(moveCount / 2);
@@ -679,10 +685,6 @@
                 return;
             }
             
-            // Actualizar estado
-            selectedPiece = null;
-            validMoves = [];
-            
             // Verificar si es jaque mate exacto en 4 jugadas
             if (isCheckmateForBlack() && moveCount === 7) {
                 updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
@@ -695,12 +697,13 @@
             isWhiteTurn = false;
             updateTurnIndicator();
             updateMoveCount();
-            updateMoveHistory();
-            
-            // El rey negro responde automáticamente
-            setTimeout(() => makeBlackKingMove(), 800);
             
             renderBoard();
+            
+            // El rey negro responde automáticamente después de un breve delay
+            setTimeout(() => {
+                makeBlackKingMove();
+            }, 600);
         }
 
         // Mostrar modal de coronación
@@ -729,23 +732,31 @@
             
             // Registrar la jugada blanca con coronación
             const moveNotation = getMoveNotation(from, {row, col}) + "=" + pieceType.substring(1).toUpperCase();
-            moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
+            const moveNumber = Math.floor(moveCount/2) + 1;
+            moveHistory.push(`${moveNumber}. ${moveNotation}`);
             moveCount++;
             
-            processMoveAftermath(moveNotation);
+            updateMoveHistory();
+            processMoveAftermath();
         }
 
-        // Hacer movimiento automático del rey negro - SIEMPRE SE MUEVE
+        // Hacer movimiento automático del rey negro - COMPLETAMENTE CORREGIDA
         function makeBlackKingMove() {
-            if (!gameActive) return;
+            if (!gameActive || isWhiteTurn) return;
             
             const kingPos = findKing('b');
-            if (!kingPos) return;
+            if (!kingPos) {
+                console.log("No se encontró el rey negro");
+                forceTurnToWhite();
+                return;
+            }
             
             const kingMoves = calculateValidMoves(kingPos.row, kingPos.col, 'bk');
             
+            console.log("Movimientos disponibles para el rey negro:", kingMoves);
+            
             if (kingMoves.length > 0) {
-                // Elegir el mejor movimiento: alejarse de piezas blancas y evitar jaque
+                // Elegir el mejor movimiento
                 const bestMove = findBestKingMove(kingPos, kingMoves);
                 
                 // Mover el rey
@@ -757,11 +768,17 @@
                 moveHistory.push(blackMoveNotation);
                 moveCount++;
                 
-                console.log("Rey negro se movió a:", blackMoveNotation);
+                console.log("Rey negro se movió de", kingPos, "a", bestMove, "Notación:", blackMoveNotation);
+                
+                // Actualizar interfaz
+                updateMoveHistory();
+                updateMoveCount();
                 
                 // Procesar consecuencias del movimiento negro
                 processBlackMoveAftermath();
+                
             } else {
+                console.log("El rey negro no puede moverse");
                 // Si el rey no puede moverse, verificar si es jaque mate
                 if (isKingInCheck('b')) {
                     const jugadasCompletas = Math.ceil(moveCount / 2);
@@ -780,6 +797,18 @@
             renderBoard();
         }
 
+        // Forzar cambio a turno blanco (en caso de error)
+        function forceTurnToWhite() {
+            moveHistory.push("--");
+            moveCount++;
+            isWhiteTurn = true;
+            updateTurnIndicator();
+            updateMoveCount();
+            updateMoveHistory();
+            updateStatus("Error en movimiento negro. Turno de las blancas.");
+            renderBoard();
+        }
+
         // Encontrar el mejor movimiento para el rey negro
         function findBestKingMove(kingPos, moves) {
             // Calcular la distancia a las piezas blancas
@@ -792,18 +821,19 @@
                 }
             }
             
-            // Ordenar movimientos por seguridad (alejarse de piezas blancas)
+            // Ordenar movimientos por seguridad
             const scoredMoves = moves.map(move => {
                 let score = 0;
                 
                 // Distancia a la pieza blanca más cercana
-                const minDistance = Math.min(...whitePieces.map(piece => 
-                    Math.max(Math.abs(move.row - piece.row), Math.abs(move.col - piece.col))
-                ));
+                if (whitePieces.length > 0) {
+                    const minDistance = Math.min(...whitePieces.map(piece => 
+                        Math.max(Math.abs(move.row - piece.row), Math.abs(move.col - piece.col))
+                    ));
+                    score += minDistance * 10; // Preferir alejarse
+                }
                 
-                score += minDistance * 10; // Preferir alejarse
-                
-                // Evitar bordes (el rey suele estar más seguro en el centro)
+                // Evitar bordes
                 const centerDistance = Math.max(
                     Math.abs(move.row - 3.5),
                     Math.abs(move.col - 3.5)
@@ -841,8 +871,6 @@
             // Cambiar turno a blancas
             isWhiteTurn = true;
             updateTurnIndicator();
-            updateMoveCount();
-            updateMoveHistory();
             
             // Verificar si es jaque mate exacto en 4 jugadas
             if (isCheckmateForBlack() && moveCount === 8) {
@@ -990,8 +1018,6 @@
         function getMoveNotation(from, to) {
             const piece = boardState[from.row][from.col];
             const pieceType = piece.substring(1).toUpperCase();
-            const fromCol = String.fromCharCode(97 + from.col);
-            const fromRow = 8 - from.row;
             const toCol = String.fromCharCode(97 + to.col);
             const toRow = 8 - to.row;
             
@@ -1097,6 +1123,7 @@
                 moveList.appendChild(li);
             }
             
+            // Desplazar hacia abajo para ver la última jugada
             moveList.scrollTop = moveList.scrollHeight;
         }
 
