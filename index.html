@@ -1659,6 +1659,22 @@
                     `;
                     statusElement.className = "status error";
                     
+                    // AGREGAR ESTA PARTE: Redirigir automáticamente al área de estado
+                    setTimeout(() => {
+                        statusElement.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        // También puedes resaltar visualmente el área de estado
+                        statusElement.style.boxShadow = "0 0 20px rgba(231, 76, 60, 0.5)";
+                        statusElement.style.transition = "box-shadow 0.3s ease";
+                        
+                        setTimeout(() => {
+                            statusElement.style.boxShadow = "none";
+                        }, 2000);
+                    }, 100);
+                    
                     // Agregar event listener al botón de reinicio
                     document.getElementById(`restart-btn${problemNumber}`).addEventListener('click', () => {
                         resetGame(problemNumber);
