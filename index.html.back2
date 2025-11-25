@@ -211,6 +211,17 @@
             border: 2px solid #2e7d32;
         }
 
+        .capture-move::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            border-radius: 50%;
+            border: 3px solid rgba(231, 76, 60, 0.7);
+            box-sizing: border-box;
+        }
+
         .last-move {
             background-color: rgba(52, 152, 219, 0.4) !important;
         }
@@ -1138,14 +1149,16 @@
                 const fromCol = state.selectedSquare.col;
                 
                 // Verificar si el movimiento es válido
-                const isValidMove = isValidMovement(problemNumber, fromRow, fromCol, row, col);
+                const isValidMove = state.validMoves.some(move => 
+                    move.to.row === row && move.to.col === col);
                 
                 if (isValidMove) {
                     makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
-                    // Movimiento no válido - mostrar alerta y reiniciar
-                    alert("Movimiento incorrecto. El problema se reiniciará.");
-                    resetGame(problemNumber);
+                    clearSelection(problemNumber);
+                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
+                        selectSquare(problemNumber, row, col);
+                    }
                 }
             } else {
                 if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
@@ -1162,49 +1175,196 @@
             const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
-            // Calcular movimientos válidos para cualquier pieza blanca
+            // Calcular todos los movimientos válidos para la pieza seleccionada
             calculateValidMoves(problemNumber, row, col);
             
             state.validMoves.forEach(move => {
                 const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
-                targetSquare.classList.add('valid-move');
+                const targetPiece = state.currentPosition[move.to.row][move.to.col];
+                
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    targetSquare.classList.add('capture-move');
+                } else {
+                    targetSquare.classList.add('valid-move');
+                }
             });
         }
 
         function calculateValidMoves(problemNumber, row, col) {
             const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
-            
-            state.validMoves = [];
             const piece = state.currentPosition[row][col];
             
             if (!piece || !isWhitePiece(piece)) return;
             
-            // Solo permitir el movimiento esperado en la secuencia de solución
-            if (state.currentMoveIndex < problem.solution.length) {
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                
-                // Permitir que cualquier pieza blanca se seleccione, pero solo el movimiento esperado es válido
-                state.validMoves.push({
-                    from: { row, col },
-                    to: expectedMove.to
-                });
+            state.validMoves = [];
+            
+            // Calcular movimientos según el tipo de pieza
+            switch(piece.toUpperCase()) {
+                case 'P': // Peón
+                    calculatePawnMoves(problemNumber, row, col);
+                    break;
+                case 'R': // Torre
+                    calculateRookMoves(problemNumber, row, col);
+                    break;
+                case 'N': // Caballo
+                    calculateKnightMoves(problemNumber, row, col);
+                    break;
+                case 'B': // Alfil
+                    calculateBishopMoves(problemNumber, row, col);
+                    break;
+                case 'Q': // Dama
+                    calculateQueenMoves(problemNumber, row, col);
+                    break;
+                case 'K': // Rey
+                    calculateKingMoves(problemNumber, row, col);
+                    break;
             }
         }
 
-        function isValidMovement(problemNumber, fromRow, fromCol, toRow, toCol) {
+        function calculatePawnMoves(problemNumber, row, col) {
             const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
             
-            if (state.currentMoveIndex >= problem.solution.length) return false;
+            // Movimiento hacia adelante (peones blancos se mueven hacia arriba en el tablero)
+            if (row > 0 && !state.currentPosition[row-1][col]) {
+                state.validMoves.push({ from: { row, col }, to: { row: row-1, col } });
+                
+                // Movimiento doble desde posición inicial
+                if (row === 6 && !state.currentPosition[row-2][col]) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-2, col } });
+                }
+            }
             
-            const expectedMove = problem.solution[state.currentMoveIndex].white;
+            // Capturas diagonales
+            if (row > 0 && col > 0) {
+                const targetPiece = state.currentPosition[row-1][col-1];
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-1, col: col-1 } });
+                }
+            }
             
-            // Verificar si el movimiento coincide con el esperado en la secuencia
-            return (fromRow === expectedMove.from.row && 
-                    fromCol === expectedMove.from.col && 
-                    toRow === expectedMove.to.row && 
-                    toCol === expectedMove.to.col);
+            if (row > 0 && col < 7) {
+                const targetPiece = state.currentPosition[row-1][col+1];
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-1, col: col+1 } });
+                }
+            }
+        }
+
+        function calculateRookMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Direcciones: arriba, derecha, abajo, izquierda
+            const directions = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+            
+            for (const [dr, dc] of directions) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    } else if (isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        break;
+                    } else {
+                        break;
+                    }
+                    
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+
+        function calculateKnightMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Movimientos en L del caballo
+            const moves = [
+                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                [1, -2], [1, 2], [2, -1], [2, 1]
+            ];
+            
+            for (const [dr, dc] of moves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece || isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    }
+                }
+            }
+        }
+
+        function calculateBishopMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Direcciones diagonales
+            const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            
+            for (const [dr, dc] of directions) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    } else if (isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        break;
+                    } else {
+                        break;
+                    }
+                    
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+
+        function calculateQueenMoves(problemNumber, row, col) {
+            // La dama combina movimientos de torre y alfil
+            calculateRookMoves(problemNumber, row, col);
+            calculateBishopMoves(problemNumber, row, col);
+        }
+
+        function calculateKingMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Todas las direcciones adyacentes
+            const moves = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            
+            for (const [dr, dc] of moves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece || isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    }
+                }
+            }
+        }
+
+        function isWhitePiece(piece) {
+            return piece === piece.toUpperCase();
+        }
+
+        function isBlackPiece(piece) {
+            return piece === piece.toLowerCase();
         }
 
         function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
@@ -1223,23 +1383,37 @@
                     to: { row: toRow, col: toCol }
                 });
                 
-                // Cambiar turno a negras
-                state.isWhiteTurn = false;
-                updateTurnIndicator(problemNumber);
+                // Verificar si el movimiento coincide con la solución
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
+                const isCorrectMove = (fromRow === expectedMove.from.row && 
+                                      fromCol === expectedMove.from.col && 
+                                      toRow === expectedMove.to.row && 
+                                      toCol === expectedMove.to.col);
                 
-                // Verificar si es el último movimiento (mate)
-                if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
-                    // Si es el último movimiento y no hay respuesta negra (mate)
-                    state.gameCompleted = true;
-                    state.currentMoveIndex++;
-                    document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
-                    document.getElementById(`status${problemNumber}`).className = "status success";
+                if (isCorrectMove) {
+                    // Cambiar turno a negras
+                    state.isWhiteTurn = false;
+                    updateTurnIndicator(problemNumber);
                     
-                    // Desbloquear la sección de palabra clave
-                    unlockKeywordSection(problemNumber);
+                    // Verificar si es el último movimiento (mate)
+                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
+                        // Si es el último movimiento y no hay respuesta negra (mate)
+                        state.gameCompleted = true;
+                        state.currentMoveIndex++;
+                        document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                        document.getElementById(`status${problemNumber}`).className = "status success";
+                        
+                        // Desbloquear la sección de palabra clave
+                        unlockKeywordSection(problemNumber);
+                    } else {
+                        // Movimiento de las negras
+                        setTimeout(() => makeBlackMove(problemNumber), 1000);
+                    }
                 } else {
-                    // Movimiento de las negras
-                    setTimeout(() => makeBlackMove(problemNumber), 1000);
+                    // Movimiento incorrecto - mostrar alerta y reiniciar
+                    alert("Movimiento incorrecto. El problema se reiniciará.");
+                    resetGame(problemNumber);
+                    return;
                 }
             }
             
@@ -1290,10 +1464,6 @@
             createBoard(problemNumber);
         }
 
-        function isWhitePiece(piece) {
-            return piece === piece.toUpperCase();
-        }
-
         function clearSelection(problemNumber) {
             const state = gameStates[problemNumber];
             state.selectedSquare = null;
@@ -1303,6 +1473,7 @@
             squares.forEach(square => {
                 square.classList.remove('selected');
                 square.classList.remove('valid-move');
+                square.classList.remove('capture-move');
             });
         }
 
