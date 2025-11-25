@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Problemas de Mate</title>
+    <title>Competición de Ajedrez - Problemas de Mate</title>
     <style>
         * {
             margin: 0;
@@ -362,6 +362,12 @@
             margin: 20px 0;
             border-left: 5px solid #3498db;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none; /* Oculto inicialmente */
+        }
+
+        .solution-text.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
         }
 
         .checkmate {
@@ -398,7 +404,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        /* Nuevos estilos para el sistema de palabras clave */
+        /* Estilos para el sistema de palabras clave */
         .keyword-section {
             background: linear-gradient(135deg, #ffeaa7, #fab1a0);
             padding: 25px;
@@ -598,7 +604,7 @@
     </style>
 </head>
 <body>
-    <h1>♔ Ajedrez de Ataque - Problemas de Mate ♚</h1>
+    <h1>🏆 Competición de Ajedrez - Problemas de Mate 🏆</h1>
     
     <!-- Selección de Problemas -->
     <div class="problem-selection">
@@ -673,7 +679,7 @@
                     <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text1" class="solution-text">
                     <h3>Solución del Problema 1:</h3>
                     <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
                     <div class="move-explanation">
@@ -738,7 +744,7 @@
                     <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text2" class="solution-text">
                     <h3>Solución del Problema 2:</h3>
                     <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
                     <div class="move-explanation">
@@ -803,7 +809,7 @@
                     <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text3" class="solution-text">
                     <h3>Solución del Problema 3:</h3>
                     <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
                     <div class="move-explanation">
@@ -1074,15 +1080,6 @@
                         square.textContent = pieces[piece];
                     }
                     
-                    // Resaltar última jugada
-                    if (state.playerMoves.length > 0) {
-                        const lastMove = state.playerMoves[state.playerMoves.length - 1];
-                        if ((row === lastMove.from.row && col === lastMove.from.col) || 
-                            (row === lastMove.to.row && col === lastMove.to.col)) {
-                            square.classList.add('last-move');
-                        }
-                    }
-                    
                     square.addEventListener('click', () => handleSquareClick(problemNumber, row, col));
                     board.appendChild(square);
                 }
@@ -1102,16 +1099,14 @@
                 const fromRow = state.selectedSquare.row;
                 const fromCol = state.selectedSquare.col;
                 
-                const isValidMove = state.validMoves.some(move => 
-                    move.to.row === row && move.to.col === col);
-                
-                if (isValidMove) {
-                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
-                } else {
+                // Verificar si el movimiento es válido (cualquier movimiento de pieza blanca es válido)
+                if (piece && isWhitePiece(piece)) {
+                    // Seleccionar nueva pieza
                     clearSelection(problemNumber);
-                    if (piece && isWhitePiece(piece)) {
-                        selectSquare(problemNumber, row, col);
-                    }
+                    selectSquare(problemNumber, row, col);
+                } else {
+                    // Mover la pieza seleccionada a esta posición
+                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 }
             } else {
                 if (piece && isWhitePiece(piece)) {
@@ -1128,6 +1123,7 @@
             const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
+            // Calcular movimientos válidos (todas las casillas vacías o con piezas negras)
             calculateValidMoves(problemNumber, row, col);
             
             state.validMoves.forEach(move => {
@@ -1138,21 +1134,23 @@
 
         function calculateValidMoves(problemNumber, row, col) {
             const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
             
             state.validMoves = [];
             const piece = state.currentPosition[row][col];
             
             if (!piece || !isWhitePiece(piece)) return;
             
-            if (state.currentMoveIndex < problem.solution.length) {
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                
-                if (row === expectedMove.from.row && col === expectedMove.from.col) {
-                    state.validMoves.push({
-                        from: { row, col },
-                        to: expectedMove.to
-                    });
+            // Permitir mover a cualquier casilla vacía o que contenga pieza negra
+            for (let toRow = 0; toRow < 8; toRow++) {
+                for (let toCol = 0; toCol < 8; toCol++) {
+                    const targetPiece = state.currentPosition[toRow][toCol];
+                    // Permitir mover a casillas vacías o que contengan piezas negras
+                    if (!targetPiece || !isWhitePiece(targetPiece)) {
+                        state.validMoves.push({
+                            from: { row, col },
+                            to: { row: toRow, col: toCol }
+                        });
+                    }
                 }
             }
         }
@@ -1162,26 +1160,34 @@
             const problem = problems[problemNumber];
             
             const piece = state.currentPosition[fromRow][fromCol];
+            const targetPiece = state.currentPosition[toRow][toCol];
             
-            // Mover la pieza correctamente
+            // Mover la pieza
             state.currentPosition[toRow][toCol] = piece;
             state.currentPosition[fromRow][fromCol] = '';
             
             if (isPlayerMove) {
                 state.playerMoves.push({
                     from: { row: fromRow, col: fromCol },
-                    to: { row: toRow, col: toCol }
+                    to: { row: toRow, col: toCol },
+                    captured: targetPiece
                 });
                 
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
-                    toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
+                // Verificar si el movimiento es correcto según la solución
+                const expectedMove = problem.solution[state.currentMoveIndex];
+                const isCorrectMove = expectedMove && 
+                    fromRow === expectedMove.white.from.row && 
+                    fromCol === expectedMove.white.from.col &&
+                    toRow === expectedMove.white.to.row && 
+                    toCol === expectedMove.white.to.col;
+                
+                if (isCorrectMove) {
+                    // Movimiento correcto
+                    state.currentMoveIndex++;
                     
                     // Verificar si es el último movimiento (mate)
-                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
-                        // Si es el último movimiento y no hay respuesta negra (mate)
+                    if (state.currentMoveIndex === problem.solution.length) {
                         state.gameCompleted = true;
-                        state.currentMoveIndex++;
                         document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                         document.getElementById(`status${problemNumber}`).className = "status success";
                         
@@ -1192,12 +1198,10 @@
                         setTimeout(() => makeBlackMove(problemNumber), 500);
                     }
                 } else {
-                    document.getElementById(`status${problemNumber}`).textContent = "Movimiento incorrecto. Intenta de nuevo.";
-                    document.getElementById(`status${problemNumber}`).className = "status error";
-                    // Revertir movimiento
-                    state.currentPosition[fromRow][fromCol] = piece;
-                    state.currentPosition[toRow][toCol] = '';
-                    state.playerMoves.pop();
+                    // Movimiento incorrecto - mostrar alerta y reiniciar
+                    alert("❌ Movimiento incorrecto. El problema se reiniciará.");
+                    resetGame(problemNumber);
+                    return;
                 }
             }
             
@@ -1213,7 +1217,6 @@
                 const blackMove = problem.solution[state.currentMoveIndex].black;
                 
                 if (blackMove) {
-                    // VERIFICAR que existe una pieza en la posición de origen
                     const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
                     
                     if (piece) {
@@ -1221,23 +1224,11 @@
                         state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
                         state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
                         
-                        // Incrementar el índice de movimiento después del movimiento negro
                         state.currentMoveIndex++;
                         
                         createBoard(problemNumber);
                         document.getElementById(`status${problemNumber}`).textContent = "Las negras han jugado. Es tu turno.";
-                    } else {
-                        console.error(`No se encontró pieza en posición (${blackMove.from.row},${blackMove.from.col})`);
                     }
-                } else {
-                    // Si no hay movimiento negro (último movimiento de mate), completar el juego
-                    state.gameCompleted = true;
-                    state.currentMoveIndex++;
-                    document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
-                    document.getElementById(`status${problemNumber}`).className = "status success";
-                    
-                    // Desbloquear la sección de palabra clave
-                    unlockKeywordSection(problemNumber);
                 }
             }
             
@@ -1278,7 +1269,6 @@
 
         function updateMovesList(problemNumber) {
             const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
             const movesContainer = document.getElementById(`moves-container${problemNumber}`);
             movesContainer.innerHTML = '';
             
@@ -1288,11 +1278,10 @@
                 state.playerMoves.forEach((move, index) => {
                     const moveElement = document.createElement('div');
                     moveElement.className = 'move-item';
-                    if (index === 3) {
-                        moveElement.innerHTML = `<strong class="checkmate">${problem.moveNotation[index]}</strong>`;
-                    } else {
-                        moveElement.textContent = problem.moveNotation[index];
-                    }
+                    const fromSquare = `${String.fromCharCode(97 + move.from.col)}${8 - move.from.row}`;
+                    const toSquare = `${String.fromCharCode(97 + move.to.col)}${8 - move.to.row}`;
+                    const captureText = move.captured ? 'x' : '';
+                    moveElement.textContent = `${index + 1}. ${fromSquare}${captureText}${toSquare}`;
                     movesContainer.appendChild(moveElement);
                 });
             }
@@ -1415,50 +1404,13 @@
             if (state.gameCompleted || state.currentMoveIndex >= problem.solution.length) return;
             
             const expectedMove = problem.solution[state.currentMoveIndex].white;
-            const fromSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
-            const toSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
-            
-            fromSquare.classList.add('selected');
-            toSquare.classList.add('valid-move');
-            
-            document.getElementById(`status${problemNumber}`).textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
-            document.getElementById(`status${problemNumber}`).className = "status";
-            
-            setTimeout(() => {
-                clearSelection(problemNumber);
-                createBoard(problemNumber);
-            }, 2000);
+            alert(`💡 Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`);
         }
 
         function showSolution(problemNumber) {
-            const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
-            
-            resetGame(problemNumber);
-            
-            const executeMove = (index) => {
-                if (index < problem.solution.length) {
-                    const whiteMove = problem.solution[index].white;
-                    makeMove(problemNumber, whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
-                    
-                    if (problem.solution[index].black) {
-                        setTimeout(() => {
-                            const blackMove = problem.solution[index].black;
-                            // Usar movimiento directo para negras en la solución automática
-                            state.currentPosition[blackMove.to.row][blackMove.to.col] = state.currentPosition[blackMove.from.row][blackMove.from.col];
-                            state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
-                            createBoard(problemNumber);
-                            executeMove(index + 1);
-                        }, 1000);
-                    } else {
-                        state.gameCompleted = true;
-                        createBoard(problemNumber);
-                        unlockKeywordSection(problemNumber);
-                    }
-                }
-            };
-            
-            executeMove(0);
+            // Solo mostrar el recuadro de solución, no ejecutar movimientos
+            const solutionElement = document.getElementById(`solution-text${problemNumber}`);
+            solutionElement.classList.add('visible');
         }
 
         function resetGame(problemNumber) {
@@ -1482,6 +1434,10 @@
             
             const inputElement = document.getElementById(`keyword-input${problemNumber}`);
             inputElement.value = '';
+            
+            // Ocultar solución si estaba visible
+            const solutionElement = document.getElementById(`solution-text${problemNumber}`);
+            solutionElement.classList.remove('visible');
         }
 
         // ========== EVENT LISTENERS ==========
