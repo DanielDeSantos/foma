@@ -356,12 +356,17 @@
         }
 
         .solution-text {
+            display: none;
             background: linear-gradient(135deg, #e8f4fd, #d6eaf8);
             padding: 20px;
             border-radius: 10px;
             margin: 20px 0;
             border-left: 5px solid #3498db;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .solution-text.active {
+            display: block;
         }
 
         .checkmate {
@@ -381,13 +386,33 @@
             border-left: 4px solid #2ecc71;
         }
 
-        .position-summary {
-            background: linear-gradient(135deg, #fff, #f8f9fa);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 2px solid #e9ecef;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .turn-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #f8f9fa;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .turn-white {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-left: 5px solid #3498db;
+        }
+
+        .turn-black {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .turn-piece {
+            font-size: 1.5rem;
         }
 
         .problem-title {
@@ -643,10 +668,10 @@
                     <div id="board1" class="board"></div>
                 </div>
                 
-                <div class="position-summary">
-                    <h3>Posición Inicial:</h3>
-                    <p><strong>Blancas:</strong> Alfiles en e7 y e2; Rey en e3; Peones en c2, g2, b4, d4, f4, h4, c5, g5</p>
-                    <p><strong>Negras:</strong> Alfil en e8; Rey en e1; Peones en c3, g3, c4, g4, f5, d5, c7, g7</p>
+                <!-- Indicador de turno -->
+                <div id="turn-indicator1" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -673,7 +698,7 @@
                     <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text1" class="solution-text">
                     <h3>Solución del Problema 1:</h3>
                     <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
                     <div class="move-explanation">
@@ -708,10 +733,10 @@
                     <div id="board2" class="board"></div>
                 </div>
                 
-                <div class="position-summary">
-                    <h3>Posición Inicial:</h3>
-                    <p><strong>Blancas:</strong> Caballo en e4, Caballo en d5, Alfil en e5, Rey en e6</p>
-                    <p><strong>Negras:</strong> Rey en c8</p>
+                <!-- Indicador de turno -->
+                <div id="turn-indicator2" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -738,7 +763,7 @@
                     <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text2" class="solution-text">
                     <h3>Solución del Problema 2:</h3>
                     <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
                     <div class="move-explanation">
@@ -773,10 +798,10 @@
                     <div id="board3" class="board"></div>
                 </div>
                 
-                <div class="position-summary">
-                    <h3>Posición Inicial:</h3>
-                    <p><strong>Blancas:</strong> Rey en h2, Dama en h6, Torres en d5 y e3, Alfiles en e4 y f4, Peones en d3, g3, g4, g2</p>
-                    <p><strong>Negras:</strong> Rey en g8, Torre en f8, Caballo en b8, Alfil en d8, Peones en c7, d7, d6, f5, g6, h7</p>
+                <!-- Indicador de turno -->
+                <div id="turn-indicator3" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -803,7 +828,7 @@
                     <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
                 </div>
                 
-                <div class="solution-text">
+                <div id="solution-text3" class="solution-text">
                     <h3>Solución del Problema 3:</h3>
                     <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
                     <div class="move-explanation">
@@ -1030,6 +1055,9 @@
             });
             document.getElementById(`problem${problemNumber}-game`).style.display = 'block';
             
+            // Ocultar la solución si está visible
+            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
+            
             // Inicializar el juego si no está inicializado
             if (!gameStates[problemNumber]) {
                 initializeGame(problemNumber);
@@ -1049,11 +1077,13 @@
                 currentMoveIndex: 0,
                 playerMoves: [],
                 gameCompleted: false,
-                keywordVerified: false
+                keywordVerified: false,
+                isWhiteTurn: true
             };
             
             createBoard(problemNumber);
             updateKeywordSection(problemNumber);
+            updateTurnIndicator(problemNumber);
         }
 
         function createBoard(problemNumber) {
@@ -1109,12 +1139,12 @@
                     makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
                     clearSelection(problemNumber);
-                    if (piece && isWhitePiece(piece)) {
+                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
                         selectSquare(problemNumber, row, col);
                     }
                 }
             } else {
-                if (piece && isWhitePiece(piece)) {
+                if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
                     selectSquare(problemNumber, row, col);
                 }
             }
@@ -1177,6 +1207,10 @@
                 if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
                     toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
                     
+                    // Cambiar turno a negras
+                    state.isWhiteTurn = false;
+                    updateTurnIndicator(problemNumber);
+                    
                     // Verificar si es el último movimiento (mate)
                     if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
                         // Si es el último movimiento y no hay respuesta negra (mate)
@@ -1189,7 +1223,7 @@
                         unlockKeywordSection(problemNumber);
                     } else {
                         // Movimiento de las negras
-                        setTimeout(() => makeBlackMove(problemNumber), 500);
+                        setTimeout(() => makeBlackMove(problemNumber), 1000);
                     }
                 } else {
                     document.getElementById(`status${problemNumber}`).textContent = "Movimiento incorrecto. Intenta de nuevo.";
@@ -1223,6 +1257,10 @@
                         
                         // Incrementar el índice de movimiento después del movimiento negro
                         state.currentMoveIndex++;
+                        
+                        // Cambiar turno a blancas
+                        state.isWhiteTurn = true;
+                        updateTurnIndicator(problemNumber);
                         
                         createBoard(problemNumber);
                         document.getElementById(`status${problemNumber}`).textContent = "Las negras han jugado. Es tu turno.";
@@ -1273,6 +1311,19 @@
             } else {
                 statusElement.textContent = `Movimiento ${state.currentMoveIndex}/4 completado. Es tu turno.`;
                 statusElement.className = "status";
+            }
+        }
+
+        function updateTurnIndicator(problemNumber) {
+            const state = gameStates[problemNumber];
+            const turnIndicator = document.getElementById(`turn-indicator${problemNumber}`);
+            
+            if (state.isWhiteTurn) {
+                turnIndicator.className = "turn-indicator turn-white";
+                turnIndicator.innerHTML = '<span class="turn-piece">♔</span><span>Turno de las Blancas</span>';
+            } else {
+                turnIndicator.className = "turn-indicator turn-black";
+                turnIndicator.innerHTML = '<span class="turn-piece">♚</span><span>Turno de las Negras</span>';
             }
         }
 
@@ -1431,34 +1482,8 @@
         }
 
         function showSolution(problemNumber) {
-            const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
-            
-            resetGame(problemNumber);
-            
-            const executeMove = (index) => {
-                if (index < problem.solution.length) {
-                    const whiteMove = problem.solution[index].white;
-                    makeMove(problemNumber, whiteMove.from.row, whiteMove.from.col, whiteMove.to.row, whiteMove.to.col, true);
-                    
-                    if (problem.solution[index].black) {
-                        setTimeout(() => {
-                            const blackMove = problem.solution[index].black;
-                            // Usar movimiento directo para negras en la solución automática
-                            state.currentPosition[blackMove.to.row][blackMove.to.col] = state.currentPosition[blackMove.from.row][blackMove.from.col];
-                            state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
-                            createBoard(problemNumber);
-                            executeMove(index + 1);
-                        }, 1000);
-                    } else {
-                        state.gameCompleted = true;
-                        createBoard(problemNumber);
-                        unlockKeywordSection(problemNumber);
-                    }
-                }
-            };
-            
-            executeMove(0);
+            const solutionText = document.getElementById(`solution-text${problemNumber}`);
+            solutionText.classList.toggle('active');
         }
 
         function resetGame(problemNumber) {
@@ -1472,8 +1497,13 @@
             state.playerMoves = [];
             state.gameCompleted = false;
             state.keywordVerified = false;
+            state.isWhiteTurn = true;
             createBoard(problemNumber);
             updateKeywordSection(problemNumber);
+            updateTurnIndicator(problemNumber);
+            
+            // Ocultar la solución si está visible
+            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
             
             // Limpiar feedback de palabra clave
             const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
