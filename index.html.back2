@@ -1632,6 +1632,14 @@
                         
                         // Desbloquear la sección de palabra clave
                         unlockKeywordSection(problemNumber);
+                        
+                        // Redirigir automáticamente a la sección de palabra clave
+                        setTimeout(() => {
+                            document.getElementById(`keyword-section${problemNumber}`).scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }, 500);
                     } else {
                         // Movimiento de las negras
                         setTimeout(() => makeBlackMove(problemNumber), 1000);
@@ -1701,6 +1709,14 @@
                     
                     // Desbloquear la sección de palabra clave
                     unlockKeywordSection(problemNumber);
+                    
+                    // Redirigir automáticamente a la sección de palabra clave
+                    setTimeout(() => {
+                        document.getElementById(`keyword-section${problemNumber}`).scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }, 500);
                 }
             }
             
