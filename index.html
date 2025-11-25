@@ -1564,9 +1564,17 @@
                         setTimeout(() => makeBlackMove(problemNumber), 1000);
                     }
                 } else {
-                    // Movimiento incorrecto - mostrar alerta y reiniciar
-                    alert("Movimiento incorrecto. El problema se reiniciará.");
-                    resetGame(problemNumber);
+                    // Movimiento incorrecto - mostrar mensaje en el área de estado
+                    document.getElementById(`status${problemNumber}`).textContent = "Movimiento incorrecto. Intenta de nuevo.";
+                    document.getElementById(`status${problemNumber}`).className = "status error";
+                    
+                    // Revertir el movimiento
+                    state.currentPosition[fromRow][fromCol] = piece;
+                    state.currentPosition[toRow][toCol] = '';
+                    state.playerMoves.pop();
+                    
+                    clearSelection(problemNumber);
+                    createBoard(problemNumber);
                     return;
                 }
             }
