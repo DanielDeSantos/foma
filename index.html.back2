@@ -5,21 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajedrez de Ataque - Problemas de Mate</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #333;
+            min-height: 100vh;
         }
+
         h1 {
-            color: #2c3e50;
+            color: white;
             text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
+            padding: 20px;
             margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5rem;
         }
+
         .problem-selection {
             display: flex;
             justify-content: center;
@@ -27,232 +37,409 @@
             margin-bottom: 40px;
             flex-wrap: wrap;
         }
+
         .problem-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 25px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             text-align: center;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            width: 300px;
+            transition: all 0.3s ease;
+            width: 320px;
             border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c);
+        }
+
         .problem-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
         }
+
         .problem-card.active {
             border-color: #3498db;
-            background-color: #e8f4fd;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
         }
+
         .problem-card h2 {
             color: #2c3e50;
             margin-bottom: 15px;
+            font-size: 1.5rem;
         }
+
         .problem-card p {
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
+
         .problem-preview {
-            font-size: 18px;
-            margin: 15px 0;
+            font-size: 16px;
+            margin: 20px 0;
             min-height: 40px;
             font-weight: bold;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
         }
+
         .btn-select {
-            padding: 10px 20px;
-            background-color: #3498db;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
         }
+
         .btn-select:hover {
-            background-color: #2980b9;
+            background: linear-gradient(135deg, #2980b9, #21618c);
+            transform: translateY(-2px);
         }
+
         .game-container {
             display: none;
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .game-container.active {
             display: block;
         }
+
         .back-btn {
-            padding: 8px 16px;
-            background-color: #95a5a6;
+            padding: 10px 20px;
+            background: #95a5a6;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .back-btn:hover {
-            background-color: #7f8c8d;
+            background: #7f8c8d;
+            transform: translateX(-5px);
         }
+
         .board-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            border: 2px solid #ddd;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #ddd;
+            margin-bottom: 25px;
+            position: relative;
         }
+
         .board {
             display: grid;
-            grid-template-columns: repeat(8, 50px);
-            grid-template-rows: repeat(8, 50px);
-            border: 2px solid #333;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 3px solid #2c3e50;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
+
         .square {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 35px;
             position: relative;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
+
+        .square:hover {
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
         .light {
             background-color: #f0d9b5;
         }
+
         .dark {
             background-color: #b58863;
         }
+
         .selected {
-            background-color: rgba(255, 255, 0, 0.5);
+            background-color: rgba(255, 235, 59, 0.7) !important;
+            box-shadow: inset 0 0 0 3px #ff9800;
         }
-        .valid-move {
-            background-color: rgba(144, 238, 144, 0.5);
+
+        .valid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(76, 175, 80, 0.6);
+            border-radius: 50%;
+            border: 2px solid #2e7d32;
         }
+
         .last-move {
-            background-color: rgba(52, 152, 219, 0.3);
+            background-color: rgba(52, 152, 219, 0.4) !important;
         }
+
         .file-coordinates {
             display: flex;
             justify-content: space-around;
-            width: 400px;
-            margin-bottom: 5px;
+            width: 480px;
+            margin-bottom: 10px;
             font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
         }
+
         .rank-coordinates {
             display: flex;
             flex-direction: column;
             justify-content: space-around;
-            height: 400px;
-            margin-right: 5px;
+            height: 480px;
+            margin-right: 10px;
             font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
         }
+
         .coords-container {
             display: flex;
+            align-items: center;
         }
+
         .game-info {
             width: 100%;
         }
+
         .controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
         }
+
         .btn {
-            padding: 10px 15px;
-            background-color: #3498db;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
         }
+
         .btn:hover {
-            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
+
         .btn:disabled {
-            background-color: #95a5a6;
+            background: #bdc3c7;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
+
         .btn-success {
-            background-color: #2ecc71;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
         }
+
         .btn-success:hover {
-            background-color: #27ae60;
+            background: linear-gradient(135deg, #27ae60, #219653);
         }
+
         .btn-danger {
-            background-color: #e74c3c;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
+
         .btn-danger:hover {
-            background-color: #c0392b;
+            background: linear-gradient(135deg, #c0392b, #a93226);
         }
+
         .status {
-            font-size: 18px;
+            font-size: 1.2rem;
             text-align: center;
-            margin: 10px 0;
-            min-height: 24px;
+            margin: 15px 0;
+            min-height: 30px;
             font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #3498db;
         }
+
         .success {
-            color: #2ecc71;
+            color: #27ae60;
+            border-left-color: #27ae60;
+            background: #d5f4e6;
         }
+
         .error {
             color: #e74c3c;
+            border-left-color: #e74c3c;
+            background: #fadbd8;
         }
+
         .legend {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        .moves-list {
+            gap: 30px;
             margin-top: 15px;
-            max-height: 150px;
+            font-size: 1rem;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .moves-list {
+            margin-top: 20px;
+            max-height: 200px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 5px;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
         }
+
         .move-item {
-            padding: 5px;
-            border-bottom: 1px solid #eee;
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            transition: background 0.2s ease;
         }
+
+        .move-item:hover {
+            background: #e9ecef;
+        }
+
         .move-item:last-child {
             border-bottom: none;
         }
+
         .solution-text {
-            background-color: #e8f4fd;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 10px 0;
-            border-left: 4px solid #3498db;
+            background: linear-gradient(135deg, #e8f4fd, #d6eaf8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+
         .checkmate {
             color: #e74c3c;
             font-weight: bold;
+            font-size: 1.3rem;
         }
+
         .move-explanation {
-            margin-top: 10px;
+            margin-top: 15px;
             font-style: italic;
-            color: #666;
+            color: #555;
+            line-height: 1.6;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2ecc71;
         }
+
         .position-summary {
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
+            background: linear-gradient(135deg, #fff, #f8f9fa);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .problem-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .problem-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .problem-card {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            
+            .square {
+                font-size: 25px;
+            }
+            
+            .file-coordinates {
+                width: 320px;
+            }
+            
+            .rank-coordinates {
+                height: 320px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Ajedrez de Ataque - Problemas de Mate</h1>
+    <h1>♔ Ajedrez de Ataque - Problemas de Mate ♚</h1>
     
     <!-- Selección de Problemas -->
     <div class="problem-selection">
@@ -284,7 +471,7 @@
         
         <!-- Problema 1 -->
         <div id="problem1-game" class="problem-game">
-            <h2>Problema 1 - Mate con Peones y Alfiles</h2>
+            <h2 class="problem-title">Problema 1 - Mate con Peones y Alfiles</h2>
             
             <div class="board-container">
                 <div class="file-coordinates">
@@ -312,8 +499,8 @@
                 </div>
                 
                 <div class="legend">
-                    <div><strong>Mayúsculas:</strong> Blancas</div>
-                    <div><strong>Minúsculas:</strong> Negras</div>
+                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
                 </div>
             </div>
             
@@ -340,7 +527,7 @@
 
         <!-- Problema 2 -->
         <div id="problem2-game" class="problem-game">
-            <h2>Problema 2 - Mate con Caballos y Alfil</h2>
+            <h2 class="problem-title">Problema 2 - Mate con Caballos y Alfil</h2>
             
             <div class="board-container">
                 <div class="file-coordinates">
@@ -368,8 +555,8 @@
                 </div>
                 
                 <div class="legend">
-                    <div><strong>Mayúsculas:</strong> Blancas</div>
-                    <div><strong>Minúsculas:</strong> Negras</div>
+                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
                 </div>
             </div>
             
@@ -396,7 +583,7 @@
 
         <!-- Problema 3 -->
         <div id="problem3-game" class="problem-game">
-            <h2>Problema 3 - Mate con Sacrificios</h2>
+            <h2 class="problem-title">Problema 3 - Mate con Sacrificios</h2>
             
             <div class="board-container">
                 <div class="file-coordinates">
@@ -424,8 +611,8 @@
                 </div>
                 
                 <div class="legend">
-                    <div><strong>Mayúsculas:</strong> Blancas</div>
-                    <div><strong>Minúsculas:</strong> Negras</div>
+                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
                 </div>
             </div>
             
@@ -562,13 +749,13 @@
                 name: "Mate con Sacrificios",
                 initialPosition: [
                     // Fila 0 (8 en ajedrez)
-                    ['', 'n', '', 'b', '', 'r', 'k', ''],  // Caballo b8, Alfil d8, Rey g8, Torre f8
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],  // Caballo b8, Alfil d8, Torre f8, Rey g8
                     // Fila 1 (7 en ajedrez)
-                    ['', '', 'p', 'p', '', '', '', 'p'], // Peones c7, d7, g6, h7
+                    ['', '', 'p', 'p', '', '', '', 'p'], // Peones c7, d7, h7
                     // Fila 2 (6 en ajedrez)
-                    ['', '', '', 'p', '', '', 'p', 'Q'],  // Peón d6
+                    ['', '', '', 'p', '', '', 'p', 'Q'],  // Peón d6, Peón g6, Dama h6
                     // Fila 3 (5 en ajedrez)
-                    ['', '', '', 'R', '', 'p', '', ''],  // Peón f5
+                    ['', '', '', 'R', '', 'p', '', ''],  // Torre d5, Peón f5
                     // Fila 4 (4 en ajedrez)
                     ['', '', '', '', 'B', 'B', 'P', ''], // Alfiles e4, f4; Peón g4
                     // Fila 5 (3 en ajedrez)
@@ -576,11 +763,11 @@
                     // Fila 6 (2 en ajedrez)
                     ['', '', '', '', '', '', 'P', 'K'], // Peón g2; Rey h2
                     // Fila 7 (1 en ajedrez)
-                    ['', '', '', '', '', '', '', '']  // Torre d5; Dama h6
+                    ['', '', '', '', '', '', '', '']  // Vacío
                 ],
                 solution: [
                     { 
-                        white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, // Ae4-d5+
+                        white: { from: { row: 3, col: 3 }, to: { row: 3, col: 5 } }, // Td5xf5
                         black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } }, // Tf8xf5
                         description: "Torre blanca captura peón en f5"
                     },
@@ -591,11 +778,11 @@
                     },
                     { 
                         white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } }, // Te3-e8+
-                        black: { from: { row: 0, col: 4 }, to: { row: 1, col: 5 } }, // Rg8-f7
+                        black: { from: { row: 0, col: 6 }, to: { row: 1, col: 5 } }, // Rg8-f7
                         description: "Torre a e8 con jaque, rey escapa a f7"
                     },
                     { 
-                        white: { from: { row: 7, col: 6 }, to: { row: 0, col: 5 } }, // Dh6-f8++
+                        white: { from: { row: 2, col: 7 }, to: { row: 0, col: 5 } }, // Dh6-f8++
                         black: null,
                         description: "¡Jaque mate con la dama!"
                     }
@@ -821,8 +1008,6 @@
                     const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
                     
                     if (piece) {
-                        console.log(`Moviendo pieza negra ${piece} de (${blackMove.from.row},${blackMove.from.col}) a (${blackMove.to.row},${blackMove.to.col})`);
-                        
                         // Mover la pieza negra
                         state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
                         state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
@@ -834,7 +1019,6 @@
                         document.getElementById(`status${problemNumber}`).textContent = "Las negras han jugado. Es tu turno.";
                     } else {
                         console.error(`No se encontró pieza en posición (${blackMove.from.row},${blackMove.from.col})`);
-                        console.log('Posición actual:', state.currentPosition);
                     }
                 } else {
                     // Si no hay movimiento negro (último movimiento de mate), completar el juego
@@ -989,4 +1173,3 @@
     </script>
 </body>
 </html>
-
