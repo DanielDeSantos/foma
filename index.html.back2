@@ -1104,7 +1104,8 @@
                 playerMoves: [],
                 gameCompleted: false,
                 keywordVerified: false,
-                isWhiteTurn: true
+                isWhiteTurn: true,
+                gamePaused: false
             };
             
             createBoard(problemNumber);
@@ -1150,7 +1151,7 @@
 
         function handleSquareClick(problemNumber, row, col) {
             const state = gameStates[problemNumber];
-            if (state.gameCompleted) return;
+            if (state.gameCompleted || state.gamePaused) return;
             
             const piece = state.currentPosition[row][col];
             
@@ -1564,9 +1565,25 @@
                         setTimeout(() => makeBlackMove(problemNumber), 1000);
                     }
                 } else {
-                    // Movimiento incorrecto - mostrar alerta y reiniciar
-                    alert("Movimiento incorrecto. El problema se reiniciará.");
-                    resetGame(problemNumber);
+                    // Movimiento incorrecto - pausar el juego y mostrar mensaje
+                    state.gamePaused = true;
+                    
+                    // Mostrar mensaje de error en el área de estado
+                    const statusElement = document.getElementById(`status${problemNumber}`);
+                    statusElement.innerHTML = `
+                        <div style="text-align: center;">
+                            <p style="color: #e74c3c; margin-bottom: 15px; font-size: 1.2rem;">❌ Movimiento incorrecto</p>
+                            <p style="margin-bottom: 15px;">Has realizado un movimiento que hará que ya no sea posible hacer jaque mate en 4 jugadas. Debes reiniciar el problema.</p>
+                            <button id="restart-btn${problemNumber}" class="btn btn-danger" style="margin-top: 10px;">Reiniciar Problema</button>
+                        </div>
+                    `;
+                    statusElement.className = "status error";
+                    
+                    // Agregar event listener al botón de reinicio
+                    document.getElementById(`restart-btn${problemNumber}`).addEventListener('click', () => {
+                        resetGame(problemNumber);
+                    });
+                    
                     return;
                 }
             }
@@ -1796,7 +1813,7 @@
             const state = gameStates[problemNumber];
             const problem = problems[problemNumber];
             
-            if (state.gameCompleted || state.currentMoveIndex >= problem.solution.length) return;
+            if (state.gameCompleted || state.currentMoveIndex >= problem.solution.length || state.gamePaused) return;
             
             const expectedMove = problem.solution[state.currentMoveIndex].white;
             const fromSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
@@ -1831,6 +1848,7 @@
             state.gameCompleted = false;
             state.keywordVerified = false;
             state.isWhiteTurn = true;
+            state.gamePaused = false;
             createBoard(problemNumber);
             updateKeywordSection(problemNumber);
             updateTurnIndicator(problemNumber);
