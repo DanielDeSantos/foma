@@ -113,43 +113,89 @@
             transform: translateY(-2px);
         }
 
-        .game-container {
+        /* MODAL STYLES */
+        .problem-modal {
             display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .problem-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
             background: white;
-            padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-            margin-top: 20px;
-            animation: fadeIn 0.5s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1000px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: scaleIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
-        .game-container.active {
-            display: block;
-        }
-
-        .back-btn {
-            padding: 10px 20px;
-            background: #95a5a6;
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
             cursor: pointer;
-            font-weight: bold;
-            margin-bottom: 25px;
-            transition: all 0.3s ease;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
+            z-index: 10;
+            transition: all 0.3s ease;
         }
 
-        .back-btn:hover {
-            background: #7f8c8d;
-            transform: translateX(-5px);
+        .close-modal:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .problem-title {
+            color: #2c3e50;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            flex: 1;
         }
 
         .board-container {
@@ -160,7 +206,6 @@
             padding: 25px;
             border-radius: 15px;
             border: 3px solid #ddd;
-            margin-bottom: 25px;
             position: relative;
         }
 
@@ -263,7 +308,9 @@
         }
 
         .game-info {
-            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
         }
 
         .controls {
@@ -352,13 +399,12 @@
         }
 
         .moves-list {
-            margin-top: 20px;
-            max-height: 200px;
-            overflow-y: auto;
             border: 2px solid #e9ecef;
             padding: 20px;
             border-radius: 10px;
             background: #f8f9fa;
+            height: 100%;
+            overflow-y: auto;
         }
 
         .move-item {
@@ -435,14 +481,6 @@
 
         .turn-piece {
             font-size: 1.5rem;
-        }
-
-        .problem-title {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 2rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         /* Nuevos estilos para el sistema de palabras clave */
@@ -594,6 +632,12 @@
             100% { transform: rotate(360deg); }
         }
 
+        @media (max-width: 1024px) {
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .problem-selection {
                 flex-direction: column;
@@ -603,6 +647,10 @@
             .problem-card {
                 width: 100%;
                 max-width: 400px;
+            }
+            
+            .modal-content {
+                padding: 20px;
             }
             
             .board {
@@ -645,6 +693,11 @@
                 width: 100%;
                 margin-left: 0;
             }
+            
+            .game-header {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -675,201 +728,223 @@
         </div>
     </div>
 
-    <!-- Contenedor del Juego -->
-    <div id="game-container" class="game-container">
-        <button class="back-btn" id="back-btn">← Volver a la selección</button>
-        
-        <!-- Problema 1 -->
-        <div id="problem1-game" class="problem-game">
-            <h2 class="problem-title">Problema 1 - Mate con Peones y Alfiles</h2>
-            
-            <div class="board-container">
-                <!-- Indicador de turno (encima del tablero) -->
-                <div id="turn-indicator1" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
+    <!-- Modal para Problema 1 -->
+    <div id="problem1-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="1">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 1 - Mate con Peones y Alfiles</h2>
                 </div>
                 
-                <div class="file-coordinates">
-                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-                </div>
-                <div class="coords-container">
-                    <div class="rank-coordinates">
-                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator1" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
                     </div>
-                    <div id="board1" class="board"></div>
-                </div>
-                
-                <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
-                
-                <div class="controls">
-                    <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
-                    <button id="hint-btn1" class="btn">Pista</button>
-                    <button id="solution-btn1" class="btn">Ver Solución</button>
-                </div>
-                
-                <div class="legend">
-                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
-                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
-                </div>
-            </div>
-            
-            <div class="game-info">
-                <div id="keyword-section1" class="keyword-section locked">
-                    <div class="lock-icon">🔒</div>
-                    <h3>¡Completa el mate para desbloquear!</h3>
-                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
-                    <input type="text" id="keyword-input1" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
-                    <button id="keyword-btn1" class="keyword-btn" disabled>Verificar</button>
-                    <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
-                </div>
-                
-                <div id="solution-text1" class="solution-text">
-                    <h3>Solución del Problema 1:</h3>
-                    <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
-                    <div class="move-explanation">
-                        <p><strong>Explicación:</strong> 
-                            1. Peón g5-g6; Peón c7-c6<br>
-                            2. Peón h4-h5; Alfil e8-d7<br>
-                            3. Alfil e7-h4; Alfil d7-c8<br>
-                            4. Alfil h4xg3++ ¡Jaque mate!
-                        </p>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board1" class="board"></div>
+                    </div>
+                    
+                    <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn1" class="btn">Pista</button>
+                        <button id="solution-btn1" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
                     </div>
                 </div>
                 
-                <div class="moves-list">
-                    <h3>Movimientos realizados:</h3>
-                    <div id="moves-container1"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Problema 2 -->
-        <div id="problem2-game" class="problem-game">
-            <h2 class="problem-title">Problema 2 - Mate con Caballos y Alfil</h2>
-            
-            <div class="board-container">
-                <!-- Indicador de turno (encima del tablero) -->
-                <div id="turn-indicator2" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
-                </div>
-                
-                <div class="file-coordinates">
-                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-                </div>
-                <div class="coords-container">
-                    <div class="rank-coordinates">
-                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section1" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input1" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn1" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text1" class="solution-text">
+                            <h3>Solución del Problema 1:</h3>
+                            <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Peón g5-g6; Peón c7-c6<br>
+                                    2. Peón h4-h5; Alfil e8-d7<br>
+                                    3. Alfil e7-h4; Alfil d7-c8<br>
+                                    4. Alfil h4xg3++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <div id="board2" class="board"></div>
-                </div>
-                
-                <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
-                
-                <div class="controls">
-                    <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
-                    <button id="hint-btn2" class="btn">Pista</button>
-                    <button id="solution-btn2" class="btn">Ver Solución</button>
-                </div>
-                
-                <div class="legend">
-                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
-                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
-                </div>
-            </div>
-            
-            <div class="game-info">
-                <div id="keyword-section2" class="keyword-section locked">
-                    <div class="lock-icon">🔒</div>
-                    <h3>¡Completa el mate para desbloquear!</h3>
-                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
-                    <input type="text" id="keyword-input2" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
-                    <button id="keyword-btn2" class="keyword-btn" disabled>Verificar</button>
-                    <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
-                </div>
-                
-                <div id="solution-text2" class="solution-text">
-                    <h3>Solución del Problema 2:</h3>
-                    <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
-                    <div class="move-explanation">
-                        <p><strong>Explicación:</strong> 
-                            1. Caballo e4-c5; Rey c8-d8<br>
-                            2. Rey e6-f7; Rey d8-c8<br>
-                            3. Caballo d5-b6+ (jaque); Rey c8-d8<br>
-                            4. Caballo c5-e6++ ¡Jaque mate!
-                        </p>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container1"></div>
                     </div>
-                </div>
-                
-                <div class="moves-list">
-                    <h3>Movimientos realizados:</h3>
-                    <div id="moves-container2"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Problema 3 -->
-        <div id="problem3-game" class="problem-game">
-            <h2 class="problem-title">Problema 3 - Mate con Sacrificios</h2>
-            
-            <div class="board-container">
-                <!-- Indicador de turno (encima del tablero) -->
-                <div id="turn-indicator3" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
+    <!-- Modal para Problema 2 -->
+    <div id="problem2-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="2">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 2 - Mate con Caballos y Alfil</h2>
                 </div>
                 
-                <div class="file-coordinates">
-                    <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-                </div>
-                <div class="coords-container">
-                    <div class="rank-coordinates">
-                        <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator2" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
                     </div>
-                    <div id="board3" class="board"></div>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board2" class="board"></div>
+                    </div>
+                    
+                    <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn2" class="btn">Pista</button>
+                        <button id="solution-btn2" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
+                    </div>
                 </div>
                 
-                <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
-                
-                <div class="controls">
-                    <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
-                    <button id="hint-btn3" class="btn">Pista</button>
-                    <button id="solution-btn3" class="btn">Ver Solución</button>
-                </div>
-                
-                <div class="legend">
-                    <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
-                    <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section2" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input2" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn2" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text2" class="solution-text">
+                            <h3>Solución del Problema 2:</h3>
+                            <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Caballo e4-c5; Rey c8-d8<br>
+                                    2. Rey e6-f7; Rey d8-c8<br>
+                                    3. Caballo d5-b6+ (jaque); Rey c8-d8<br>
+                                    4. Caballo c5-e6++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container2"></div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="game-info">
-                <div id="keyword-section3" class="keyword-section locked">
-                    <div class="lock-icon">🔒</div>
-                    <h3>¡Completa el mate para desbloquear!</h3>
-                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
-                    <input type="text" id="keyword-input3" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
-                    <button id="keyword-btn3" class="keyword-btn" disabled>Verificar</button>
-                    <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <!-- Modal para Problema 3 -->
+    <div id="problem3-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="3">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 3 - Mate con Sacrificios</h2>
                 </div>
                 
-                <div id="solution-text3" class="solution-text">
-                    <h3>Solución del Problema 3:</h3>
-                    <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
-                    <div class="move-explanation">
-                        <p><strong>Explicación:</strong> 
-                            1. Torre d5xf5; Torre f8xf5 (captura)<br>
-                            2. Alfil e4-d5+ (jaque); Torre f5xd5 (captura)<br>
-                            3. Torre e3-e8+ (jaque); Rey g8-f7<br>
-                            4. Dama h6-f8++ ¡Jaque mate!
-                        </p>
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator3" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board3" class="board"></div>
+                    </div>
+                    
+                    <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn3" class="btn">Pista</button>
+                        <button id="solution-btn3" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
                     </div>
                 </div>
                 
-                <div class="moves-list">
-                    <h3>Movimientos realizados:</h3>
-                    <div id="moves-container3"></div>
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section3" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input3" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn3" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text3" class="solution-text">
+                            <h3>Solución del Problema 3:</h3>
+                            <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Torre d5xf5; Torre f8xf5 (captura)<br>
+                                    2. Alfil e4-d5+ (jaque); Torre f5xd5 (captura)<br>
+                                    3. Torre e3-e8+ (jaque); Rey g8-f7<br>
+                                    4. Dama h6-f8++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container3"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1057,9 +1132,8 @@
 
         // ========== FUNCIONES DE INTERFAZ ==========
         function showProblemSelection() {
-            document.getElementById('game-container').classList.remove('active');
-            document.querySelectorAll('.problem-card').forEach(card => {
-                card.classList.remove('active');
+            document.querySelectorAll('.problem-modal').forEach(modal => {
+                modal.classList.remove('active');
             });
         }
 
@@ -1072,14 +1146,8 @@
             });
             document.querySelector(`.problem-card[data-problem="${problemNumber}"]`).classList.add('active');
             
-            // Mostrar contenedor del juego
-            document.getElementById('game-container').classList.add('active');
-            
-            // Ocultar todos los juegos y mostrar el seleccionado
-            document.querySelectorAll('.problem-game').forEach(game => {
-                game.style.display = 'none';
-            });
-            document.getElementById(`problem${problemNumber}-game`).style.display = 'block';
+            // Mostrar modal del problema
+            document.getElementById(`problem${problemNumber}-modal`).classList.add('active');
             
             // Ocultar la solución si está visible
             document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
@@ -1090,6 +1158,10 @@
             } else {
                 createBoard(problemNumber);
             }
+        }
+
+        function closeProblemModal(problemNumber) {
+            document.getElementById(`problem${problemNumber}-modal`).classList.remove('active');
         }
 
         // ========== FUNCIONES DEL JUEGO ==========
@@ -1889,7 +1961,23 @@
             });
         });
 
-        document.getElementById('back-btn').addEventListener('click', showProblemSelection);
+        // Event listeners para cerrar modales
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const problemNumber = this.dataset.problem;
+                closeProblemModal(problemNumber);
+            });
+        });
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.querySelectorAll('.problem-modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const problemNumber = this.id.replace('problem', '').replace('-modal', '');
+                    closeProblemModal(problemNumber);
+                }
+            });
+        });
 
         // Event listeners para los controles de cada problema
         for (let i = 1; i <= 3; i++) {
