@@ -1128,8 +1128,8 @@
             const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
-            // Calcular movimientos válidos según las reglas del ajedrez
-            calculateValidMoves(problemNumber, row, col);
+            // Calcular movimientos válidos SOLO para la pieza correcta en el movimiento actual
+            calculateValidMovesForCurrentTurn(problemNumber, row, col);
             
             state.validMoves.forEach(move => {
                 const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
@@ -1137,24 +1137,22 @@
             });
         }
 
-        function calculateValidMoves(problemNumber, row, col) {
+        function calculateValidMovesForCurrentTurn(problemNumber, row, col) {
             const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             state.validMoves = [];
             
-            const piece = state.currentPosition[row][col];
-            if (!piece || !isWhitePiece(piece)) return;
-
-            // Para simplificar, permitimos cualquier movimiento a casillas vacías o con piezas negras
-            // En una implementación real, aquí irían las reglas específicas de cada pieza
-            for (let toRow = 0; toRow < 8; toRow++) {
-                for (let toCol = 0; toCol < 8; toCol++) {
-                    const targetPiece = state.currentPosition[toRow][toCol];
-                    if (!targetPiece || !isWhitePiece(targetPiece)) {
-                        state.validMoves.push({
-                            from: { row, col },
-                            to: { row: toRow, col: toCol }
-                        });
-                    }
+            // Solo mostrar movimientos válidos para la pieza que debe moverse en el turno actual
+            if (state.currentMoveIndex < problem.solution.length) {
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
+                
+                // Verificar si esta es la pieza que debe moverse en este turno
+                if (row === expectedMove.from.row && col === expectedMove.from.col) {
+                    // Solo mostrar el movimiento correcto como válido
+                    state.validMoves.push({
+                        from: { row, col },
+                        to: { row: expectedMove.to.row, col: expectedMove.to.col }
+                    });
                 }
             }
         }
