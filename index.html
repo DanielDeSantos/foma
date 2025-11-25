@@ -398,6 +398,7 @@
             font-size: 1.2rem;
             background: #f8f9fa;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 480px;
         }
 
         .turn-white {
@@ -600,6 +601,10 @@
                 height: 320px;
             }
             
+            .turn-indicator {
+                width: 320px;
+            }
+            
             .controls {
                 flex-direction: column;
                 align-items: center;
@@ -658,6 +663,12 @@
             <h2 class="problem-title">Problema 1 - Mate con Peones y Alfiles</h2>
             
             <div class="board-container">
+                <!-- Indicador de turno (encima del tablero) -->
+                <div id="turn-indicator1" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
+                </div>
+                
                 <div class="file-coordinates">
                     <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
                 </div>
@@ -666,12 +677,6 @@
                         <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                     </div>
                     <div id="board1" class="board"></div>
-                </div>
-                
-                <!-- Indicador de turno -->
-                <div id="turn-indicator1" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -723,6 +728,12 @@
             <h2 class="problem-title">Problema 2 - Mate con Caballos y Alfil</h2>
             
             <div class="board-container">
+                <!-- Indicador de turno (encima del tablero) -->
+                <div id="turn-indicator2" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
+                </div>
+                
                 <div class="file-coordinates">
                     <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
                 </div>
@@ -731,12 +742,6 @@
                         <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                     </div>
                     <div id="board2" class="board"></div>
-                </div>
-                
-                <!-- Indicador de turno -->
-                <div id="turn-indicator2" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -788,6 +793,12 @@
             <h2 class="problem-title">Problema 3 - Mate con Sacrificios</h2>
             
             <div class="board-container">
+                <!-- Indicador de turno (encima del tablero) -->
+                <div id="turn-indicator3" class="turn-indicator turn-white">
+                    <span class="turn-piece">♔</span>
+                    <span>Turno de las Blancas</span>
+                </div>
+                
                 <div class="file-coordinates">
                     <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
                 </div>
@@ -796,12 +807,6 @@
                         <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
                     </div>
                     <div id="board3" class="board"></div>
-                </div>
-                
-                <!-- Indicador de turno -->
-                <div id="turn-indicator3" class="turn-indicator turn-white">
-                    <span class="turn-piece">♔</span>
-                    <span>Turno de las Blancas</span>
                 </div>
                 
                 <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
@@ -1132,16 +1137,15 @@
                 const fromRow = state.selectedSquare.row;
                 const fromCol = state.selectedSquare.col;
                 
-                const isValidMove = state.validMoves.some(move => 
-                    move.to.row === row && move.to.col === col);
+                // Verificar si el movimiento es válido
+                const isValidMove = isValidMovement(problemNumber, fromRow, fromCol, row, col);
                 
                 if (isValidMove) {
                     makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
-                    clearSelection(problemNumber);
-                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
-                        selectSquare(problemNumber, row, col);
-                    }
+                    // Movimiento no válido - mostrar alerta y reiniciar
+                    alert("Movimiento incorrecto. El problema se reiniciará.");
+                    resetGame(problemNumber);
                 }
             } else {
                 if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
@@ -1158,6 +1162,7 @@
             const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
+            // Calcular movimientos válidos para cualquier pieza blanca
             calculateValidMoves(problemNumber, row, col);
             
             state.validMoves.forEach(move => {
@@ -1175,16 +1180,31 @@
             
             if (!piece || !isWhitePiece(piece)) return;
             
+            // Solo permitir el movimiento esperado en la secuencia de solución
             if (state.currentMoveIndex < problem.solution.length) {
                 const expectedMove = problem.solution[state.currentMoveIndex].white;
                 
-                if (row === expectedMove.from.row && col === expectedMove.from.col) {
-                    state.validMoves.push({
-                        from: { row, col },
-                        to: expectedMove.to
-                    });
-                }
+                // Permitir que cualquier pieza blanca se seleccione, pero solo el movimiento esperado es válido
+                state.validMoves.push({
+                    from: { row, col },
+                    to: expectedMove.to
+                });
             }
+        }
+
+        function isValidMovement(problemNumber, fromRow, fromCol, toRow, toCol) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            if (state.currentMoveIndex >= problem.solution.length) return false;
+            
+            const expectedMove = problem.solution[state.currentMoveIndex].white;
+            
+            // Verificar si el movimiento coincide con el esperado en la secuencia
+            return (fromRow === expectedMove.from.row && 
+                    fromCol === expectedMove.from.col && 
+                    toRow === expectedMove.to.row && 
+                    toCol === expectedMove.to.col);
         }
 
         function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
@@ -1203,35 +1223,23 @@
                     to: { row: toRow, col: toCol }
                 });
                 
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                if (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col &&
-                    toRow === expectedMove.to.row && toCol === expectedMove.to.col) {
+                // Cambiar turno a negras
+                state.isWhiteTurn = false;
+                updateTurnIndicator(problemNumber);
+                
+                // Verificar si es el último movimiento (mate)
+                if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
+                    // Si es el último movimiento y no hay respuesta negra (mate)
+                    state.gameCompleted = true;
+                    state.currentMoveIndex++;
+                    document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                    document.getElementById(`status${problemNumber}`).className = "status success";
                     
-                    // Cambiar turno a negras
-                    state.isWhiteTurn = false;
-                    updateTurnIndicator(problemNumber);
-                    
-                    // Verificar si es el último movimiento (mate)
-                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
-                        // Si es el último movimiento y no hay respuesta negra (mate)
-                        state.gameCompleted = true;
-                        state.currentMoveIndex++;
-                        document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
-                        document.getElementById(`status${problemNumber}`).className = "status success";
-                        
-                        // Desbloquear la sección de palabra clave
-                        unlockKeywordSection(problemNumber);
-                    } else {
-                        // Movimiento de las negras
-                        setTimeout(() => makeBlackMove(problemNumber), 1000);
-                    }
+                    // Desbloquear la sección de palabra clave
+                    unlockKeywordSection(problemNumber);
                 } else {
-                    document.getElementById(`status${problemNumber}`).textContent = "Movimiento incorrecto. Intenta de nuevo.";
-                    document.getElementById(`status${problemNumber}`).className = "status error";
-                    // Revertir movimiento
-                    state.currentPosition[fromRow][fromCol] = piece;
-                    state.currentPosition[toRow][toCol] = '';
-                    state.playerMoves.pop();
+                    // Movimiento de las negras
+                    setTimeout(() => makeBlackMove(problemNumber), 1000);
                 }
             }
             
