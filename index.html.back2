@@ -398,6 +398,155 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
+        /* Nuevos estilos para el sistema de palabras clave */
+        .keyword-section {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            border: 3px solid #e17055;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .keyword-section.locked {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            border-color: #7f8c8d;
+            opacity: 0.7;
+        }
+
+        .keyword-section.unlocked {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-color: #e17055;
+            opacity: 1;
+            animation: unlockAnimation 0.5s ease;
+        }
+
+        @keyframes unlockAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .keyword-input {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            width: 300px;
+            margin: 15px 0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .keyword-input:disabled {
+            background: #ecf0f1;
+            border-color: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .keyword-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+            transform: scale(1.05);
+        }
+
+        .keyword-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .keyword-btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .keyword-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .congratulations {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .congratulations-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            color: #2c3e50;
+        }
+
+        .congratulations h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+
+        .congratulations p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .celebration {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+
+        .unlock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #27ae60;
+            animation: spin 1s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         @media (max-width: 768px) {
             .problem-selection {
                 flex-direction: column;
@@ -434,6 +583,16 @@
             .btn {
                 width: 100%;
                 max-width: 200px;
+            }
+
+            .keyword-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .keyword-btn {
+                width: 100%;
+                margin-left: 0;
             }
         }
     </style>
@@ -505,6 +664,15 @@
             </div>
             
             <div class="game-info">
+                <div id="keyword-section1" class="keyword-section locked">
+                    <div class="lock-icon">🔒</div>
+                    <h3>¡Completa el mate para desbloquear!</h3>
+                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                    <input type="text" id="keyword-input1" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                    <button id="keyword-btn1" class="keyword-btn" disabled>Verificar</button>
+                    <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
+                
                 <div class="solution-text">
                     <h3>Solución del Problema 1:</h3>
                     <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
@@ -561,6 +729,15 @@
             </div>
             
             <div class="game-info">
+                <div id="keyword-section2" class="keyword-section locked">
+                    <div class="lock-icon">🔒</div>
+                    <h3>¡Completa el mate para desbloquear!</h3>
+                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                    <input type="text" id="keyword-input2" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                    <button id="keyword-btn2" class="keyword-btn" disabled>Verificar</button>
+                    <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
+                
                 <div class="solution-text">
                     <h3>Solución del Problema 2:</h3>
                     <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
@@ -617,6 +794,15 @@
             </div>
             
             <div class="game-info">
+                <div id="keyword-section3" class="keyword-section locked">
+                    <div class="lock-icon">🔒</div>
+                    <h3>¡Completa el mate para desbloquear!</h3>
+                    <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                    <input type="text" id="keyword-input3" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                    <button id="keyword-btn3" class="keyword-btn" disabled>Verificar</button>
+                    <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
+                
                 <div class="solution-text">
                     <h3>Solución del Problema 3:</h3>
                     <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
@@ -638,11 +824,29 @@
         </div>
     </div>
 
+    <!-- Pantalla de Felicitaciones -->
+    <div id="congratulations" class="congratulations">
+        <div class="congratulations-content">
+            <div class="celebration">🎉🥳🎊</div>
+            <h2>¡Felicidades!</h2>
+            <p id="congrats-message">Has resuelto correctamente el problema de ajedrez.</p>
+            <p><strong>Palabra clave aceptada:</strong> <span id="accepted-keyword"></span></p>
+            <button id="continue-btn" class="btn btn-success" style="margin-top: 20px;">Continuar Jugando</button>
+        </div>
+    </div>
+
     <script>
         // Piezas representadas con emojis
         const pieces = {
             'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
             'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+        };
+
+        // Palabras clave para cada problema
+        const keywords = {
+            1: "ALFIL", // Palabra clave para el problema 1
+            2: "CABALLO", // Palabra clave para el problema 2
+            3: "SACRIFICIO" // Palabra clave para el problema 3
         };
 
         // ========== CONFIGURACIÓN DE PROBLEMAS ==========
@@ -844,10 +1048,12 @@
                 validMoves: [],
                 currentMoveIndex: 0,
                 playerMoves: [],
-                gameCompleted: false
+                gameCompleted: false,
+                keywordVerified: false
             };
             
             createBoard(problemNumber);
+            updateKeywordSection(problemNumber);
         }
 
         function createBoard(problemNumber) {
@@ -978,6 +1184,9 @@
                         state.currentMoveIndex++;
                         document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                         document.getElementById(`status${problemNumber}`).className = "status success";
+                        
+                        // Desbloquear la sección de palabra clave
+                        unlockKeywordSection(problemNumber);
                     } else {
                         // Movimiento de las negras
                         setTimeout(() => makeBlackMove(problemNumber), 500);
@@ -1026,6 +1235,9 @@
                     state.currentMoveIndex++;
                     document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
                     document.getElementById(`status${problemNumber}`).className = "status success";
+                    
+                    // Desbloquear la sección de palabra clave
+                    unlockKeywordSection(problemNumber);
                 }
             }
             
@@ -1086,6 +1298,116 @@
             }
         }
 
+        // ========== SISTEMA DE PALABRAS CLAVE ==========
+        function updateKeywordSection(problemNumber) {
+            const state = gameStates[problemNumber];
+            const keywordSection = document.getElementById(`keyword-section${problemNumber}`);
+            const keywordInput = document.getElementById(`keyword-input${problemNumber}`);
+            const keywordBtn = document.getElementById(`keyword-btn${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            
+            if (state.gameCompleted) {
+                // Desbloquear
+                keywordSection.classList.remove('locked');
+                keywordSection.classList.add('unlocked');
+                keywordInput.disabled = false;
+                keywordInput.placeholder = "Escribe la palabra aquí";
+                keywordBtn.disabled = false;
+                
+                // Cambiar icono de candado a desbloqueado
+                const iconElement = keywordSection.querySelector('.lock-icon');
+                if (iconElement) {
+                    iconElement.textContent = '🔓';
+                    iconElement.className = 'unlock-icon';
+                }
+            } else {
+                // Bloquear
+                keywordSection.classList.remove('unlocked');
+                keywordSection.classList.add('locked');
+                keywordInput.disabled = true;
+                keywordInput.placeholder = "Bloqueado hasta completar el mate";
+                keywordBtn.disabled = true;
+                feedbackElement.textContent = '';
+                
+                // Cambiar icono a candado
+                const iconElement = keywordSection.querySelector('.unlock-icon, .lock-icon');
+                if (iconElement) {
+                    iconElement.textContent = '🔒';
+                    iconElement.className = 'lock-icon';
+                }
+            }
+        }
+
+        function unlockKeywordSection(problemNumber) {
+            const keywordSection = document.getElementById(`keyword-section${problemNumber}`);
+            const keywordInput = document.getElementById(`keyword-input${problemNumber}`);
+            const keywordBtn = document.getElementById(`keyword-btn${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            
+            // Animación de desbloqueo
+            keywordSection.classList.remove('locked');
+            keywordSection.classList.add('unlocked');
+            keywordInput.disabled = false;
+            keywordInput.placeholder = "Escribe la palabra aquí";
+            keywordBtn.disabled = false;
+            
+            // Cambiar icono
+            const iconElement = keywordSection.querySelector('.lock-icon');
+            if (iconElement) {
+                iconElement.textContent = '🔓';
+                iconElement.className = 'unlock-icon';
+            }
+            
+            feedbackElement.textContent = '¡Sección desbloqueada! Ingresa la palabra clave.';
+            feedbackElement.style.color = '#27ae60';
+        }
+
+        function verifyKeyword(problemNumber) {
+            const state = gameStates[problemNumber];
+            const inputElement = document.getElementById(`keyword-input${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            const keyword = keywords[problemNumber];
+            
+            const userInput = inputElement.value.trim().toUpperCase();
+            
+            if (!state.gameCompleted) {
+                feedbackElement.textContent = "⚠️ Primero debes completar el mate";
+                feedbackElement.style.color = "#e74c3c";
+                return;
+            }
+            
+            if (userInput === keyword) {
+                feedbackElement.textContent = "✅ ¡Palabra correcta!";
+                feedbackElement.style.color = "#27ae60";
+                state.keywordVerified = true;
+                
+                // Mostrar pantalla de felicitaciones
+                showCongratulations(problemNumber, keyword);
+            } else {
+                feedbackElement.textContent = "❌ Palabra incorrecta. Intenta de nuevo.";
+                feedbackElement.style.color = "#e74c3c";
+            }
+        }
+
+        function showCongratulations(problemNumber, keyword) {
+            const congratsElement = document.getElementById('congratulations');
+            const messageElement = document.getElementById('congrats-message');
+            const keywordElement = document.getElementById('accepted-keyword');
+            
+            messageElement.textContent = `Has resuelto correctamente el Problema ${problemNumber}: ${problems[problemNumber].name}`;
+            keywordElement.textContent = keyword;
+            
+            congratsElement.style.display = 'flex';
+        }
+
+        function hideCongratulations() {
+            const congratsElement = document.getElementById('congratulations');
+            congratsElement.style.display = 'none';
+            
+            // Volver a la selección de problemas
+            showProblemSelection();
+        }
+
         function showHint(problemNumber) {
             const state = gameStates[problemNumber];
             const problem = problems[problemNumber];
@@ -1131,6 +1453,7 @@
                     } else {
                         state.gameCompleted = true;
                         createBoard(problemNumber);
+                        unlockKeywordSection(problemNumber);
                     }
                 }
             };
@@ -1148,7 +1471,17 @@
             state.currentMoveIndex = 0;
             state.playerMoves = [];
             state.gameCompleted = false;
+            state.keywordVerified = false;
             createBoard(problemNumber);
+            updateKeywordSection(problemNumber);
+            
+            // Limpiar feedback de palabra clave
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            feedbackElement.textContent = '';
+            feedbackElement.className = '';
+            
+            const inputElement = document.getElementById(`keyword-input${problemNumber}`);
+            inputElement.value = '';
         }
 
         // ========== EVENT LISTENERS ==========
@@ -1166,7 +1499,18 @@
             document.getElementById(`reset-btn${i}`).addEventListener('click', () => resetGame(i));
             document.getElementById(`hint-btn${i}`).addEventListener('click', () => showHint(i));
             document.getElementById(`solution-btn${i}`).addEventListener('click', () => showSolution(i));
+            document.getElementById(`keyword-btn${i}`).addEventListener('click', () => verifyKeyword(i));
+            
+            // También verificar con Enter
+            document.getElementById(`keyword-input${i}`).addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    verifyKeyword(i);
+                }
+            });
         }
+
+        // Event listener para el botón de continuar
+        document.getElementById('continue-btn').addEventListener('click', hideCongratulations);
 
         // Inicializar mostrando la selección de problemas
         showProblemSelection();
