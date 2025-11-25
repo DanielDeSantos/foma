@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Competición de Ajedrez - Problemas de Mate</title>
     <style>
+        /* Todos los estilos se mantienen igual */
         * {
             margin: 0;
             padding: 0;
@@ -1212,7 +1213,7 @@
                         // Desbloquear la sección de palabra clave
                         unlockKeywordSection(problemNumber);
                     } else {
-                        // Movimiento de las negras
+                        // Movimiento de las negras (automático)
                         setTimeout(() => makeBlackMove(problemNumber), 500);
                     }
                 } else {
@@ -1298,7 +1299,8 @@
                 statusElement.textContent = "¡Selecciona una pieza blanca para comenzar!";
                 statusElement.className = "status";
             } else {
-                statusElement.textContent = `Movimiento ${state.currentMoveIndex}/4 completado. ${state.isWhiteTurn ? "Es tu turno." : "Las negras están pensando..."}`;
+                // Mensaje simplificado sin "Las negras están pensando..."
+                statusElement.textContent = `Movimiento ${state.currentMoveIndex}/4 completado. ${state.isWhiteTurn ? "Es tu turno." : ""}`;
                 statusElement.className = "status";
             }
         }
