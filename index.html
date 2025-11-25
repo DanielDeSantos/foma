@@ -222,6 +222,16 @@
             box-sizing: border-box;
         }
 
+        .invalid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(231, 76, 60, 0.6);
+            border-radius: 50%;
+            border: 2px solid #c0392b;
+        }
+
         .last-move {
             background-color: rgba(52, 152, 219, 0.4) !important;
         }
@@ -1219,6 +1229,13 @@
                     calculateKingMoves(problemNumber, row, col);
                     break;
             }
+            
+            // Filtrar movimientos que dejarían al rey en jaque
+            if (piece.toUpperCase() !== 'K') {
+                state.validMoves = state.validMoves.filter(move => 
+                    !wouldKingBeInCheck(problemNumber, move.from.row, move.from.col, move.to.row, move.to.col)
+                );
+            }
         }
 
         function calculatePawnMoves(problemNumber, row, col) {
@@ -1353,10 +1370,147 @@
                     const targetPiece = state.currentPosition[r][c];
                     
                     if (!targetPiece || isBlackPiece(targetPiece)) {
-                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        // Verificar que el rey no se mueva a casillas adyacentes al rey negro
+                        if (!isAdjacentToBlackKing(problemNumber, r, c)) {
+                            state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        }
                     }
                 }
             }
+        }
+
+        function isAdjacentToBlackKing(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Encontrar la posición del rey negro
+            let blackKingRow = -1;
+            let blackKingCol = -1;
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (state.currentPosition[r][c] === 'k') {
+                        blackKingRow = r;
+                        blackKingCol = c;
+                        break;
+                    }
+                }
+                if (blackKingRow !== -1) break;
+            }
+            
+            if (blackKingRow === -1) return false;
+            
+            // Verificar si la casilla está adyacente al rey negro
+            const rowDiff = Math.abs(row - blackKingRow);
+            const colDiff = Math.abs(col - blackKingCol);
+            
+            return rowDiff <= 1 && colDiff <= 1;
+        }
+
+        function wouldKingBeInCheck(problemNumber, fromRow, fromCol, toRow, toCol) {
+            const state = gameStates[problemNumber];
+            
+            // Crear una copia temporal del tablero
+            const tempPosition = JSON.parse(JSON.stringify(state.currentPosition));
+            
+            // Realizar el movimiento temporal
+            const piece = tempPosition[fromRow][fromCol];
+            tempPosition[toRow][toCol] = piece;
+            tempPosition[fromRow][fromCol] = '';
+            
+            // Encontrar la posición del rey blanco
+            let kingRow = -1;
+            let kingCol = -1;
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (tempPosition[r][c] === 'K') {
+                        kingRow = r;
+                        kingCol = c;
+                        break;
+                    }
+                }
+                if (kingRow !== -1) break;
+            }
+            
+            if (kingRow === -1) return false;
+            
+            // Verificar si el rey está en jaque
+            return isSquareAttacked(problemNumber, kingRow, kingCol, tempPosition);
+        }
+
+        function isSquareAttacked(problemNumber, row, col, position) {
+            // Verificar ataques de peones
+            if (row < 7) {
+                if (col > 0 && position[row+1][col-1] === 'p') return true;
+                if (col < 7 && position[row+1][col+1] === 'p') return true;
+            }
+            
+            // Verificar ataques de caballos
+            const knightMoves = [
+                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                [1, -2], [1, 2], [2, -1], [2, 1]
+            ];
+            
+            for (const [dr, dc] of knightMoves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8 && position[r][c] === 'n') {
+                    return true;
+                }
+            }
+            
+            // Verificar ataques en línea recta (torres y damas)
+            const straightDirections = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            
+            for (const [dr, dc] of straightDirections) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const piece = position[r][c];
+                    if (piece) {
+                        if (piece === 'r' || piece === 'q') return true;
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+            
+            // Verificar ataques diagonales (alfiles y damas)
+            const diagonalDirections = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            
+            for (const [dr, dc] of diagonalDirections) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const piece = position[r][c];
+                    if (piece) {
+                        if (piece === 'b' || piece === 'q') return true;
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+            
+            // Verificar ataques del rey negro (casillas adyacentes)
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    
+                    const r = row + dr;
+                    const c = col + dc;
+                    
+                    if (r >= 0 && r < 8 && c >= 0 && c < 8 && position[r][c] === 'k') {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
         }
 
         function isWhitePiece(piece) {
