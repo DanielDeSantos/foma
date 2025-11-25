@@ -5,8 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Competición de Ajedrez - Problemas de Mate</title>
     <style>
-        /* (Los estilos se mantienen igual) */
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-size: 2.5rem;
+        }
+
+        .problem-selection {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .problem-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 320px;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c);
+        }
+
+        .problem-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .problem-card.active {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        }
+
+        .problem-card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .problem-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .problem-preview {
+            font-size: 16px;
+            margin: 20px 0;
+            min-height: 40px;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .btn-select {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+        }
+
+        .btn-select:hover {
+            background: linear-gradient(135deg, #2980b9, #21618c);
+            transform: translateY(-2px);
+        }
+
+        .game-container {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-container.active {
+            display: block;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: #95a5a6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #7f8c8d;
+            transform: translateX(-5px);
+        }
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #ddd;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 3px solid #2c3e50;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .square:hover {
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .light {
+            background-color: #f0d9b5;
+        }
+
+        .dark {
+            background-color: #b58863;
+        }
+
+        .selected {
+            background-color: rgba(255, 235, 59, 0.7) !important;
+            box-shadow: inset 0 0 0 3px #ff9800;
+        }
+
+        .valid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(76, 175, 80, 0.6);
+            border-radius: 50%;
+            border: 2px solid #2e7d32;
+        }
+
+        .last-move {
+            background-color: rgba(52, 152, 219, 0.4) !important;
+        }
+
+        .file-coordinates {
+            display: flex;
+            justify-content: space-around;
+            width: 480px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .rank-coordinates {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 480px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .coords-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .game-info {
+            width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #27ae60, #219653);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+
+        .status {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 30px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #3498db;
+        }
+
+        .success {
+            color: #27ae60;
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .error {
+            color: #e74c3c;
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 1rem;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .moves-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .move-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            transition: background 0.2s ease;
+        }
+
+        .move-item:hover {
+            background: #e9ecef;
+        }
+
+        .move-item:last-child {
+            border-bottom: none;
+        }
+
+        .solution-text {
+            background: linear-gradient(135deg, #e8f4fd, #d6eaf8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .solution-text.visible {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .checkmate {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .move-explanation {
+            margin-top: 15px;
+            font-style: italic;
+            color: #555;
+            line-height: 1.6;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2ecc71;
+        }
+
         .turn-indicator {
             background: linear-gradient(135deg, #3498db, #2980b9);
             color: white;
@@ -27,8 +407,209 @@
             background: linear-gradient(135deg, #2c3e50, #34495e);
         }
 
-        .position-summary {
-            display: none; /* Ocultamos el recuadro de posición inicial */
+        .keyword-section {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            border: 3px solid #e17055;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .keyword-section.locked {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            border-color: #7f8c8d;
+            opacity: 0.7;
+        }
+
+        .keyword-section.unlocked {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-color: #e17055;
+            opacity: 1;
+            animation: unlockAnimation 0.5s ease;
+        }
+
+        @keyframes unlockAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .keyword-input {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            width: 300px;
+            margin: 15px 0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .keyword-input:disabled {
+            background: #ecf0f1;
+            border-color: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .keyword-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+            transform: scale(1.05);
+        }
+
+        .keyword-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .keyword-btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .keyword-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .congratulations {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .congratulations-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            color: #2c3e50;
+        }
+
+        .congratulations h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+
+        .congratulations p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .celebration {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+
+        .unlock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #27ae60;
+            animation: spin 1s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .problem-title {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        @media (max-width: 768px) {
+            .problem-selection {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .problem-card {
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            
+            .square {
+                font-size: 25px;
+            }
+            
+            .file-coordinates {
+                width: 320px;
+            }
+            
+            .rank-coordinates {
+                height: 320px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .keyword-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .keyword-btn {
+                width: 100%;
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -563,149 +1144,17 @@
             const piece = state.currentPosition[row][col];
             if (!piece || !isWhitePiece(piece)) return;
 
-            switch (piece.toUpperCase()) {
-                case 'P': // Peón
-                    calculatePawnMoves(problemNumber, row, col, piece);
-                    break;
-                case 'R': // Torre
-                    calculateRookMoves(problemNumber, row, col);
-                    break;
-                case 'N': // Caballo
-                    calculateKnightMoves(problemNumber, row, col);
-                    break;
-                case 'B': // Alfil
-                    calculateBishopMoves(problemNumber, row, col);
-                    break;
-                case 'Q': // Dama
-                    calculateQueenMoves(problemNumber, row, col);
-                    break;
-                case 'K': // Rey
-                    calculateKingMoves(problemNumber, row, col);
-                    break;
-            }
-        }
-
-        function calculatePawnMoves(problemNumber, row, col, piece) {
-            const state = gameStates[problemNumber];
-            const direction = isWhitePiece(piece) ? -1 : 1; // Blancas hacia arriba, negras hacia abajo
-            
-            // Movimiento hacia adelante
-            const forwardRow = row + direction;
-            if (forwardRow >= 0 && forwardRow < 8 && !state.currentPosition[forwardRow][col]) {
-                state.validMoves.push({ from: { row, col }, to: { row: forwardRow, col } });
-                
-                // Primer movimiento (dos casillas)
-                if ((isWhitePiece(piece) && row === 6) || (!isWhitePiece(piece) && row === 1)) {
-                    const doubleRow = row + 2 * direction;
-                    if (!state.currentPosition[doubleRow][col]) {
-                        state.validMoves.push({ from: { row, col }, to: { row: doubleRow, col } });
-                    }
-                }
-            }
-            
-            // Capturas diagonales
-            const captureCols = [col - 1, col + 1];
-            for (const captureCol of captureCols) {
-                if (captureCol >= 0 && captureCol < 8) {
-                    const captureRow = row + direction;
-                    const targetPiece = state.currentPosition[captureRow][captureCol];
-                    if (targetPiece && !isWhitePiece(targetPiece)) {
-                        state.validMoves.push({ from: { row, col }, to: { row: captureRow, col: captureCol } });
-                    }
-                }
-            }
-        }
-
-        function calculateRookMoves(problemNumber, row, col) {
-            calculateLinearMoves(problemNumber, row, col, [
-                { dr: -1, dc: 0 }, // arriba
-                { dr: 1, dc: 0 },  // abajo
-                { dr: 0, dc: -1 }, // izquierda
-                { dr: 0, dc: 1 }   // derecha
-            ]);
-        }
-
-        function calculateBishopMoves(problemNumber, row, col) {
-            calculateLinearMoves(problemNumber, row, col, [
-                { dr: -1, dc: -1 }, // arriba-izquierda
-                { dr: -1, dc: 1 },  // arriba-derecha
-                { dr: 1, dc: -1 },  // abajo-izquierda
-                { dr: 1, dc: 1 }    // abajo-derecha
-            ]);
-        }
-
-        function calculateQueenMoves(problemNumber, row, col) {
-            calculateRookMoves(problemNumber, row, col);
-            calculateBishopMoves(problemNumber, row, col);
-        }
-
-        function calculateKnightMoves(problemNumber, row, col) {
-            const state = gameStates[problemNumber];
-            const knightMoves = [
-                { dr: -2, dc: -1 }, { dr: -2, dc: 1 },
-                { dr: -1, dc: -2 }, { dr: -1, dc: 2 },
-                { dr: 1, dc: -2 }, { dr: 1, dc: 2 },
-                { dr: 2, dc: -1 }, { dr: 2, dc: 1 }
-            ];
-            
-            for (const move of knightMoves) {
-                const newRow = row + move.dr;
-                const newCol = col + move.dc;
-                
-                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                    const targetPiece = state.currentPosition[newRow][newCol];
+            // Para simplificar, permitimos cualquier movimiento a casillas vacías o con piezas negras
+            // En una implementación real, aquí irían las reglas específicas de cada pieza
+            for (let toRow = 0; toRow < 8; toRow++) {
+                for (let toCol = 0; toCol < 8; toCol++) {
+                    const targetPiece = state.currentPosition[toRow][toCol];
                     if (!targetPiece || !isWhitePiece(targetPiece)) {
-                        state.validMoves.push({ from: { row, col }, to: { row: newRow, col: newCol } });
+                        state.validMoves.push({
+                            from: { row, col },
+                            to: { row: toRow, col: toCol }
+                        });
                     }
-                }
-            }
-        }
-
-        function calculateKingMoves(problemNumber, row, col) {
-            const state = gameStates[problemNumber];
-            const kingMoves = [
-                { dr: -1, dc: -1 }, { dr: -1, dc: 0 }, { dr: -1, dc: 1 },
-                { dr: 0, dc: -1 }, { dr: 0, dc: 1 },
-                { dr: 1, dc: -1 }, { dr: 1, dc: 0 }, { dr: 1, dc: 1 }
-            ];
-            
-            for (const move of kingMoves) {
-                const newRow = row + move.dr;
-                const newCol = col + move.dc;
-                
-                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
-                    const targetPiece = state.currentPosition[newRow][newCol];
-                    if (!targetPiece || !isWhitePiece(targetPiece)) {
-                        state.validMoves.push({ from: { row, col }, to: { row: newRow, col: newCol } });
-                    }
-                }
-            }
-        }
-
-        function calculateLinearMoves(problemNumber, row, col, directions) {
-            const state = gameStates[problemNumber];
-            
-            for (const direction of directions) {
-                let currentRow = row + direction.dr;
-                let currentCol = col + direction.dc;
-                
-                while (currentRow >= 0 && currentRow < 8 && currentCol >= 0 && currentCol < 8) {
-                    const targetPiece = state.currentPosition[currentRow][currentCol];
-                    
-                    if (!targetPiece) {
-                        // Casilla vacía
-                        state.validMoves.push({ from: { row, col }, to: { row: currentRow, col: currentCol } });
-                    } else {
-                        // Hay una pieza
-                        if (!isWhitePiece(targetPiece)) {
-                            // Pieza enemiga - se puede capturar
-                            state.validMoves.push({ from: { row, col }, to: { row: currentRow, col: currentCol } });
-                        }
-                        break; // No se puede saltar sobre piezas
-                    }
-                    
-                    currentRow += direction.dr;
-                    currentCol += direction.dc;
                 }
             }
         }
