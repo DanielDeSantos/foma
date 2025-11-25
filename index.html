@@ -397,6 +397,7 @@
             text-align: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             border: 2px solid white;
+            transition: all 0.3s ease;
         }
 
         .turn-indicator.white {
@@ -405,6 +406,10 @@
 
         .turn-indicator.black {
             background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        .turn-indicator.hidden {
+            display: none;
         }
 
         .keyword-section {
@@ -1054,7 +1059,8 @@
                 playerMoves: [],
                 gameCompleted: false,
                 keywordVerified: false,
-                isWhiteTurn: true
+                isWhiteTurn: true,
+                firstMoveMade: false
             };
             
             createBoard(problemNumber);
@@ -1128,8 +1134,8 @@
             const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
             squareElement.classList.add('selected');
             
-            // Calcular movimientos válidos SOLO para la pieza correcta en el movimiento actual
-            calculateValidMovesForCurrentTurn(problemNumber, row, col);
+            // Calcular movimientos válidos según las reglas del ajedrez
+            calculateValidMoves(problemNumber, row, col);
             
             state.validMoves.forEach(move => {
                 const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
@@ -1137,22 +1143,24 @@
             });
         }
 
-        function calculateValidMovesForCurrentTurn(problemNumber, row, col) {
+        function calculateValidMoves(problemNumber, row, col) {
             const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
             state.validMoves = [];
             
-            // Solo mostrar movimientos válidos para la pieza que debe moverse en el turno actual
-            if (state.currentMoveIndex < problem.solution.length) {
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                
-                // Verificar si esta es la pieza que debe moverse en este turno
-                if (row === expectedMove.from.row && col === expectedMove.from.col) {
-                    // Solo mostrar el movimiento correcto como válido
-                    state.validMoves.push({
-                        from: { row, col },
-                        to: { row: expectedMove.to.row, col: expectedMove.to.col }
-                    });
+            const piece = state.currentPosition[row][col];
+            if (!piece || !isWhitePiece(piece)) return;
+
+            // Permitir mover a cualquier casilla vacía o que contenga pieza negra
+            for (let toRow = 0; toRow < 8; toRow++) {
+                for (let toCol = 0; toCol < 8; toCol++) {
+                    const targetPiece = state.currentPosition[toRow][toCol];
+                    // Permitir mover a casillas vacías o que contengan piezas negras
+                    if (!targetPiece || !isWhitePiece(targetPiece)) {
+                        state.validMoves.push({
+                            from: { row, col },
+                            to: { row: toRow, col: toCol }
+                        });
+                    }
                 }
             }
         }
@@ -1174,6 +1182,13 @@
                     to: { row: toRow, col: toCol },
                     captured: targetPiece
                 });
+                
+                // Marcar que se hizo el primer movimiento
+                if (!state.firstMoveMade) {
+                    state.firstMoveMade = true;
+                    // Ocultar el indicador de turno después del primer movimiento
+                    document.getElementById(`turn-indicator${problemNumber}`).classList.add('hidden');
+                }
                 
                 // Verificar si el movimiento es correcto según la solución
                 const expectedMove = problem.solution[state.currentMoveIndex];
@@ -1246,12 +1261,13 @@
             const state = gameStates[problemNumber];
             const indicator = document.getElementById(`turn-indicator${problemNumber}`);
             
-            if (state.isWhiteTurn) {
-                indicator.textContent = "Turno actual: BLANCAS";
+            // Solo mostrar el indicador en la posición inicial (antes del primer movimiento)
+            if (!state.firstMoveMade && state.isWhiteTurn) {
+                indicator.textContent = "Primer movimiento: BLANCAS";
                 indicator.className = "turn-indicator white";
+                indicator.classList.remove('hidden');
             } else {
-                indicator.textContent = "Turno actual: NEGRAS";
-                indicator.className = "turn-indicator black";
+                indicator.classList.add('hidden');
             }
         }
 
@@ -1445,6 +1461,7 @@
             state.gameCompleted = false;
             state.keywordVerified = false;
             state.isWhiteTurn = true;
+            state.firstMoveMade = false;
             createBoard(problemNumber);
             updateKeywordSection(problemNumber);
             updateTurnIndicator(problemNumber);
