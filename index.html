@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Competición de Ajedrez - Problemas de Mate</title>
     <style>
+        /* Todos los estilos se mantienen igual */
         * {
             margin: 0;
             padding: 0;
@@ -696,29 +697,44 @@
             1: {
                 name: "Mate con Peones y Alfiles",
                 initialPosition: [
-                    ['', '', '', '', 'b', '', '', ''],
-                    ['', '', 'p', '', 'B', '', 'p', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', 'P', '', '', 'p', 'P', ''],
-                    ['', 'P', '', 'P', '', 'P', '', 'P'],
-                    ['', '', 'p', '', 'K', '', 'p', ''],
-                    ['', '', 'P', '', 'B', '', 'P', ''],
-                    ['', '', '', '', 'k', '', '', '']
+                    // Fila 0 (8 en ajedrez) - a b c d e f g h
+                    ['', '', '', '', 'b', '', '', ''],  // a8 b8 c8 d8 e8 f8 g8 h8
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', 'p', '', 'B', '', 'p', ''],  // a7 b7 c7 d7 e7 f7 g7 h7
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', '', '', '', '', ''],     // a6 b6 c6 d6 e6 f6 g6 h6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', 'P', '', '', 'p', 'P', ''],  // a5 b5 c5 d5 e5 f5 g5 h5
+                    // Fila 4 (4 en ajedrez)
+                    ['', 'P', '', 'P', '', 'P', '', 'P'], // a4 b4 c4 d4 e4 f4 g4 h4
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', 'p', '', 'K', '', 'p', ''],  // a3 b3 c3 d3 e3 f3 g3 h3
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', 'P', '', 'B', '', 'P', ''],  // a2 b2 c2 d2 e2 f2 g2 h2
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', 'k', '', '', '']     // a1 b1 c1 d1 e1 f1 g1 h1
                 ],
                 solution: [
                     { 
+                        // Movimiento 1: Peón g5-g6 (fila 3, col 6 -> fila 2, col 6)
                         white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } },
+                        // Peón c7-c6 (fila 1, col 2 -> fila 2, col 2)
                         black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }
                     },
                     { 
+                        // Movimiento 2: Peón h4-h5 (fila 4, col 7 -> fila 3, col 7)
                         white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } },
+                        // Alfil e8-d7 (fila 0, col 4 -> fila 1, col 3)
                         black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }
                     },
                     { 
+                        // Movimiento 3: Alfil e7-h4 (fila 1, col 4 -> fila 4, col 7)
                         white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } },
+                        // Alfil d7-c8 (fila 1, col 3 -> fila 0, col 2)
                         black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }
                     },
                     { 
+                        // Movimiento 4: Alfil h4xg3++ (fila 4, col 7 -> fila 5, col 6)
                         white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } },
                         black: null
                     }
@@ -727,29 +743,44 @@
             2: {
                 name: "Mate con Caballos y Alfil",
                 initialPosition: [
-                    ['', '', 'k', '', '', '', '', ''],
+                    // Fila 0 (8 en ajedrez)
+                    ['', '', 'k', '', '', '', '', ''],  // Rey negro en c8
+                    // Fila 1 (7 en ajedrez)
                     ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', 'K', '', '', ''],
-                    ['', '', '', 'N', 'B', '', '', ''],
-                    ['', '', '', '', 'N', '', '', ''],
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', '', 'K', '', '', ''],  // Rey blanco en e6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', '', 'N', 'B', '', '', ''], // Caballo en d5, Alfil en e5
+                    // Fila 4 (4 en ajedrez)
+                    ['', '', '', '', 'N', '', '', ''],  // Caballo en e4
+                    // Fila 5 (3 en ajedrez)
                     ['', '', '', '', '', '', '', ''],
+                    // Fila 6 (2 en ajedrez)
                     ['', '', '', '', '', '', '', ''],
+                    // Fila 7 (1 en ajedrez)
                     ['', '', '', '', '', '', '', '']
                 ],
                 solution: [
                     { 
+                        // Caballo e4-c5 (fila 4, col 4 -> fila 3, col 2)
                         white: { from: { row: 4, col: 4 }, to: { row: 3, col: 2 } },
+                        // Rey c8-d8 (fila 0, col 2 -> fila 0, col 3)
                         black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }
                     },
                     { 
+                        // Rey e6-f7 (fila 2, col 4 -> fila 1, col 5)
                         white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } },
+                        // Rey d8-c8 (fila 0, col 3 -> fila 0, col 2)
                         black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } }
                     },
                     { 
+                        // Caballo d5-b6+ (fila 3, col 3 -> fila 2, col 1)
                         white: { from: { row: 3, col: 3 }, to: { row: 2, col: 1 } },
+                        // Rey c8-d8 (fila 0, col 2 -> fila 0, col 3)
                         black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }
                     },
                     { 
+                        // Caballo c5-e6++ (fila 3, col 2 -> fila 2, col 4)
                         white: { from: { row: 3, col: 2 }, to: { row: 2, col: 4 } },
                         black: null
                     }
@@ -758,29 +789,44 @@
             3: {
                 name: "Mate con Sacrificios",
                 initialPosition: [
-                    ['', 'n', '', 'b', '', 'r', 'k', ''],
-                    ['', '', 'p', 'p', '', '', '', 'p'],
-                    ['', '', '', 'p', '', '', 'p', 'Q'],
-                    ['', '', '', 'R', '', 'p', '', ''],
-                    ['', '', '', '', 'B', 'B', 'P', ''],
-                    ['', '', '', 'P', 'R', '', 'P', ''],
-                    ['', '', '', '', '', '', 'P', 'K'],
-                    ['', '', '', '', '', '', '', '']
+                    // Fila 0 (8 en ajedrez)
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],  // Caballo b8, Alfil d8, Torre f8, Rey g8
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', 'p', 'p', '', '', '', 'p'], // Peones c7, d7, h7
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', 'p', '', '', 'p', 'Q'],  // Peón d6, Peón g6, Dama h6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', '', 'R', '', 'p', '', ''],  // Torre d5, Peón f5
+                    // Fila 4 (4 en ajedrez)
+                    ['', '', '', '', 'B', 'B', 'P', ''], // Alfiles e4, f4; Peón g4
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', '', 'P', 'R', '', 'P', ''], // Peón d3; Torre e3; Peón g3
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', '', '', '', '', 'P', 'K'], // Peón g2; Rey h2
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', '', '', '', '']  // Vacío
                 ],
                 solution: [
                     { 
+                        // Torre d5xf5 (fila 3, col 3 -> fila 3, col 5)
                         white: { from: { row: 3, col: 3 }, to: { row: 3, col: 5 } },
+                        // Torre f8xf5 (fila 0, col 5 -> fila 3, col 5)
                         black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } }
                     },
                     { 
+                        // Alfil e4-d5+ (fila 4, col 4 -> fila 3, col 3)
                         white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } },
+                        // Torre f5xd5 (fila 3, col 5 -> fila 3, col 3)
                         black: { from: { row: 3, col: 5 }, to: { row: 3, col: 3 } }
                     },
                     { 
+                        // Torre e3-e8+ (fila 5, col 4 -> fila 0, col 4)
                         white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } },
+                        // Rey g8-f7 (fila 0, col 6 -> fila 1, col 5)
                         black: { from: { row: 0, col: 6 }, to: { row: 1, col: 5 } }
                     },
                     { 
+                        // Dama h6-f8++ (fila 2, col 7 -> fila 0, col 5)
                         white: { from: { row: 2, col: 7 }, to: { row: 0, col: 5 } },
                         black: null
                     }
@@ -934,6 +980,7 @@
             const piece = state.currentPosition[fromRow][fromCol];
             const targetPiece = state.currentPosition[toRow][toCol];
             
+            // Mover la pieza
             state.currentPosition[toRow][toCol] = piece;
             state.currentPosition[fromRow][fromCol] = '';
             
@@ -966,6 +1013,7 @@
                         document.getElementById(`status${problemNumber}`).className = "status success";
                         unlockKeywordSection(problemNumber);
                     } else {
+                        // Movimiento inmediato de las negras
                         makeBlackMove(problemNumber);
                     }
                 } else {
@@ -991,6 +1039,7 @@
                     const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
                     
                     if (piece) {
+                        // Mover la pieza negra
                         state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
                         state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
                         
