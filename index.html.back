@@ -3,277 +3,607 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal de Ciberseguridad</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Protocolo de Cifrado - Selección de Misión</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Paleta de colores Cyberpunk Verde */
-            --bg-main: #050505;
+            --bg-body: #050505;
             --bg-panel: #0a0a0a;
-            --primary-green: #00ff41; /* Verde Terminal Clásico */
-            --secondary-green: #008f11; /* Verde más oscuro */
-            --text-dim: #32a852;
-            --border-color: #00ff41;
-            --glow-spread: 10px;
+            --primary: #00ff41; /* Verde Matrix */
+            --primary-dim: rgba(0, 255, 65, 0.1);
+            --danger: #ff003c;
+            --text-main: #e0e0e0;
+            --border: #333;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Share Tech Mono', monospace;
-            background-color: var(--bg-main);
-            color: var(--primary-green);
-            min-height: 100vh;
-            padding: 20px;
-            
-            /* Efecto sutil de líneas de escaneo CRT */
-            background-image: linear-gradient(
-                rgba(0, 255, 65, 0.02) 1px, 
-                transparent 1px
-            );
-            background-size: 100% 4px;
-        }
-
-        /* Efecto de parpadeo del cursor */
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* Header estilo terminal */
-        header {
-            margin-bottom: 40px;
-            border-bottom: 2px solid var(--primary-green);
-            padding-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 var(--glow-spread) var(--primary-green);
-        }
-
-        h1::before {
-            content: ">_ ";
-        }
-
-        h1::after {
-            content: "|";
-            animation: blink 1s infinite;
-        }
-
-        .status-bar {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            overflow-x: hidden;
             display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-            color: var(--text-dim);
+            flex-direction: column;
         }
 
-        /* Grid de problemas */
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        /* Tarjeta de Problema */
-        .problem-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            position: relative;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        /* Efecto Hover */
-        .problem-card:hover {
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), inset 0 0 10px rgba(0, 255, 65, 0.2);
-            transform: translateY(-5px);
-            background-color: #0f0f0f;
-        }
-
-        /* Decoración de esquina superior izquierda */
-        .problem-card::before {
-            content: '';
+        /* EFECTO CRT */
+        body::before {
+            content: " ";
+            display: block;
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-top: 30px solid var(--primary-green);
-            border-right: 30px solid transparent;
-            opacity: 0.7;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
         }
 
-        .card-header {
+        header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px dashed var(--secondary-green);
-            padding-bottom: 10px;
+            background: var(--bg-panel);
+            position: relative;
+            z-index: 3;
         }
 
-        .problem-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-shadow: 0 0 5px var(--primary-green);
+        h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
+
+        /* PANTALLAS (Vistas) */
+        .screen {
+            display: none;
+            flex-grow: 1;
+            position: relative;
+            z-index: 3;
+            padding: 2rem;
+            animation: fadeIn 0.5s;
+        }
+        .screen.active { display: flex; }
+
+        /* VISTA 1: SELECCIÓN DE MISIONES (GRID) */
+        #mission-select-screen {
+            flex-direction: column;
+            align-items: center;
         }
 
-        .difficulty {
-            font-size: 0.8rem;
-            color: var(--bg-main);
-            background-color: var(--primary-green);
-            padding: 2px 8px;
-            font-weight: bold;
-        }
-
-        .problem-desc {
-            color: var(--text-dim);
-            margin-bottom: 20px;
-            line-height: 1.4;
-        }
-
-        .tech-data {
-            font-size: 0.75rem;
-            color: var(--secondary-green);
-            margin-top: auto;
-        }
-        
-        /* Botón de acción */
-        .btn-access {
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
             width: 100%;
-            padding: 10px;
-            background: transparent;
-            border: 1px solid var(--primary-green);
-            color: var(--primary-green);
-            font-family: 'Share Tech Mono', monospace;
-            text-transform: uppercase;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        .mission-card {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 2rem;
+            position: relative;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        .mission-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-dim);
+            transform: translateY(-5px);
+        }
+
+        .mission-card::before {
+            content: "CONFIDENTIAL";
+            position: absolute;
+            top: 20px; right: -30px;
+            background: var(--danger);
+            color: black;
+            font-size: 0.7rem;
+            padding: 5px 30px;
+            transform: rotate(45deg);
             font-weight: bold;
         }
 
-        .btn-access:hover {
-            background: var(--primary-green);
-            color: var(--bg-main);
-            box-shadow: 0 0 15px var(--primary-green);
+        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); }
+        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; }
+        .mission-desc { color: #888; font-size: 0.9rem; line-height: 1.4; }
+        
+        /* VISTA 2: INTERFAZ DE JUEGO */
+        #game-interface {
+            display: none; /* Controlado por JS */
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            height: 100%;
+            padding: 0;
+        }
+        #game-interface.active { display: grid; }
+
+        /* TABLERO */
+        .board-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #080808;
+            position: relative;
         }
 
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 70px);
+            grid-template-rows: repeat(8, 70px);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+        }
+
+        .square {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 45px; cursor: pointer;
+        }
+
+        .light { background-color: #0f2615; color: var(--primary); }
+        .dark { background-color: #030f06; color: var(--primary); }
+        
+        .square:hover { box-shadow: inset 0 0 15px var(--primary); }
+        .selected { background-color: rgba(255, 255, 0, 0.2) !important; }
+        .last-move { background-color: rgba(255, 255, 255, 0.1) !important; }
+
+        /* PANEL LATERAL */
+        .side-panel {
+            background: #0a0a0a;
+            border-left: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 1rem;
+            align-self: flex-start;
+        }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .terminal-log {
+            background: #000;
+            border: 1px solid #333;
+            flex-grow: 1;
+            max-height: 300px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #aaa;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+        .log-entry { margin-bottom: 5px; }
+        .log-entry::before { content: "> "; color: var(--primary); }
+
+        /* INPUT SEGURO */
+        .cipher-box {
+            border: 2px dashed #444;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.5s;
+        }
+        .cipher-box.unlocked {
+            border-color: var(--primary);
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .cipher-input {
+            width: 100%;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            padding: 1rem;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .cipher-input:disabled { background: #080808; color: #444; cursor: not-allowed; }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: black;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-submit:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+        /* OVERLAYS */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 10;
+            backdrop-filter: blur(5px);
+        }
+        .overlay.active { display: flex; }
+
+        .data-packet {
+            border: 2px solid var(--primary);
+            padding: 2rem;
+            background: #000;
+            text-align: center;
+            max-width: 500px;
+            animation: glitch 0.3s;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes glitch { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-2px, -2px); } 40% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            #game-interface { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
+            .square { font-size: 30px; }
+            .side-panel { padding: 1rem; }
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Sistema de Desafíos</h1>
-        <div class="status-bar">
-            <span>USUARIO: ROOT</span>
-            <span>ESTADO DE RED: SEGURO</span>
-            <span>NODOS ACTIVOS: 6</span>
-        </div>
+        <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
+        <div style="font-size: 0.8rem; color: #666;">SYS_ADMIN_ACCESS: <span style="color:var(--danger)">RESTRICTED</span></div>
     </header>
 
-    <main class="problem-grid">
+    <div id="mission-select-screen" class="screen active">
+        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1200px;">
+            // SELECCIONAR_VECTOR_DE_ATAQUE
+        </h2>
+        
+        <div class="mission-grid">
+            <div class="mission-card" onclick="loadMission(1)">
+                <div class="mission-icon">♟️</div>
+                <div class="mission-title">ARCHIVO 01: PEÓN</div>
+                <div class="mission-desc">
+                    Intercepta la comunicación enemiga utilizando una estructura de peones. 
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                </div>
+            </div>
 
-        <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 1</div>
-                <span class="difficulty">FÁCIL</span>
+            <div class="mission-card" onclick="loadMission(2)">
+                <div class="mission-icon">♞</div>
+                <div class="mission-title">ARCHIVO 02: INCURSIÓN</div>
+                <div class="mission-desc">
+                    Hackea el servidor central mediante una maniobra de caballería ligera.
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                </div>
             </div>
-            <div class="problem-desc">
-                <p>Inyección SQL básica detectada en el portal de login. Bypass requerido.</p>
+
+            <div class="mission-card" onclick="loadMission(3)">
+                <div class="mission-icon">💥</div>
+                <div class="mission-title">ARCHIVO 03: SACRIFICIO</div>
+                <div class="mission-desc">
+                    Sobrecarga el sistema con un sacrificio de material pesado.
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                </div>
             </div>
-            <div class="tech-data">
-                HASH: 0x4A7F2...<br>
-                PUERTO: 8080 [ABIERTO]
+        </div>
+    </div>
+
+    <div id="game-interface" class="screen">
+        <div class="board-area">
+            <div id="board" class="board"></div>
+
+            <div id="victory-overlay" class="overlay">
+                <div class="data-packet">
+                    <h2 style="color: white; margin-bottom: 15px;">ACCESO AL NÚCLEO CONCEDIDO</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Hash desencriptado:</p>
+                    <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
+                    <p style="font-size: 0.8rem; color: var(--danger); margin-bottom: 20px;">[ ! ] COPIA EL HASH Y ÚSALO EN EL PANEL LATERAL.</p>
+                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
+                </div>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
         </div>
 
-        <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 2</div>
-                <span class="difficulty">MEDIO</span>
+        <div class="side-panel">
+            <button class="back-btn" onclick="returnToMenu()">← ABORTAR MISIÓN</button>
+            
+            <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
+            <div id="terminal" class="terminal-log">
+                <div class="log-entry">Esperando conexión...</div>
             </div>
-            <div class="problem-desc">
-                <p>El servidor utiliza un cifrado César débil para las comunicaciones internas. Descifrar el mensaje.</p>
+
+            <div style="flex-grow: 1;"></div>
+            <div id="cipher-box" class="cipher-box">
+                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
+                
+                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">
+                    Jaque Mate requerido para desbloquear la entrada de datos.
+                </p>
+                
+                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
+                <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
             </div>
-            <div class="tech-data">
-                CIFRADO: ROT13<br>
-                DATA_STREAM: ENCRIPTADO
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
         </div>
+    </div>
 
-        <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 3</div>
-                <span class="difficulty">MEDIO</span>
-            </div>
-            <div class="problem-desc">
-                <p>Análisis forense de memoria. Encontrar la clave privada RSA oculta en el dump hexadecimal.</p>
-            </div>
-            <div class="tech-data">
-                TIPO: MEMORY_DUMP<br>
-                TAMAÑO: 512MB
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
-        </div>
+    <script>
+        // --- DATOS DE LAS MISIONES ---
+        const missions = {
+            1: {
+                initial: [
+                    ['', '', '', '', 'b', '', '', ''],
+                    ['', '', 'p', '', 'B', '', 'p', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', 'P', '', '', 'p', 'P', ''],
+                    ['', 'P', '', 'P', '', 'P', '', 'P'],
+                    ['', '', 'p', '', 'K', '', 'p', ''],
+                    ['', '', 'P', '', 'B', '', 'P', ''],
+                    ['', '', '', '', 'k', '', '', '']
+                ],
+                solutionMoves: [
+                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, // 1. g6 c6
+                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, // 2. h5 Ad7
+                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, // 3. Ah4 Ac8
+                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }                         // 4. Axg3++
+                ],
+                fakeHash: "A-X-Q-B-V", // Lo que se muestra al ganar
+                answer: "AXQBV"        // Lo que el usuario debe escribir
+            },
+            2: {
+                initial: [
+                    ['', '', 'k', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', 'K', '', '', ''],
+                    ['', '', '', 'N', 'B', '', '', ''],
+                    ['', '', '', '', 'N', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                solutionMoves: [
+                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
+                ],
+                fakeHash: "C-A-B-A-L-L-O",
+                answer: "CABALLO"
+            },
+            3: {
+                initial: [
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],
+                    ['', '', 'p', 'p', '', '', '', 'p'],
+                    ['', '', '', 'p', '', '', 'p', 'Q'],
+                    ['', '', '', 'R', '', 'p', '', ''],
+                    ['', '', '', '', 'B', 'B', 'P', ''],
+                    ['', '', '', 'P', 'R', '', 'P', ''],
+                    ['', '', '', '', '', '', 'P', 'K'],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                solutionMoves: [
+                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
+                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
+                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
+                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
+                ],
+                fakeHash: "S-A-C-R-I-F-I-C-I-O",
+                answer: "SACRIFICIO"
+            }
+        };
 
-        <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 4</div>
-                <span class="difficulty">DIFÍCIL</span>
-            </div>
-            <div class="problem-desc">
-                <p>Desbordamiento de búfer (Buffer Overflow) en el servicio FTP. Obtener una shell remota.</p>
-            </div>
-            <div class="tech-data">
-                ARQUITECTURA: x86<br>
-                ASLR: ACTIVADO
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
-        </div>
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
+        
+        // ESTADO GLOBAL
+        let currentMissionId = 1;
+        let gameState = {
+            position: [],
+            moveIdx: 0,
+            selection: null,
+            locked: false
+        };
 
-         <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 5</div>
-                <span class="difficulty">FÁCIL</span>
-            </div>
-            <div class="problem-desc">
-                <p>Rastreo de paquetes de red. Identificar la IP de origen del ataque DDoS.</p>
-            </div>
-            <div class="tech-data">
-                PROTOCOLO: TCP/UDP<br>
-                TRÁFICO: SATURADO
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
-        </div>
+        // --- NAVEGACIÓN ---
+        function loadMission(id) {
+            currentMissionId = id;
+            document.getElementById('mission-select-screen').classList.remove('active');
+            document.getElementById('game-interface').classList.add('active');
+            
+            // Reiniciar juego
+            gameState.position = JSON.parse(JSON.stringify(missions[id].initial));
+            gameState.moveIdx = 0;
+            gameState.selection = null;
+            gameState.locked = false;
+            
+            // Bloquear input
+            lockInput();
+            document.getElementById('terminal').innerHTML = '<div class="log-entry">Inicializando protocolo de misión...</div>';
+            document.getElementById('victory-overlay').classList.remove('active');
+            
+            drawBoard();
+        }
 
-        <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 6</div>
-                <span class="difficulty">EXTREMO</span>
-            </div>
-            <div class="problem-desc">
-                <p>Ingeniería inversa de un malware tipo Ransomware. Crear un descifrador.</p>
-            </div>
-            <div class="tech-data">
-                TARGET: KERNEL_MODE<br>
-                OBFUSCACIÓN: ALTA
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
-        </div>
+        function returnToMenu() {
+            document.getElementById('game-interface').classList.remove('active');
+            document.getElementById('mission-select-screen').classList.add('active');
+        }
 
-    </main>
+        // --- LÓGICA DE JUEGO ---
+        function drawBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    
+                    const p = gameState.position[r][c];
+                    if(p) {
+                        sq.innerText = pieces[p];
+                        sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
+                        sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
+                    }
+                    
+                    sq.onclick = () => handleSquare(r, c);
+                    
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
+                        sq.classList.add('selected');
+                    }
+                    
+                    board.appendChild(sq);
+                }
+            }
+        }
 
+        function handleSquare(r, c) {
+            if(gameState.locked) return;
+            
+            const p = gameState.position[r][c];
+            // Seleccionar blancas
+            if(p && p === p.toUpperCase()) {
+                gameState.selection = {r, c};
+                drawBoard();
+                return;
+            }
+            
+            // Mover
+            if(gameState.selection) {
+                const solution = missions[currentMissionId].solutionMoves;
+                // Verificar si quedan movimientos
+                if (gameState.moveIdx >= solution.length) return;
+
+                const correctMove = solution[gameState.moveIdx].w;
+                
+                // Verificar si el movimiento es correcto
+                if(correctMove.f.r === gameState.selection.r && correctMove.f.c === gameState.selection.c &&
+                   correctMove.t.r === r && correctMove.t.c === c) {
+                    
+                    executeMove(gameState.selection, {r, c}, true);
+                    
+                } else {
+                    log("Movimiento inválido. Protocolo fallido.", true);
+                    gameState.selection = null;
+                    drawBoard();
+                }
+            }
+        }
+
+        function executeMove(from, to, isPlayer) {
+            const p = gameState.position[from.r][from.c];
+            gameState.position[to.r][to.c] = p;
+            gameState.position[from.r][from.c] = '';
+            
+            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`);
+            
+            gameState.selection = null;
+            drawBoard();
+            
+            if(isPlayer) {
+                const step = missions[currentMissionId].solutionMoves[gameState.moveIdx];
+                if(!step.b) {
+                    // JAQUE MATE
+                    setTimeout(missionComplete, 500);
+                } else {
+                    // Turno CPU
+                    gameState.locked = true;
+                    setTimeout(() => {
+                        executeMove(step.b.f, step.b.t, false);
+                        gameState.moveIdx++;
+                        gameState.locked = false;
+                    }, 800);
+                }
+            }
+        }
+
+        function missionComplete() {
+            log("AMENAZA NEUTRALIZADA. OBTENIENDO HASH...", false, true);
+            const mission = missions[currentMissionId];
+            
+            document.getElementById('hash-display').innerText = mission.fakeHash;
+            document.getElementById('victory-overlay').classList.add('active');
+            
+            unlockInput();
+        }
+
+        function closeOverlay() {
+            document.getElementById('victory-overlay').classList.remove('active');
+        }
+
+        // --- SISTEMA DE INPUT ---
+        function lockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.remove('unlocked');
+            inp.disabled = true;
+            inp.value = '';
+            inp.placeholder = "ACCESO DENEGADO";
+            btn.disabled = true;
+            status.innerText = "🔒 INPUT BLOQUEADO";
+            status.style.color = "#666";
+            document.getElementById('feedback-msg').innerText = '';
+        }
+
+        function unlockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.add('unlocked');
+            inp.disabled = false;
+            inp.placeholder = "INTRODUZCA HASH";
+            inp.focus();
+            btn.disabled = false;
+            status.innerText = "🔓 PUERTO ABIERTO";
+            status.style.color = "var(--primary)";
+        }
+
+        function verifySolution() {
+            const val = document.getElementById('solution-input').value.toUpperCase().replace(/-/g, '').trim();
+            const correct = missions[currentMissionId].answer;
+            const feedback = document.getElementById('feedback-msg');
+            
+            if(val === correct) {
+                feedback.innerText = "ACCESO CONCEDIDO.";
+                feedback.style.color = "var(--primary)";
+                log("Credencial verificada. Archivo guardado.", false, true);
+                setTimeout(() => {
+                    alert("¡Misión Cumplida! Volviendo al menú.");
+                    returnToMenu();
+                }, 1000);
+            } else {
+                feedback.innerText = "ERROR DE CREDENCIAL";
+                feedback.style.color = "var(--danger)";
+                log("Intento de inyección fallido.", true);
+            }
+        }
+
+        // --- UTILS ---
+        function log(msg, err=false, success=false) {
+            const t = document.getElementById('terminal');
+            const d = document.createElement('div');
+            d.className = 'log-entry';
+            d.innerText = msg;
+            if(err) d.style.color = 'var(--danger)';
+            if(success) d.style.color = 'var(--primary)';
+            t.appendChild(d);
+            t.scrollTop = t.scrollHeight;
+        }
+
+        function coords(o) { return `${String.fromCharCode(97+o.c)}${8-o.r}`; }
+
+    </script>
 </body>
 </html>
