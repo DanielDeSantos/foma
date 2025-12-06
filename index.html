@@ -1,155 +1,817 @@
-// --- NIVELES (CONFIGURACIÓN DE AJEDREZ) ---
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Nivel - Ciberseguridad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-body: #050505;
+            --bg-panel: #0a0a0a;
+            --primary: #00ff41; 
+            --primary-dim: rgba(0, 255, 65, 0.1);
+            --danger: #ff003c;
+            --text-main: #e0e0e0;
+            --border: #333;
+            --valid-indicator: rgba(0, 255, 65, 0.6);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* EFECTO CRT */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-panel);
+            position: relative;
+            z-index: 3;
+        }
+
+        h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
+
+        /* PANTALLAS */
+        .screen {
+            display: none;
+            flex-grow: 1;
+            position: relative;
+            z-index: 3;
+            padding: 2rem;
+            animation: fadeIn 0.5s;
+        }
+        .screen.active { display: flex; }
+
+        /* MENU GRID */
+        #mission-select-screen {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1400px;
+            margin-top: 2rem;
+        }
+
+        /* TARJETAS */
+        .mission-card {
+            background: #000;
+            border: 1px solid var(--border);
+            padding: 2rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mission-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-dim);
+            transform: translateY(-5px);
+            background-image: 
+                linear-gradient(45deg, #051a05 25%, transparent 25%), 
+                linear-gradient(-45deg, #051a05 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #051a05 75%), 
+                linear-gradient(-45deg, transparent 75%, #051a05 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        .mission-card.solved {
+            border-color: var(--primary);
+            opacity: 0.8;
+        }
+
+        /* CINTA DE ESTADO */
+        .mission-card::before {
+            content: "NO SOLUCIONADO";
+            position: absolute;
+            top: 25px; 
+            right: -55px; 
+            width: 200px; 
+            background: var(--danger);
+            color: black;
+            font-size: 0.65rem;
+            padding: 5px 0;
+            text-align: center;
+            transform: rotate(45deg);
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+        
+        .mission-card.solved::before {
+            content: "SOLUCIONADO";
+            background: var(--primary);
+        }
+
+        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); text-shadow: 0 0 10px var(--primary-dim); }
+        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; font-weight: bold; }
+        .mission-desc { 
+            color: #888; font-size: 0.9rem; line-height: 1.4; font-family: 'Courier New', monospace; flex-grow: 1;
+        }
+        .mission-desc::before { content: "> "; color: var(--primary); }
+        
+        .mission-footer {
+            margin-top: 15px;
+            border-top: 1px dashed #333;
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* INTERFAZ DE JUEGO */
+        #game-interface {
+            display: none;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+            height: 100%;
+            padding: 0;
+        }
+        #game-interface.active { display: grid; }
+
+        .board-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #080808;
+            position: relative;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 70px);
+            grid-template-rows: repeat(8, 70px);
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+        }
+
+        .square {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 45px; cursor: pointer; position: relative;
+        }
+
+        .light { background-color: #0f2615; color: var(--primary); }
+        .dark { background-color: #030f06; color: var(--primary); }
+        
+        .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 15px var(--primary); }
+        
+        /* MOVIMIENTOS E INDICADORES */
+        .valid-move::after {
+            content: ''; position: absolute;
+            width: 18px; height: 18px;
+            background-color: var(--valid-indicator);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary);
+            pointer-events: none;
+        }
+        
+        .capture-move {
+            box-shadow: inset 0 0 15px var(--danger);
+        }
+        .capture-move::after {
+            content: ''; position: absolute;
+            width: 70%; height: 70%;
+            border: 2px dashed var(--danger);
+            box-sizing: border-box;
+            border-radius: 50%;
+            animation: spin 4s linear infinite;
+            pointer-events: none;
+        }
+
+        /* PANEL LATERAL */
+        .side-panel {
+            background: #0a0a0a;
+            border-left: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 1rem;
+            align-self: flex-start;
+        }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+        .terminal-log {
+            background: #000;
+            border: 1px solid #333;
+            flex-grow: 1;
+            max-height: 300px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #aaa;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+        .log-entry { margin-bottom: 5px; }
+        .log-entry::before { content: "> "; color: var(--primary); }
+        .log-entry.err { color: var(--danger); }
+        .log-entry.sys { color: var(--primary); }
+
+        /* INPUT */
+        .cipher-box {
+            border: 2px dashed #444;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.5s;
+        }
+        .cipher-box.unlocked {
+            border-color: var(--primary);
+            border-style: solid;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+        }
+
+        .cipher-input {
+            width: 100%; background: #111; border: 1px solid #333;
+            color: white; padding: 1rem;
+            font-family: 'Share Tech Mono', monospace; font-size: 1.2rem;
+            text-align: center; margin-bottom: 10px;
+        }
+        .cipher-input:disabled { background: #080808; color: #444; cursor: not-allowed; }
+
+        .btn-submit {
+            width: 100%; padding: 1rem;
+            background: var(--primary); color: black;
+            font-weight: bold; border: none; cursor: pointer;
+        }
+        .btn-submit:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+        /* OVERLAYS */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none; justify-content: center; align-items: center; z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+        .overlay.active { display: flex; }
+
+        .data-packet {
+            border: 2px solid var(--primary); padding: 2rem;
+            background: #000; text-align: center;
+            max-width: 500px; animation: glitch 0.3s;
+        }
+
+        /* ESTILOS PARA LA VENTANA DE ADVERTENCIA */
+        .btn-group {
+            display: flex; gap: 10px; margin-top: 20px;
+        }
+        .btn-cancel {
+            background: transparent; border: 1px solid var(--danger); color: var(--danger);
+            width: 100%; padding: 1rem; font-weight: bold; cursor: pointer; font-family: inherit;
+        }
+        .btn-cancel:hover { background: rgba(255, 0, 60, 0.1); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 900px) {
+            #game-interface { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
+            .square { font-size: 30px; }
+            .side-panel { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><span style="color:white">PRUEBA</span> DE NIVEL</h1>
+        <div style="font-size: 0.9rem; color: #666; font-weight: bold;">
+            ESTADO: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
+        </div>
+    </header>
+
+    <div id="mission-select-screen" class="screen active">
+        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
+            // SELECCIONA UN PROBLEMA
+        </h2>
+        
+        <div class="mission-grid">
+            <div id="card-1" class="mission-card" onclick="checkAndLoadMission(1)">
+                <div class="mission-icon">♟️</div>
+                <div class="mission-title">PROBLEMA 1</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
+                <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
+            </div>
+            
+            <div id="card-2" class="mission-card" onclick="checkAndLoadMission(2)">
+                <div class="mission-icon">♞</div>
+                <div class="mission-title">PROBLEMA 2</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
+                <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
+            </div>
+            
+            <div id="card-3" class="mission-card" onclick="checkAndLoadMission(3)">
+                <div class="mission-icon">♝</div>
+                <div class="mission-title">PROBLEMA 3</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
+                <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
+            </div>
+            
+            <div id="card-4" class="mission-card" onclick="checkAndLoadMission(4)">
+                <div class="mission-icon">♜</div>
+                <div class="mission-title">PROBLEMA 4</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
+                <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
+            </div>
+            
+            <div id="card-5" class="mission-card" onclick="checkAndLoadMission(5)">
+                <div class="mission-icon">♛</div>
+                <div class="mission-title">PROBLEMA 5</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
+                <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
+            </div>
+            
+            <div id="card-6" class="mission-card" onclick="checkAndLoadMission(6)">
+                <div class="mission-icon">♚</div>
+                <div class="mission-title">PROBLEMA 6</div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
+                <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-interface" class="screen">
+        <div class="board-area">
+            <div id="board" class="board"></div>
+            
+            <div id="victory-overlay" class="overlay">
+                <div class="data-packet">
+                    <h2 style="color: white; margin-bottom: 15px;">JAQUE MATE EJECUTADO</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Hash de victoria:</p>
+                    <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
+                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
+                </div>
+            </div>
+
+            <div id="success-overlay" class="overlay">
+                <div class="data-packet" style="border-color: var(--primary); box-shadow: 0 0 30px rgba(0,255,65,0.2);">
+                    <h2 id="success-title" style="color: var(--primary); margin-bottom: 15px;">...</h2>
+                    <p id="success-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
+                    <div id="success-icon" style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
+                    <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <button class="back-btn" onclick="returnToMenu()">← ABORTAR</button>
+            <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
+            <div id="terminal" class="terminal-log"><div class="log-entry">Analizando posición...</div></div>
+
+            <div style="flex-grow: 1;"></div>
+            <div id="cipher-box" class="cipher-box">
+                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
+                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">Jaque Mate requerido para desbloquear.</p>
+                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
+                <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="warning-overlay" class="overlay">
+        <div class="data-packet" style="border-color: var(--danger);">
+            <h2 id="warning-title" style="color: var(--danger); margin-bottom: 15px;">ATENCIÓN</h2>
+            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
+            <div class="btn-group">
+                <button class="btn-cancel" onclick="closeWarning()">CANCELAR</button>
+                <button class="btn-submit" id="btn-warning-confirm">CONTINUAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- NIVELES ---
         const levels = {
             1: {
-                initial: [
-                    ['', '', '', '', 'b', '', '', ''],
-                    ['', '', 'p', '', 'B', '', 'p', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', 'P', '', '', 'p', 'P', ''],
-                    ['', 'P', '', 'P', '', 'P', '', 'P'],
-                    ['', '', 'p', '', 'K', '', 'p', ''],
-                    ['', '', 'P', '', 'B', '', 'P', ''],
-                    ['', '', '', '', 'k', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
-                ],
+                initial: [['','','','','b','','',''],['','','p','','B','','p',''],['','','','','','','',''],['','','P','','','p','P',''],['','P','','P','','P','','P'],['','','p','','K','','p',''],['','','P','','B','','P',''],['','','','','k','','','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }],
                 fakeHash: "TWYTTERUPCEPSEVZ", answer: "AXQBVQXAÇÇXEUSRE"
             },
             2: {
-                initial: [
-                    ['', '', 'k', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', 'K', '', '', ''],
-                    ['', '', '', 'N', 'B', '', '', ''],
-                    ['', '', '', '', 'N', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
-                ],
+                initial: [['','','k','','','','',''],['','','','','','','',''],['','','','','K','','',''],['','','','N','B','','',''],['','','','','N','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','','']],
+                moves: [{ w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} }, { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }],
                 fakeHash: "KNIGHT-FORK-X", answer: "SECRET"
             },
             3: {
-                initial: [
-                    ['', 'n', '', 'b', '', 'r', 'k', ''],
-                    ['', '', 'p', 'p', '', '', '', 'p'],
-                    ['', '', '', 'p', '', '', 'p', 'Q'],
-                    ['', '', '', 'R', '', 'p', '', ''],
-                    ['', '', '', '', 'B', 'B', 'P', ''],
-                    ['', '', '', 'P', 'R', '', 'P', ''],
-                    ['', '', '', '', '', '', 'P', 'K'],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
-                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
-                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
-                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
-                ],
+                initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
+                moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
             },
             4: {
-                // Problema 4: Mate de Pasillo con Sacrificio de Dama
-                // Blancas: Dama d3, Torres d1, e1. Negras: Torre a8, Rey g8, Peones f7,g7,h7. Caballo f6, Dama d6 (bloqueadores).
-                initial: [
-                    ['r', '', '', '', '', '', 'k', ''], // 0 (Negras) - Torre a8, Rey g8
-                    ['p', 'p', 'p', '', '', 'n', 'p', 'p'], // 1 - Peones, caballo f6
-                    ['', '', '', 'q', '', '', '', ''], // 2 - Dama negra d6
-                    ['', '', '', '', '', '', '', ''], // 3
-                    ['', '', '', '', '', '', '', ''], // 4
-                    ['', '', '', 'Q', '', '', '', ''], // 5 - Dama blanca d3
-                    ['P', 'P', 'P', '', '', 'P', 'P', 'P'], // 6
-                    ['', '', '', 'R', 'R', '', 'K', '']  // 7 (Blancas) - Torres d1, e1
-                ],
-                moves: [
-                    // 1. Dd8+ (Sacrificio) -> Txd8
-                    { w: {f:{r:5,c:3}, t:{r:0,c:3}}, b: {f:{r:0,c:0}, t:{r:0,c:3}} }, 
-                    // 2. Txd8+ -> Ce8 (Bloqueo)
-                    { w: {f:{r:7,c:3}, t:{r:0,c:3}}, b: {f:{r:1,c:5}, t:{r:0,c:4}} }, 
-                    // 3. Txe8+ -> Df8 (Bloqueo)
-                    { w: {f:{r:0,c:3}, t:{r:0,c:4}}, b: {f:{r:2,c:3}, t:{r:0,c:5}} }, 
-                    // 4. Txf8++
-                    { w: {f:{r:0,c:4}, t:{r:0,c:5}}, b: null } 
-                ],
+                initial: [['r','','','','','','k',''],['p','p','p','','','n','p','p'],['','','','q','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','Q','','','',''],['P','P','P','','','P','P','P'],['','','','R','R','','K','']],
+                moves: [{ w: {f:{r:5,c:3}, t:{r:0,c:3}}, b: {f:{r:0,c:0}, t:{r:0,c:3}} }, { w: {f:{r:7,c:3}, t:{r:0,c:3}}, b: {f:{r:1,c:5}, t:{r:0,c:4}} }, { w: {f:{r:0,c:3}, t:{r:0,c:4}}, b: {f:{r:2,c:3}, t:{r:0,c:5}} }, { w: {f:{r:0,c:4}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "FIREWALL-BYPASS-OK", answer: "BACKDOOR"
             },
             5: {
-                // Problema 5: Mate de la Coz (Smothered Mate)
-                // Blancas: Dama b3, Caballo h6 (ya en posición). Negras: Rey h8, Torre g8.
-                initial: [
-                    ['', '', '', '', '', '', 'r', 'k'], // 0 - Torre g8, Rey h8
-                    ['p', 'p', 'p', '', '', 'p', 'p', ''], // 1
-                    ['', '', '', '', '', '', '', 'P'], // 2 - Peón h6 (para sostener el tema visual)
-                    ['', '', '', '', '', 'N', '', ''], // 3 - Caballo f5 (listo para saltar a h6)
-                    ['', '', 'Q', '', '', '', '', ''], // 4 - Dama b4
-                    ['', '', '', '', '', '', '', ''], // 5
-                    ['P', 'P', '', '', '', 'P', 'P', ''], // 6
-                    ['', '', '', '', '', '', 'K', '']  // 7
-                ],
-                moves: [
-                    // 1. Ch6+ (Doble Jaque) -> Rh8 (Forzado, si Rf8 Df7 mate en 1, asumimos CPU va a la esquina)
-                    { w: {f:{r:3,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, // Nota: Simulación visual, la CPU moverá el rey de g8 a h8 en realidad.
-                    // Corrección para engine simple: Partimos de C h6+ directo.
-                    // Vamos a hacer la secuencia clásica: 1.Cf7+ Rg8 2.Ch6+ Rh8 3.Dg8+ Txg8 4.Cf7#
-                    // Posición inicial ajustada para secuencia completa:
-                    // Caballo en g5 (3,6)
-                ],
-                // REAJUSTE PARA ENGINE SIMPLE (Secuencia Determinista):
-                initial: [
-                    ['', '', '', '', '', 'r', 'k', ''], // 0 - Rey g8
-                    ['p', 'p', 'p', '', '', 'p', 'p', 'p'], // 1
-                    ['', '', '', '', '', '', '', ''], // 2
-                    ['', '', '', '', '', '', 'N', ''], // 3 - Caballo g5
-                    ['', '', 'Q', '', '', '', '', ''], // 4 - Dama c4
-                    ['', '', '', '', '', '', '', ''], // 5
-                    ['P', 'P', '', '', '', 'P', 'P', 'P'], // 6
-                    ['', '', '', '', '', '', 'K', '']  // 7
-                ],
-                moves: [
-                    // 1. Cf7+ -> Rg8
-                    { w: {f:{r:3,c:6}, t:{r:1,c:5}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, // Rey a g8? No, en array 0,6 es g8.
-                    // 2. Ch6+ -> Rh8 (Jaque doble)
-                    { w: {f:{r:1,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, // Rey a h8
-                    // 3. Dg8+ -> Txg8 (Sacrificio Dama)
-                    { w: {f:{r:4,c:2}, t:{r:0,c:6}}, b: {f:{r:0,c:5}, t:{r:0,c:6}} }, // Torre come Dama
-                    // 4. Cf7# (Mate de la Coz)
-                    { w: {f:{r:2,c:7}, t:{r:1,c:5}}, b: null }
-                ],
+                initial: [['','','','','','r','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','N',''],['','','Q','','','','',''],['','','','','','','',''],['P','P','','','','P','P','P'],['','','','','','','K','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:1,c:5}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:1,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:4,c:2}, t:{r:0,c:6}}, b: {f:{r:0,c:5}, t:{r:0,c:6}} }, { w: {f:{r:2,c:7}, t:{r:1,c:5}}, b: null }],
                 fakeHash: "BUFFER-OVERFLOW-X", answer: "DDOS"
             },
             6: {
-                // Problema 6: Mate de Damiano (King Hunt / Red)
-                // Blancas: Torre h1, Dama d1. Negras: Rey g8.
-                // Secuencia: 1. Th8+ Rxh8 2. Dh1+ Rg8 3. Dh7+ Rf8 4. Dh8#
-                initial: [
-                    ['', '', '', '', '', '', 'k', ''], // 0 - Rey g8
-                    ['p', 'p', 'p', '', '', 'p', 'p', 'p'], // 1
-                    ['', '', '', '', '', '', '', ''], // 2
-                    ['', '', '', '', '', '', '', ''], // 3
-                    ['', '', '', '', '', '', '', ''], // 4
-                    ['', '', '', '', '', '', '', ''], // 5
-                    ['P', 'P', 'P', '', '', 'P', 'P', 'P'], // 6
-                    ['', '', '', 'Q', '', '', '', 'R']  // 7 - Dama d1, Torre h1
-                ],
-                moves: [
-                    // 1. Th8+ -> Rxh8 (Sacrificio Torre)
-                    { w: {f:{r:7,c:7}, t:{r:0,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} },
-                    // 2. Dh1+ -> Rg8
-                    { w: {f:{r:7,c:3}, t:{r:7,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} },
-                    // 3. Dh7+ -> Rf8
-                    { w: {f:{r:7,c:7}, t:{r:1,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:5}} },
-                    // 4. Dh8#
-                    { w: {f:{r:1,c:7}, t:{r:0,c:7}}, b: null }
-                ],
+                initial: [['','','','','','','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','','','P','P','P'],['','','','Q','','','','R']],
+                moves: [{ w: {f:{r:7,c:7}, t:{r:0,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:7,c:3}, t:{r:7,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:7,c:7}, t:{r:1,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:5}} }, { w: {f:{r:1,c:7}, t:{r:0,c:7}}, b: null }],
                 fakeHash: "KERNEL-PANIC-00", answer: "EXPLOIT"
             }
         };
+
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
+        let currentMissionId = 1;
+        let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
+        let solvedLevels = new Set();
+
+        // --- SISTEMA DE CONTROL Y VENTANAS ---
+        
+        function checkAndLoadMission(id) {
+            if (solvedLevels.has(id)) {
+                showWarning("PROBLEMA YA SOLUCIONADO", "Este nodo ya está bajo control administrativo. ¿Deseas volver a ejecutar la simulación?", () => startLevel(id));
+                return;
+            }
+            const isTargetEven = (id % 2 === 0);
+            let hasSameParitySolved = false;
+            solvedLevels.forEach(solvedId => {
+                if ((solvedId % 2 === 0) === isTargetEven) hasSameParitySolved = true;
+            });
+            if (hasSameParitySolved) {
+                const type = isTargetEven ? "PAR" : "IMPAR";
+                showWarning("REDUNDANCIA DETECTADA", `Ya has superado un problema ${type}. No es necesario para completar la prueba, pero puedes proceder para entrenamiento.`, () => startLevel(id));
+                return;
+            }
+            startLevel(id);
+        }
+
+        function showWarning(title, msg, confirmCallback) {
+            document.getElementById('warning-title').innerText = title;
+            document.getElementById('warning-msg').innerText = msg;
+            const btnConfirm = document.getElementById('btn-warning-confirm');
+            const newBtn = btnConfirm.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
+            newBtn.onclick = () => { closeWarning(); confirmCallback(); };
+            document.getElementById('warning-overlay').classList.add('active');
+        }
+
+        function closeWarning() {
+            document.getElementById('warning-overlay').classList.remove('active');
+        }
+
+        function startLevel(id) {
+            currentMissionId = id;
+            document.getElementById('mission-select-screen').classList.remove('active');
+            document.getElementById('game-interface').classList.add('active');
+            gameState.position = JSON.parse(JSON.stringify(levels[id].initial));
+            gameState.moveIdx = 0;
+            gameState.selection = null;
+            gameState.locked = false;
+            gameState.validMoves = [];
+            lockInput();
+            document.getElementById('terminal').innerHTML = '';
+            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
+            document.getElementById('victory-overlay').classList.remove('active');
+            document.getElementById('success-overlay').classList.remove('active');
+            drawBoard();
+        }
+
+        function returnToMenu() {
+            document.getElementById('game-interface').classList.remove('active');
+            document.getElementById('mission-select-screen').classList.add('active');
+        }
+
+        function drawBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    const p = gameState.position[r][c];
+                    if(p) {
+                        sq.innerText = pieces[p];
+                        sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
+                        sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
+                    }
+                    sq.onclick = () => handleSquare(r, c);
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) sq.classList.add('selected');
+                    const moveType = getMoveType(r, c);
+                    if(moveType === 'move') sq.classList.add('valid-move');
+                    if(moveType === 'capture') sq.classList.add('capture-move');
+                    board.appendChild(sq);
+                }
+            }
+        }
+
+        function getMoveType(r, c) {
+            const move = gameState.validMoves.find(m => m.r === r && m.c === c);
+            return move ? move.type : null;
+        }
+
+        // --- VALIDACIÓN JAQUES ---
+        function isSquareAttacked(r, c, attackerColor, tempBoard) {
+            const boardToCheck = tempBoard || gameState.position;
+            const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
+            const pawnChar = attackerColor === 'white' ? 'P' : 'p';
+            if(pawnAttackRow >= 0 && pawnAttackRow < 8) {
+                if(c > 0 && boardToCheck[pawnAttackRow][c-1] === pawnChar) return true;
+                if(c < 7 && boardToCheck[pawnAttackRow][c+1] === pawnChar) return true;
+            }
+            const knightChar = attackerColor === 'white' ? 'N' : 'n';
+            const knightMoves = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
+            for(let m of knightMoves) {
+                let nr=r+m[0], nc=c+m[1];
+                if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === knightChar) return true;
+            }
+            const kingChar = attackerColor === 'white' ? 'K' : 'k';
+            const kingMoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+            for(let m of kingMoves) {
+                let nr=r+m[0], nc=c+m[1];
+                if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === kingChar) return true;
+            }
+            const rookChar = attackerColor === 'white' ? 'R' : 'r';
+            const queenChar = attackerColor === 'white' ? 'Q' : 'q';
+            const linearDirs = [[0,1],[0,-1],[1,0],[-1,0]];
+            for(let d of linearDirs) {
+                let i=1; 
+                while(true) {
+                    let nr=r+d[0]*i, nc=c+d[1]*i;
+                    if(nr<0||nr>7||nc<0||nc>7) break;
+                    let p = boardToCheck[nr][nc];
+                    if(p) { if(p===rookChar || p===queenChar) return true; break; }
+                    i++;
+                }
+            }
+            const bishopChar = attackerColor === 'white' ? 'B' : 'b';
+            const diagDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
+            for(let d of diagDirs) {
+                let i=1; 
+                while(true) {
+                    let nr=r+d[0]*i, nc=c+d[1]*i;
+                    if(nr<0||nr>7||nc<0||nc>7) break;
+                    let p = boardToCheck[nr][nc];
+                    if(p) { if(p===bishopChar || p===queenChar) return true; break; }
+                    i++;
+                }
+            }
+            return false;
+        }
+
+        function testMove(fromR, fromC, toR, toC) {
+            const tempBoard = JSON.parse(JSON.stringify(gameState.position));
+            const p = tempBoard[fromR][fromC];
+            tempBoard[toR][toC] = p;
+            tempBoard[fromR][fromC] = '';
+            let myKing = null;
+            const myColor = (p === p.toUpperCase()) ? 'white' : 'black';
+            const enemyColor = (myColor === 'white') ? 'black' : 'white';
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    if(tempBoard[r][c] === (myColor==='white'?'K':'k')) { myKing = {r,c}; break; }
+                }
+            }
+            if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) return false; 
+            return true; 
+        }
+
+        function calculatePossibleMoves(r, c, piece) {
+            let moves = [];
+            const type = piece.toUpperCase();
+            const isWhite = piece === piece.toUpperCase();
+            const tryAdd = (tr, tc) => {
+                if(tr<0||tr>7||tc<0||tc>7) return false; 
+                const target = gameState.position[tr][tc];
+                let moveType = null;
+                if(!target) { moveType = 'move'; } 
+                else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) { moveType = 'capture'; } 
+                else { return false; }
+                if(testMove(r, c, tr, tc)) { moves.push({r:tr, c:tc, type:moveType}); }
+                return (moveType === 'move'); 
+            };
+            if(type === 'P') { 
+                const dir = -1;
+                if(r+dir>=0 && !gameState.position[r+dir][c]) {
+                    if(testMove(r,c,r+dir,c)) moves.push({r:r+dir, c:c, type:'move'});
+                    if(r===6 && !gameState.position[r+(dir*2)][c]) {
+                         if(testMove(r,c,r+(dir*2),c)) moves.push({r:r+(dir*2), c:c, type:'move'});
+                    }
+                }
+                if(r+dir>=0) {
+                    if(c>0) {
+                        const t = gameState.position[r+dir][c-1];
+                        if(t && t===t.toLowerCase() && testMove(r,c,r+dir,c-1)) moves.push({r:r+dir, c:c-1, type:'capture'});
+                    }
+                    if(c<7) {
+                        const t = gameState.position[r+dir][c+1];
+                        if(t && t===t.toLowerCase() && testMove(r,c,r+dir,c+1)) moves.push({r:r+dir, c:c+1, type:'capture'});
+                    }
+                }
+            }
+            if(type === 'R' || type === 'Q') { [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'B' || type === 'Q') { [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'N') { [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
+            if(type === 'K') { [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
+            return moves;
+        }
+
+        function handleSquare(r, c) {
+            if(gameState.locked) return;
+            const p = gameState.position[r][c];
+            if(p && p === p.toUpperCase()) {
+                gameState.selection = {r, c};
+                gameState.validMoves = calculatePossibleMoves(r, c, p);
+                drawBoard();
+                return;
+            }
+            if(gameState.selection) {
+                const validMove = gameState.validMoves.find(m => m.r === r && m.c === c);
+                if(validMove) {
+                    const puzzleMove = levels[currentMissionId].moves[gameState.moveIdx].w;
+                    if(puzzleMove.f.r === gameState.selection.r && puzzleMove.f.c === gameState.selection.c &&
+                       puzzleMove.t.r === r && puzzleMove.t.c === c) {
+                        executeMove(gameState.selection, {r, c}, true);
+                    } else {
+                        log("Error Táctico: Movimiento subóptimo.", true);
+                        gameState.selection = null;
+                        gameState.validMoves = [];
+                        drawBoard();
+                    }
+                } else {
+                    gameState.selection = null;
+                    gameState.validMoves = [];
+                    drawBoard();
+                }
+            }
+        }
+
+        function executeMove(from, to, isPlayer) {
+            const p = gameState.position[from.r][from.c];
+            gameState.position[to.r][to.c] = p;
+            gameState.position[from.r][from.c] = '';
+            log(`${isPlayer ? 'USR' : 'SYS'} mueve: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
+            gameState.selection = null;
+            gameState.validMoves = [];
+            drawBoard();
+            if(isPlayer) {
+                const step = levels[currentMissionId].moves[gameState.moveIdx];
+                if(!step.b) {
+                    setTimeout(missionComplete, 500);
+                } else {
+                    gameState.locked = true;
+                    setTimeout(() => {
+                        executeMove(step.b.f, step.b.t, false);
+                        gameState.moveIdx++;
+                        gameState.locked = false;
+                    }, 800);
+                }
+            }
+        }
+
+        function missionComplete() {
+            log("REY ENEMIGO CAPTURADO. CIFRADO ROTO.", false, true);
+            const mission = levels[currentMissionId];
+            document.getElementById('hash-display').innerText = mission.fakeHash;
+            document.getElementById('victory-overlay').classList.add('active');
+            unlockInput();
+        }
+
+        function closeOverlay() {
+            document.getElementById('victory-overlay').classList.remove('active');
+        }
+
+        function lockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.remove('unlocked');
+            inp.disabled = true; inp.value = ''; inp.placeholder = "ACCESO DENEGADO";
+            btn.disabled = true;
+            status.innerText = "🔒 INPUT BLOQUEADO"; status.style.color = "#666";
+            document.getElementById('feedback-msg').innerText = '';
+        }
+
+        function unlockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.add('unlocked');
+            inp.disabled = false; inp.placeholder = "INTRODUZCA HASH"; inp.focus();
+            btn.disabled = false;
+            status.innerText = "🔓 PUERTO ABIERTO"; status.style.color = "var(--primary)";
+        }
+
+        function verifySolution() {
+            const val = document.getElementById('solution-input').value.toUpperCase().replace(/-/g, '').trim();
+            const correct = levels[currentMissionId].answer;
+            const feedback = document.getElementById('feedback-msg');
+            
+            if(val === correct) {
+                feedback.innerText = "ACCESO CONCEDIDO.";
+                feedback.style.color = "var(--primary)";
+                log("Credencial verificada. Archivo guardado.", false, true);
+                
+                // MARCAR COMO RESUELTO
+                solvedLevels.add(currentMissionId);
+                document.getElementById(`card-${currentMissionId}`).classList.add('solved');
+                
+                // LÓGICA DE MENSAJES DE PROGRESO
+                let hasOdd = false;
+                let hasEven = false;
+                solvedLevels.forEach(lvl => {
+                    if (lvl % 2 === 0) hasEven = true;
+                    else hasOdd = true;
+                });
+
+                let title = "PROBLEMA RESUELTO";
+                let msg = "";
+                let icon = "🔓";
+
+                if (hasOdd && hasEven) {
+                    title = "¡PRUEBA SUPERADA!";
+                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. Pronto nos pondremos en contacto contigo.";
+                    icon = "🤝";
+                    // Update Header
+                    const globalStatus = document.getElementById('global-status');
+                    globalStatus.innerText = "SUPERADA";
+                    globalStatus.style.color = "var(--primary)";
+                    globalStatus.style.textShadow = "0 0 10px var(--primary)";
+                } else {
+                    if (!hasOdd) msg = "Acceso parcial. Aún necesitas resolver un problema IMPAR (1, 3, 5) para superar la prueba.";
+                    else if (!hasEven) msg = "Acceso parcial. Aún necesitas resolver un problema PAR (2, 4, 6) para superar la prueba.";
+                }
+
+                document.getElementById('success-title').innerText = title;
+                document.getElementById('success-msg').innerText = msg;
+                document.getElementById('success-icon').innerText = icon;
+
+                setTimeout(() => {
+                    document.getElementById('success-overlay').classList.add('active');
+                }, 1000);
+            } else {
+                feedback.innerText = "ERROR DE CREDENCIAL";
+                feedback.style.color = "var(--danger)";
+                log("Intento de inyección fallido.", true);
+            }
+        }
+        
+        function closeSuccessAndReturn() {
+            document.getElementById('success-overlay').classList.remove('active');
+            returnToMenu();
+        }
+
+        function log(msg, err=false, success=false) {
+            const t = document.getElementById('terminal');
+            const d = document.createElement('div');
+            d.className = 'log-entry';
+            if(err) d.classList.add('err');
+            if(success) d.classList.add('sys');
+            d.innerText = msg;
+            t.appendChild(d);
+            t.scrollTop = t.scrollHeight;
+        }
+
+        function coords(o) { return `${String.fromCharCode(97+o.c)}${8-o.r}`; }
+
+    </script>
+</body>
+</html>
