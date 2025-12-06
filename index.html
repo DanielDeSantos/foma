@@ -347,6 +347,7 @@
     <div id="game-interface" class="screen">
         <div class="board-area">
             <div id="board" class="board"></div>
+            
             <div id="victory-overlay" class="overlay">
                 <div class="data-packet">
                     <h2 style="color: white; margin-bottom: 15px;">JAQUE MATE EJECUTADO</h2>
@@ -355,6 +356,16 @@
                     <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
                 </div>
             </div>
+
+            <div id="success-overlay" class="overlay">
+                <div class="data-packet" style="border-color: var(--primary); box-shadow: 0 0 30px rgba(0,255,65,0.2);">
+                    <h2 style="color: var(--primary); margin-bottom: 15px;">MISION_COMPLETA</h2>
+                    <p style="color: #ccc; margin-bottom: 20px;">Acceso administrativo restaurado con éxito.</p>
+                    <div style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
+                    <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
+                </div>
+            </div>
+
         </div>
 
         <div class="side-panel">
@@ -461,6 +472,7 @@
             document.getElementById('terminal').innerHTML = '';
             log(`Inicializando tablero táctico NODE_0${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
+            document.getElementById('success-overlay').classList.remove('active');
             
             drawBoard();
         }
@@ -511,7 +523,6 @@
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             
-            // 1. Peones
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
             const pawnChar = attackerColor === 'white' ? 'P' : 'p';
             if(pawnAttackRow >= 0 && pawnAttackRow < 8) {
@@ -519,7 +530,6 @@
                 if(c < 7 && boardToCheck[pawnAttackRow][c+1] === pawnChar) return true;
             }
 
-            // 2. Caballos
             const knightChar = attackerColor === 'white' ? 'N' : 'n';
             const knightMoves = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
             for(let m of knightMoves) {
@@ -527,7 +537,6 @@
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === knightChar) return true;
             }
 
-            // 3. Reyes
             const kingChar = attackerColor === 'white' ? 'K' : 'k';
             const kingMoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let m of kingMoves) {
@@ -535,7 +544,6 @@
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === kingChar) return true;
             }
 
-            // 4. Lineales
             const rookChar = attackerColor === 'white' ? 'R' : 'r';
             const queenChar = attackerColor === 'white' ? 'Q' : 'q';
             const linearDirs = [[0,1],[0,-1],[1,0],[-1,0]];
@@ -553,7 +561,6 @@
                 }
             }
 
-            // 5. Diagonales
             const bishopChar = attackerColor === 'white' ? 'B' : 'b';
             const diagDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let d of diagDirs) {
@@ -761,15 +768,22 @@
                 feedback.innerText = "ACCESO CONCEDIDO.";
                 feedback.style.color = "var(--primary)";
                 log("Credencial verificada. Archivo guardado.", false, true);
+                
+                // Mostrar Ventana Modal de Éxito
                 setTimeout(() => {
-                    alert("¡Misión Cumplida! Volviendo al menú.");
-                    returnToMenu();
+                    document.getElementById('success-overlay').classList.add('active');
                 }, 1000);
+                
             } else {
                 feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
                 log("Intento de inyección fallido.", true);
             }
+        }
+        
+        function closeSuccessAndReturn() {
+            document.getElementById('success-overlay').classList.remove('active');
+            returnToMenu();
         }
 
         function log(msg, err=false, success=false) {
