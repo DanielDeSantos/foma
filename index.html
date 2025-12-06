@@ -3,267 +3,668 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal de Ciberseguridad - Acceso Restringido</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Torneo Oficial - Ajedrez de Ataque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #020402;
-            --bg-panel: #0d110d;
-            --primary-green: #00ff41; 
-            --secondary-green: #003b00; 
-            --text-dim: #2e8b57;
-            --border-color: #00ff41;
-            --alert: #ff3333;
+            --bg-body: #0f172a; /* Fondo oscuro para competición */
+            --bg-card: #1e293b;
+            --primary: #3b82f6; /* Azul eléctrico */
+            --accent: #f59e0b; /* Dorado trofeo */
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --board-light: #e2e8f0;
+            --board-dark: #475569;
+            --radius: 8px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background-color: var(--bg-main);
-            color: var(--primary-green);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             min-height: 100vh;
-            padding: 20px;
-            background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px);
-            background-size: 100% 4px;
         }
 
-        /* Header */
+        /* HEADER DE COMPETICIÓN */
         header {
-            margin-bottom: 40px;
-            border-bottom: 2px solid var(--primary-green);
-            padding-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            text-shadow: 0 0 10px var(--primary-green);
-            letter-spacing: 2px;
-        }
-
-        .sys-info {
-            text-align: right;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            line-height: 1.5;
-        }
-
-        /* Grid */
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Tarjetas */
-        .problem-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--text-dim);
-            padding: 25px;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 250px;
-        }
-
-        .problem-card:hover {
-            border-color: var(--primary-green);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
-            transform: translateY(-5px);
-            background-color: #0f1a0f;
-        }
-
-        .card-header {
+            background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
+            border-bottom: 4px solid var(--accent);
+            padding: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
-            border-bottom: 1px dashed var(--secondary-green);
-            padding-bottom: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .problem-id {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-green);
+        .tournament-title h1 {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: white;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
 
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            background-color: var(--alert);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--alert);
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.8rem;
             animation: pulse 2s infinite;
         }
 
-        .log-text {
-            color: #888;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            flex-grow: 1;
-            /* Simula texto de terminal */
-            font-family: 'Courier New', Courier, monospace; 
+        /* CARDS DE RONDAS */
+        .problem-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 20px;
         }
 
-        .log-text::before { content: "> "; color: var(--primary-green); }
+        .problem-card {
+            background: var(--bg-card);
+            border: 1px solid #334155;
+            border-radius: var(--radius);
+            padding: 0;
+            overflow: hidden;
+            transition: transform 0.3s;
+            position: relative;
+        }
 
-        .metadata {
+        .problem-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .card-header {
+            background: #020617;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #334155;
             display: flex;
             justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            margin-top: 20px;
-            border-top: 1px solid var(--secondary-green);
-            padding-top: 10px;
+            align-items: center;
         }
 
-        .btn-connect {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            background: transparent;
-            border: 1px solid var(--primary-green);
-            color: var(--primary-green);
-            padding: 5px 15px;
-            font-family: 'Share Tech Mono', monospace;
+        .round-badge {
+            font-family: 'Chakra Petch', sans-serif;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .card-body { padding: 1.5rem; }
+        
+        .card-body h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .btn-select {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            font-weight: 700;
             text-transform: uppercase;
             cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.3s;
+            transition: background 0.2s;
+        }
+        .btn-select:hover { background: #2563eb; }
+
+        /* MODAL DE TORNEO */
+        .problem-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .problem-modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--bg-card);
+            width: 95%;
+            max-width: 1100px;
+            height: 90vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            border: 1px solid #475569;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
         }
 
-        .problem-card:hover .btn-connect {
-            opacity: 1;
+        /* AREA DE JUEGO */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            height: 100%;
+            overflow: hidden;
         }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .board-area {
+            background: #0f172a;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            position: relative;
+        }
 
+        /* Player Plates */
+        .player-plate {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 480px; /* Ancho del tablero */
+            padding: 0.5rem 1rem;
+            background: #1e293b;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid transparent;
+        }
+        
+        .player-top { border-left-color: #ef4444; } /* Rival */
+        .player-bottom { border-left-color: #22c55e; } /* Usuario */
+
+        .player-name { font-weight: 600; font-size: 0.9rem; }
+        .player-rating { color: var(--text-muted); font-family: monospace; }
+        
+        /* Board */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 5px solid #334155;
+        }
+        .square {
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; cursor: pointer;
+        }
+        .light { background-color: var(--board-light); color: black; }
+        .dark { background-color: var(--board-dark); color: white; }
+        
+        /* Sidebar Info */
+        .info-panel {
+            background: #1e293b;
+            border-left: 1px solid #334155;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* CLOCK */
+        .clock-container {
+            background: black;
+            color: var(--danger);
+            font-family: 'Chakra Petch', monospace;
+            font-size: 2.5rem;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-box {
+            text-align: center;
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 4px;
+            border: 1px solid #334155;
+        }
+
+        /* Inputs de Código */
+        .vault {
+            margin-top: auto;
+            background: #0f172a;
+            padding: 1rem;
+            border: 1px solid #334155;
+            border-radius: 4px;
+        }
+        
+        .vault-input {
+            width: 100%;
+            background: black;
+            border: 1px solid #333;
+            color: var(--accent);
+            padding: 0.8rem;
+            font-family: monospace;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 0.8rem;
+            background: #334155;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .btn-primary { background: var(--primary); }
+        .btn-accent { background: var(--accent); color: black; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .game-container { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            .board { grid-template-columns: repeat(8, 42px); grid-template-rows: repeat(8, 42px); }
+            .player-plate { width: 336px; }
+            .square { font-size: 28px; }
+        }
+        
+        /* Overlays */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center; z-index: 50;
+        }
+        .overlay.active { display: flex; }
+        .overlay-content { text-align: center; animation: pulse 1s infinite alternate; }
+        
+        /* Utility */
+        .selected { background-color: rgba(255, 215, 0, 0.5) !important; }
+        .valid-move::after { content: ''; position: absolute; width: 12px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 50%; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>SISTEMA_VIGILANCIA_V4</h1>
-        <div class="sys-info">
-            UPTIME: 404h 21m<br>
-            ENCRIPTACIÓN: AES-256<br>
-            USUARIO: INVITADO
+        <div class="tournament-title">
+            <span class="live-badge">● EN VIVO</span>
+            <h1>Copa de Maestros 2025</h1>
+        </div>
+        <div style="text-align: right; color: var(--text-muted); font-size: 0.9rem;">
+            <div>Jugador: <strong style="color: white;">Candidato</strong></div>
+            <div>Ranking: 1850 ELO</div>
         </div>
     </header>
 
-    <main class="problem-grid">
-
+    <div class="problem-selection">
         <div class="problem-card">
             <div class="card-header">
-                <span class="problem-id"># NODE_01</span>
-                <span class="status-dot"></span>
+                <span class="round-badge">Ronda 1</span>
+                <span style="color:#94a3b8">Blitz 5|0</span>
             </div>
-            <div class="log-text">
-                ERROR 503: Servicio de autenticación no responde.<br>
-                Gateway inaccesible.<br>
-                Solicitando credenciales manuales...
+            <div class="card-body">
+                <h2>Clasificatoria</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Derrota al Maestro Nacional. Mate en 4 obligatorio para avanzar.</p>
+                <button class="btn-select" onclick="startRound(1)">Iniciar Partida</button>
             </div>
-            <div class="metadata">
-                <span>PORT: 8080</span>
-                <span>LOCK: ACTIVE</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
         </div>
 
         <div class="problem-card">
             <div class="card-header">
-                <span class="problem-id"># NODE_02</span>
-                <span class="status-dot"></span>
+                <span class="round-badge">Semifinal</span>
+                <span style="color:#94a3b8">Tactical Rush</span>
             </div>
-            <div class="log-text">
-                Tráfico interceptado.<br>
-                El contenido del paquete no coincide con la suma de verificación (checksum).<br>
-                Datos ilegibles.
+            <div class="card-body">
+                <h2>Duelo de Caballos</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Un final complejo contra el Maestro Internacional. Precisión absoluta requerida.</p>
+                <button class="btn-select" onclick="startRound(2)">Iniciar Partida</button>
             </div>
-            <div class="metadata">
-                <span>TYPE: STREAM</span>
-                <span>ENC: UNKNOWN</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
         </div>
 
-        <div class="problem-card">
+        <div class="problem-card" style="border-color: var(--accent);">
+            <div class="card-header" style="background: rgba(245, 158, 11, 0.1);">
+                <span class="round-badge" style="color: #fff;">🏆 GRAN FINAL</span>
+                <span style="color:#94a3b8">Muerte Súbita</span>
+            </div>
+            <div class="card-body">
+                <h2 style="color: var(--accent);">El Sacrificio Final</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Enfréntate al Gran Maestro motor de IA. Solo un sacrificio brillante te dará la victoria.</p>
+                <button class="btn-select" style="background: var(--accent); color: black;" onclick="startRound(3)">Jugar la Final</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="game-modal" class="problem-modal">
+        <div class="modal-content">
             <div class="card-header">
-                <span class="problem-id"># NODE_03</span>
-                <span class="status-dot"></span>
+                <h2 id="modal-title" style="color:white; font-family:'Chakra Petch'">Ronda 1</h2>
+                <button onclick="closeModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">×</button>
             </div>
-            <div class="log-text">
-                Violación de segmento detectada.<br>
-                Volcado de pila incompleto.<br>
-                Se requiere análisis de estructura interna.
+
+            <div class="game-container">
+                <div class="board-area">
+                    <div class="player-plate player-top">
+                        <span class="player-name" id="opponent-name">Gran Maestro (CPU)</span>
+                        <span class="player-rating">2400</span>
+                    </div>
+
+                    <div id="board" class="board"></div>
+
+                    <div class="player-plate player-bottom">
+                        <span class="player-name">Candidato (Tú)</span>
+                        <span class="player-rating">1850</span>
+                    </div>
+
+                    <div id="result-overlay" class="overlay">
+                        <div class="overlay-content">
+                            <h1 style="font-size:3rem; color: var(--accent); margin-bottom:1rem;">VICTORIA</h1>
+                            <p style="margin-bottom:1rem; font-size:1.2rem;">Código de Pase:</p>
+                            <div id="victory-code" style="font-family:monospace; background:white; color:black; padding:10px; font-weight:bold; font-size:1.5rem;">---</div>
+                            <button onclick="closeModal()" class="btn-select" style="margin-top:20px; width: auto; padding: 10px 30px;">Salir al Lobby</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel">
+                    <div class="clock-container" id="clock">05:00</div>
+                    
+                    <div class="status-box" id="game-status">
+                        Turno de las Blancas
+                    </div>
+
+                    <div style="flex-grow:1; overflow-y:auto; border:1px solid #333; padding:10px; font-family:monospace; color:#ccc;">
+                        <div id="move-history"></div>
+                    </div>
+
+                    <div class="controls">
+                        <button class="btn-action" onclick="resetCurrentGame()">Reiniciar Tablero</button>
+                        <button class="btn-action" onclick="showHint()">Solicitar Ayuda (Penalización)</button>
+                    </div>
+
+                    <div class="vault">
+                        <label style="display:block; margin-bottom:5px; color:#64748b; font-size:0.8rem;">SISTEMA DE VERIFICACIÓN</label>
+                        <input type="text" id="code-input" class="vault-input" placeholder="INGRESA CÓDIGO">
+                        <button class="btn-action btn-accent" onclick="verifyCode()">VALIDAR VICTORIA</button>
+                        <div id="code-feedback" style="text-align:center; font-weight:bold; height:20px;"></div>
+                    </div>
+                </div>
             </div>
-            <div class="metadata">
-                <span>ADDR: 0x0F4A</span>
-                <span>MEM: CORRUPT</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
         </div>
+    </div>
 
-        <div class="problem-card">
-            <div class="card-header">
-                <span class="problem-id"># NODE_04</span>
-                <span class="status-dot"></span>
-            </div>
-            <div class="log-text">
-                Alerta de seguridad: Protocolo de transferencia interrumpido.<br>
-                Exceso de peticiones en cola.<br>
-                Sistema inestable.
-            </div>
-            <div class="metadata">
-                <span>PID: 4421</span>
-                <span>STATUS: HALTED</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
-        </div>
+    <script>
+        // CONFIGURACIÓN DE PROBLEMAS (LOGICA DE AJEDREZ)
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
+        
+        // Datos del Torneo
+        const rounds = {
+            1: {
+                title: "Ronda 1: Clasificatoria",
+                opponent: "Maestro FIDE (2300)",
+                code: "RONDA1-OK",
+                initial: [
+                    ['', '', '', '', 'b', '', '', ''],
+                    ['', '', 'p', '', 'B', '', 'p', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', 'P', '', '', 'p', 'P', ''],
+                    ['', 'P', '', 'P', '', 'P', '', 'P'],
+                    ['', '', 'p', '', 'K', '', 'p', ''],
+                    ['', '', 'P', '', 'B', '', 'P', ''],
+                    ['', '', '', '', 'k', '', '', '']
+                ],
+                // Solución: 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
+                solution: [
+                    { white: {f:{r:3,c:6}, t:{r:2,c:6}}, black: {f:{r:1,c:2}, t:{r:2,c:2}} },
+                    { white: {f:{r:4,c:7}, t:{r:3,c:7}}, black: {f:{r:0,c:4}, t:{r:1,c:3}} },
+                    { white: {f:{r:1,c:4}, t:{r:4,c:7}}, black: {f:{r:1,c:3}, t:{r:0,c:2}} },
+                    { white: {f:{r:4,c:7}, t:{r:5,c:6}}, black: null }
+                ]
+            },
+            2: {
+                title: "Semifinal: Duelo Táctico",
+                opponent: "Maestro Internacional (2450)",
+                code: "SEMIFINAL-WIN",
+                initial: [
+                    ['', '', 'k', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', 'K', '', '', ''],
+                    ['', '', '', 'N', 'B', '', '', ''],
+                    ['', '', '', '', 'N', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                // Solución: 1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++
+                solution: [
+                    { white: {f:{r:4,c:4}, t:{r:3,c:2}}, black: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { white: {f:{r:2,c:4}, t:{r:1,c:5}}, black: {f:{r:0,c:3}, t:{r:0,c:2}} },
+                    { white: {f:{r:3,c:3}, t:{r:2,c:1}}, black: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { white: {f:{r:3,c:2}, t:{r:2,c:4}}, black: null }
+                ]
+            },
+            3: {
+                title: "GRAN FINAL: La Inmortal",
+                opponent: "Gran Maestro IA (3200)",
+                code: "CHAMPION-2025",
+                initial: [
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],
+                    ['', '', 'p', 'p', '', '', '', 'p'],
+                    ['', '', '', 'p', '', '', 'p', 'Q'],
+                    ['', '', '', 'R', '', 'p', '', ''],
+                    ['', '', '', '', 'B', 'B', 'P', ''],
+                    ['', '', '', 'P', 'R', '', 'P', ''],
+                    ['', '', '', '', '', '', 'P', 'K'],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                // Solución: 1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++
+                solution: [
+                    { white: {f:{r:3,c:3}, t:{r:3,c:5}}, black: {f:{r:0,c:5}, t:{r:3,c:5}} },
+                    { white: {f:{r:4,c:4}, t:{r:3,c:3}}, black: {f:{r:3,c:5}, t:{r:3,c:3}} },
+                    { white: {f:{r:5,c:4}, t:{r:0,c:4}}, black: {f:{r:0,c:6}, t:{r:1,c:5}} },
+                    { white: {f:{r:2,c:7}, t:{r:0,c:5}}, black: null }
+                ]
+            }
+        };
 
-        <div class="problem-card">
-            <div class="card-header">
-                <span class="problem-id"># NODE_05</span>
-                <span class="status-dot"></span>
-            </div>
-            <div class="log-text">
-                Anomalía en la capa de transporte.<br>
-                Latencia inusual detectada en clúster externo.<br>
-                Origen de datos oculto.
-            </div>
-            <div class="metadata">
-                <span>NET: TCP/IP</span>
-                <span>FLAG: SYN_ACK</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
-        </div>
+        // ESTADO GLOBAL
+        let activeRound = 1;
+        let gameState = {
+            position: [],
+            selection: null,
+            moveIdx: 0,
+            locked: false,
+            timerInterval: null
+        };
 
-        <div class="problem-card">
-            <div class="card-header">
-                <span class="problem-id"># NODE_06</span>
-                <span class="status-dot"></span>
-            </div>
-            <div class="log-text">
-                ¡CRÍTICO! Archivo del sistema bloqueado.<br>
-                Firma digital no reconocida.<br>
-                Acceso administrativo revocado.
-            </div>
-            <div class="metadata">
-                <span>LEVEL: KERNEL</span>
-                <span>PERM: DENIED</span>
-            </div>
-            <button class="btn-connect">CONECTAR</button>
-        </div>
+        // UI ACTIONS
+        function startRound(roundNum) {
+            activeRound = roundNum;
+            const round = rounds[roundNum];
+            
+            document.getElementById('game-modal').classList.add('active');
+            document.getElementById('modal-title').innerText = round.title;
+            document.getElementById('opponent-name').innerText = round.opponent;
+            document.getElementById('result-overlay').classList.remove('active');
+            document.getElementById('code-input').value = "";
+            document.getElementById('code-feedback').innerText = "";
+            
+            startClock();
+            initGame();
+        }
 
-    </main>
+        function closeModal() {
+            document.getElementById('game-modal').classList.remove('active');
+            stopClock();
+        }
 
+        // RELOJ DEL TORNEO
+        function startClock() {
+            stopClock();
+            let time = 300; // 5 minutos
+            const display = document.getElementById('clock');
+            
+            gameState.timerInterval = setInterval(() => {
+                time--;
+                const m = Math.floor(time / 60).toString().padStart(2, '0');
+                const s = (time % 60).toString().padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+                
+                if (time <= 0) {
+                    stopClock();
+                    alert("¡Tiempo agotado! Has perdido la partida.");
+                    closeModal();
+                }
+            }, 1000);
+        }
+
+        function stopClock() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            document.getElementById('clock').innerText = "05:00";
+        }
+
+        // MOTOR DE JUEGO (Simplificado para el ejemplo)
+        function initGame() {
+            // Copia profunda de la posición
+            gameState.position = JSON.parse(JSON.stringify(rounds[activeRound].initial));
+            gameState.selection = null;
+            gameState.moveIdx = 0;
+            gameState.locked = false;
+            document.getElementById('move-history').innerHTML = "";
+            drawBoard();
+            updateStatus("Tu turno - Encuentra el mate");
+        }
+        
+        function resetCurrentGame() {
+            initGame();
+        }
+
+        function drawBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    sq.dataset.r = r; sq.dataset.c = c;
+                    
+                    const p = gameState.position[r][c];
+                    if(p) {
+                        sq.innerText = pieces[p];
+                        sq.style.color = (p === p.toUpperCase()) ? '#fff' : '#000';
+                        sq.style.textShadow = (p === p.toUpperCase()) ? '0 2px 2px rgba(0,0,0,0.5)' : 'none';
+                    }
+                    
+                    sq.onclick = () => handleSquareClick(r, c);
+                    
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
+                        sq.classList.add('selected');
+                    }
+                    board.appendChild(sq);
+                }
+            }
+        }
+
+        function handleSquareClick(r, c) {
+            if(gameState.locked) return;
+            
+            const p = gameState.position[r][c];
+            const isWhite = p && p === p.toUpperCase();
+
+            // Selección
+            if(isWhite) {
+                gameState.selection = {r, c};
+                drawBoard();
+                return;
+            }
+
+            // Movimiento
+            if(gameState.selection) {
+                const move = {
+                    f: gameState.selection,
+                    t: {r, c}
+                };
+                
+                if(validateMove(move)) {
+                    executeMove(move, true);
+                } else {
+                    // Si clic en vacío o pieza negra incorrecta, deseleccionar
+                    gameState.selection = null;
+                    drawBoard();
+                }
+            }
+        }
+
+        function validateMove(userMove) {
+            const expected = rounds[activeRound].solution[gameState.moveIdx].white;
+            return (userMove.f.r === expected.f.r && userMove.f.c === expected.f.c &&
+                    userMove.t.r === expected.t.r && userMove.t.c === expected.t.c);
+        }
+
+        function executeMove(move, isPlayer) {
+            const p = gameState.position[move.f.r][move.f.c];
+            gameState.position[move.t.r][move.t.c] = p;
+            gameState.position[move.f.r][move.f.c] = '';
+            gameState.selection = null;
+            
+            // Notación simple
+            const log = document.createElement('div');
+            log.innerText = `${isPlayer ? 'Tú' : 'CPU'}: ${String.fromCharCode(97+move.f.c)}${8-move.f.r} -> ${String.fromCharCode(97+move.t.c)}${8-move.t.r}`;
+            document.getElementById('move-history').appendChild(log);
+            
+            drawBoard();
+
+            if(isPlayer) {
+                const currentStep = rounds[activeRound].solution[gameState.moveIdx];
+                
+                // Verificar si terminó el problema
+                if (gameState.moveIdx === rounds[activeRound].solution.length - 1 && !currentStep.black) {
+                    gameWin();
+                    return;
+                }
+
+                // Respuesta de la CPU
+                gameState.locked = true;
+                setTimeout(() => {
+                    const cpuMove = currentStep.black;
+                    executeMove(cpuMove, false);
+                    gameState.moveIdx++;
+                    gameState.locked = false;
+                }, 600);
+            }
+        }
+
+        function gameWin() {
+            stopClock();
+            updateStatus("¡JAQUE MATE!");
+            document.getElementById('victory-code').innerText = rounds[activeRound].code;
+            document.getElementById('result-overlay').classList.add('active');
+        }
+
+        function updateStatus(msg) {
+            document.getElementById('game-status').innerText = msg;
+        }
+        
+        function verifyCode() {
+            const input = document.getElementById('code-input').value.trim();
+            const feedback = document.getElementById('code-feedback');
+            
+            if(input === rounds[activeRound].code) {
+                feedback.innerText = "¡CÓDIGO ACEPTADO!";
+                feedback.style.color = "#22c55e";
+            } else {
+                feedback.innerText = "CÓDIGO INVÁLIDO";
+                feedback.style.color = "#ef4444";
+            }
+        }
+        
+        function showHint() {
+            if(gameState.locked) return;
+            const nextMove = rounds[activeRound].solution[gameState.moveIdx].white;
+            alert(`Pista: Mueve la pieza en ${String.fromCharCode(97+nextMove.f.c)}${8-nextMove.f.r}`);
+        }
+
+    </script>
 </body>
 </html>
