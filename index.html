@@ -80,6 +80,7 @@
             margin-top: 2rem;
         }
 
+        /* --- TARJETAS CON TEMÁTICA AJEDREZ --- */
         .mission-card {
             background: #000;
             border: 1px solid var(--border);
@@ -92,10 +93,18 @@
             flex-direction: column;
         }
 
+        /* Fondo ajedrezado al hacer hover */
         .mission-card:hover {
             border-color: var(--primary);
             box-shadow: 0 0 20px var(--primary-dim);
             transform: translateY(-5px);
+            background-image: 
+                linear-gradient(45deg, #051a05 25%, transparent 25%), 
+                linear-gradient(-45deg, #051a05 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #051a05 75%), 
+                linear-gradient(-45deg, transparent 75%, #051a05 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
         .mission-card::before {
@@ -110,7 +119,7 @@
             font-weight: bold;
         }
 
-        .mission-icon { font-size: 2rem; margin-bottom: 1rem; color: var(--primary); }
+        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); text-shadow: 0 0 10px var(--primary-dim); }
         .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; font-weight: bold; }
         .mission-desc { 
             color: #888; font-size: 0.9rem; line-height: 1.4; font-family: 'Courier New', monospace; flex-grow: 1;
@@ -291,40 +300,45 @@
         
         <div class="mission-grid">
             <div class="mission-card" onclick="loadMission(1)">
-                <div class="mission-icon">🔒</div>
+                <div class="mission-icon">♟️</div>
                 <div class="mission-title">NODE_01</div>
-                <div class="mission-desc">ERROR 503: Servicio de autenticación no responde. Gateway inaccesible.</div>
-                <div class="mission-footer"><span>PORT: 8080</span><span>STATUS: ACTIVE</span></div>
+                <div class="mission-desc">ERROR 503: Autenticación de bajo nivel fallida. Credenciales básicas requeridas.</div>
+                <div class="mission-footer"><span>RANK: PAWN</span><span>STATUS: ACTIVE</span></div>
             </div>
+            
             <div class="mission-card" onclick="loadMission(2)">
-                <div class="mission-icon">📡</div>
+                <div class="mission-icon">♞</div>
                 <div class="mission-title">NODE_02</div>
-                <div class="mission-desc">Tráfico interceptado. Checksum incorrecto en el stream de datos.</div>
-                <div class="mission-footer"><span>TYPE: STREAM</span><span>ENC: UNKNOWN</span></div>
+                <div class="mission-desc">Saltos de memoria no lineales detectados en el sector L. Tráfico interceptado.</div>
+                <div class="mission-footer"><span>RANK: KNIGHT</span><span>ENC: UNKNOWN</span></div>
             </div>
+            
             <div class="mission-card" onclick="loadMission(3)">
-                <div class="mission-icon">💾</div>
+                <div class="mission-icon">♝</div>
                 <div class="mission-title">NODE_03</div>
-                <div class="mission-desc">Violación de segmento. Volcado de memoria incompleto.</div>
-                <div class="mission-footer"><span>ADDR: 0x0F4A</span><span>MEM: CORRUPT</span></div>
+                <div class="mission-desc">Ataque diagonal en la subrutina de cifrado. Volcado de memoria incompleto.</div>
+                <div class="mission-footer"><span>RANK: BISHOP</span><span>MEM: CORRUPT</span></div>
             </div>
+            
             <div class="mission-card" onclick="loadMission(4)">
-                <div class="mission-icon">⚠️</div>
+                <div class="mission-icon">♜</div>
                 <div class="mission-title">NODE_04</div>
-                <div class="mission-desc">Alerta de seguridad: Protocolo interrumpido. Exceso de peticiones.</div>
-                <div class="mission-footer"><span>PID: 4421</span><span>QUEUE: FULL</span></div>
+                <div class="mission-desc">Bloqueo lineal en puertos principales. Firewall perimetral activado.</div>
+                <div class="mission-footer"><span>RANK: ROOK</span><span>QUEUE: FULL</span></div>
             </div>
+            
             <div class="mission-card" onclick="loadMission(5)">
-                <div class="mission-icon">🌐</div>
+                <div class="mission-icon">♛</div>
                 <div class="mission-title">NODE_05</div>
-                <div class="mission-desc">Anomalía en capa de transporte. Latencia inusual detectada.</div>
-                <div class="mission-footer"><span>NET: TCP/IP</span><span>FLAG: SYN_ACK</span></div>
+                <div class="mission-desc">Anomalía omnidireccional. El núcleo central está comprometido.</div>
+                <div class="mission-footer"><span>RANK: QUEEN</span><span>FLAG: SYN_ACK</span></div>
             </div>
+            
             <div class="mission-card" onclick="loadMission(6)">
-                <div class="mission-icon">☢️</div>
+                <div class="mission-icon">♚</div>
                 <div class="mission-title">NODE_06</div>
-                <div class="mission-desc">¡CRÍTICO! Archivo de sistema bloqueado. Firma digital no reconocida.</div>
-                <div class="mission-footer"><span>LEVEL: KERNEL</span><span>PERM: DENIED</span></div>
+                <div class="mission-desc">¡CRÍTICO! Acceso Root detectado. Firma digital maestra requerida.</div>
+                <div class="mission-footer"><span>RANK: KING</span><span>PERM: DENIED</span></div>
             </div>
         </div>
     </div>
@@ -420,6 +434,7 @@
             }
         };
 
+        // Copias para tener 6 niveles jugables
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
@@ -444,7 +459,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Iniciando conexión a NODE_0${id}...`, false, true);
+            log(`Conectando a NODE_0${id}... Iniciando protocolo.`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             
             drawBoard();
@@ -492,23 +507,12 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE AJEDREZ AVANZADO (VALIDACIÓN DE JAQUES) ---
+        // --- MOTOR DE VALIDACIÓN DE JAQUES ---
         
-        // Comprueba si una casilla está siendo atacada por el color 'attackerColor'
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
-            const dirPawn = attackerColor === 'white' ? -1 : 1; // Aunque visualmente es diferente, usaremos la lógica de que White es UpperCase
-
-            // 1. Peones
-            // Si el atacante es Blanco (UpperCase), ataca "hacia arriba" (index--)
-            // Si el atacante es Negro (LowerCase), ataca "hacia abajo" (index++)
-            // Nota: En nuestro array 0 es arriba, 7 es abajo. 
-            // Piezas blancas 'P' (usuario) empiezan abajo (row 6-7). Piezas negras 'p' (CPU) empiezan arriba (row 0-1).
-            // Entonces, un PEON BLANCO en (r,c) ataca (r-1, c-1) y (r-1, c+1).
-            // Un PEON NEGRO en (r,c) ataca (r+1, c-1) y (r+1, c+1).
             
-            // Aquí chequeamos INVERSAMENTE: ¿Hay un peón enemigo atacando MI casilla (r,c)?
-            // Si soy blanco, me atacan peones negros desde (r-1, c±1).
+            // 1. Peones
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
             const pawnChar = attackerColor === 'white' ? 'P' : 'p';
             if(pawnAttackRow >= 0 && pawnAttackRow < 8) {
@@ -524,7 +528,7 @@
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === knightChar) return true;
             }
 
-            // 3. Reyes (Adyacencia)
+            // 3. Reyes
             const kingChar = attackerColor === 'white' ? 'K' : 'k';
             const kingMoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let m of kingMoves) {
@@ -544,7 +548,7 @@
                     let p = boardToCheck[nr][nc];
                     if(p) {
                         if(p===rookChar || p===queenChar) return true;
-                        break; // Bloqueado por otra pieza
+                        break; 
                     }
                     i++;
                 }
@@ -566,37 +570,19 @@
                     i++;
                 }
             }
-
             return false;
         }
 
-        // Encuentra la posición del Rey
-        function findKing(color) {
-            const kingChar = color === 'white' ? 'K' : 'k';
-            for(let r=0; r<8; r++) {
-                for(let c=0; c<8; c++) {
-                    if(gameState.position[r][c] === kingChar) return {r, c};
-                }
-            }
-            return null; // No debería pasar
-        }
-
-        // Simula un movimiento para ver si deja al Rey en Jaque
         function testMove(fromR, fromC, toR, toC) {
-            // 1. Crear copia del tablero
             const tempBoard = JSON.parse(JSON.stringify(gameState.position));
             const p = tempBoard[fromR][fromC];
-            
-            // 2. Ejecutar movimiento en copia
             tempBoard[toR][toC] = p;
             tempBoard[fromR][fromC] = '';
 
-            // 3. Buscar mi Rey en el nuevo tablero
             let myKing = null;
             const myColor = (p === p.toUpperCase()) ? 'white' : 'black';
             const enemyColor = (myColor === 'white') ? 'black' : 'white';
 
-            // Buscar rey manualmente en tempBoard
             for(let r=0; r<8; r++) {
                 for(let c=0; c<8; c++) {
                     if(tempBoard[r][c] === (myColor==='white'?'K':'k')) {
@@ -606,56 +592,42 @@
                 }
             }
 
-            // 4. ¿Está mi rey atacado?
             if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) {
-                return false; // Movimiento ilegal (deja al rey en jaque)
+                return false; 
             }
-            
-            return true; // Movimiento legal
+            return true; 
         }
 
         function calculatePossibleMoves(r, c, piece) {
             let moves = [];
             const type = piece.toUpperCase();
             const isWhite = piece === piece.toUpperCase();
-            const enemyColor = isWhite ? 'black' : 'white';
             
-            // Función auxiliar para agregar movimiento si pasa las reglas básicas Y la simulación de Jaque
             const tryAdd = (tr, tc) => {
-                if(tr<0||tr>7||tc<0||tc>7) return false; // Fuera tablero
-                
+                if(tr<0||tr>7||tc<0||tc>7) return false; 
                 const target = gameState.position[tr][tc];
                 let moveType = null;
-
-                // Regla base: Casilla vacía o captura enemigo
                 if(!target) {
                     moveType = 'move';
                 } else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) {
                     moveType = 'capture';
                 } else {
-                    return false; // Bloqueado por pieza propia
+                    return false; 
                 }
-
-                // VALIDACIÓN CRÍTICA: Simular movimiento para ver si es legal (no hay auto-jaque)
                 if(testMove(r, c, tr, tc)) {
                     moves.push({r:tr, c:tc, type:moveType});
                 }
-
-                return (moveType === 'move'); // Retorna true si sigue camino (no captura ni bloquea)
+                return (moveType === 'move'); 
             };
 
-            // Lógica de piezas (Geometría)
             if(type === 'P') { 
-                const dir = -1; // Asumimos blancas siempre suben visualmente
-                // Movimiento normal
+                const dir = -1;
                 if(r+dir>=0 && !gameState.position[r+dir][c]) {
                     if(testMove(r,c,r+dir,c)) moves.push({r:r+dir, c:c, type:'move'});
-                    // Doble salto inicial
                     if(r===6 && !gameState.position[r+(dir*2)][c]) {
                          if(testMove(r,c,r+(dir*2),c)) moves.push({r:r+(dir*2), c:c, type:'move'});
                     }
                 }
-                // Capturas
                 if(r+dir>=0) {
                     if(c>0) {
                         const t = gameState.position[r+dir][c-1];
@@ -683,17 +655,14 @@
             if(type === 'K') {
                 [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc));
             }
-
             return moves;
         }
-
 
         // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(gameState.locked) return;
             
             const p = gameState.position[r][c];
-            // 1. Seleccionar pieza blanca
             if(p && p === p.toUpperCase()) {
                 gameState.selection = {r, c};
                 gameState.validMoves = calculatePossibleMoves(r, c, p);
@@ -701,7 +670,6 @@
                 return;
             }
             
-            // 2. Mover
             if(gameState.selection) {
                 const validMove = gameState.validMoves.find(m => m.r === r && m.c === c);
                 
