@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Cifrado - Acceso Root</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <title>Terminal de Ciberseguridad - Acceso Root</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #050505;
-            --bg-panel: #0a0a0a;
-            --primary: #00ff41; /* Verde Matrix */
-            --primary-dim: rgba(0, 255, 65, 0.1);
-            --danger: #ff003c;
-            --text-main: #e0e0e0;
-            --border: #333;
+            --bg-main: #020402;
+            --bg-panel: #0d110d;
+            --primary-green: #00ff41; 
+            --secondary-green: #003b00; 
+            --text-dim: #2e8b57;
+            --alert: #ff3333;
+            /* Color para los puntos de ayuda */
             --valid-indicator: rgba(0, 255, 65, 0.6);
         }
 
@@ -21,138 +21,147 @@
 
         body {
             font-family: 'Share Tech Mono', monospace;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--primary-green);
+            min-height: 100vh;
+            padding: 20px;
+            /* Efecto Scanlines */
+            background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+            background-size: 100% 4px;
             overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
         }
 
-        /* EFECTO CRT */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-
+        /* --- HEADER --- */
         header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--primary);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--primary-green);
+            padding-bottom: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background: var(--bg-panel);
-            position: relative;
-            z-index: 3;
+            align-items: flex-end;
         }
 
-        h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
-
-        /* PANTALLAS (Vistas) */
-        .screen {
-            display: none;
-            flex-grow: 1;
-            position: relative;
-            z-index: 3;
-            padding: 2rem;
-            animation: fadeIn 0.5s;
-        }
-        .screen.active { display: flex; }
-
-        /* VISTA 1: SELECCIÓN DE MISIONES (GRID) */
-        #mission-select-screen {
-            flex-direction: column;
-            align-items: center;
+        h1 {
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px var(--primary-green);
+            letter-spacing: 2px;
         }
 
-        .mission-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            width: 100%;
-            max-width: 1400px;
-            margin-top: 2rem;
-        }
-
-        /* ESTILO ORIGINAL DE TU ARCHIVO PARA LAS TARJETAS */
-        .mission-card {
-            background: #000;
-            border: 1px solid var(--border);
-            padding: 2rem;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mission-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px var(--primary-dim);
-            transform: translateY(-5px);
-        }
-
-        .mission-card::before {
-            content: "LOCKED";
-            position: absolute;
-            top: 20px; right: -30px;
-            background: var(--danger);
-            color: black;
-            font-size: 0.7rem;
-            padding: 5px 30px;
-            transform: rotate(45deg);
-            font-weight: bold;
-        }
-
-        .mission-icon { font-size: 2rem; margin-bottom: 1rem; color: var(--primary); }
-        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; font-weight: bold; }
-        .mission-desc { 
-            color: #888; font-size: 0.9rem; line-height: 1.4; font-family: 'Courier New', monospace; flex-grow: 1;
-        }
-        .mission-desc::before { content: "> "; color: var(--primary); }
-        
-        .mission-footer {
-            margin-top: 15px;
-            border-top: 1px dashed #333;
-            padding-top: 10px;
+        .sys-info {
+            text-align: right;
             font-size: 0.8rem;
-            color: var(--primary);
-            display: flex;
-            justify-content: space-between;
+            color: var(--text-dim);
+            line-height: 1.5;
         }
 
-        /* VISTA 2: INTERFAZ DE JUEGO */
+        /* --- PANTALLAS --- */
+        .screen { display: none; animation: fadeIn 0.5s; }
+        .screen.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- MENU GRID (6 NODOS) --- */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .problem-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--text-dim);
+            padding: 25px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 260px;
+            cursor: pointer;
+        }
+
+        .problem-card:hover {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
+            transform: translateY(-5px);
+            background-color: #0f1a0f;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed var(--secondary-green);
+            padding-bottom: 10px;
+        }
+
+        .problem-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .status-dot {
+            height: 10px; width: 10px;
+            background-color: var(--alert);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--alert);
+            animation: pulse 2s infinite;
+        }
+
+        .log-text {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
+            font-family: 'Courier New', Courier, monospace; 
+        }
+
+        .log-text::before { content: "> "; color: var(--primary-green); }
+
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 20px;
+            border-top: 1px solid var(--secondary-green);
+            padding-top: 10px;
+        }
+
+        .btn-connect {
+            position: absolute; bottom: 25px; right: 25px;
+            background: transparent; border: 1px solid var(--primary-green);
+            color: var(--primary-green); padding: 5px 15px;
+            font-family: 'Share Tech Mono', monospace; text-transform: uppercase;
+            cursor: pointer; opacity: 0; transition: opacity 0.3s;
+        }
+        .problem-card:hover .btn-connect { opacity: 1; }
+
+        /* --- INTERFAZ DE JUEGO --- */
         #game-interface {
-            display: none; /* Controlado por JS */
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
             grid-template-columns: 1fr 350px;
-            gap: 20px;
-            height: 100%;
-            padding: 0;
+            gap: 2rem;
         }
         #game-interface.active { display: grid; }
 
-        /* TABLERO */
-        .board-area {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #080808;
-            position: relative;
+        .board-container {
+            display: flex; justify-content: center; align-items: center;
+            background: #050505; border: 1px solid var(--text-dim);
+            padding: 20px; position: relative;
         }
 
         .board {
             display: grid;
             grid-template-columns: repeat(8, 70px);
             grid-template-rows: repeat(8, 70px);
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            border: 2px solid var(--primary-green);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
         }
 
         .square {
@@ -160,174 +169,280 @@
             font-size: 45px; cursor: pointer; position: relative;
         }
 
-        .light { background-color: #0f2615; color: var(--primary); }
-        .dark { background-color: #030f06; color: var(--primary); }
+        .light { background-color: #0a140a; color: var(--primary-green); }
+        .dark { background-color: #020502; color: var(--primary-green); }
         
         /* Highlight Selección */
-        .square.selected { background-color: rgba(255, 255, 0, 0.2) !important; }
-        .last-move { background-color: rgba(255, 255, 255, 0.1) !important; }
-
-        /* --- VISUALIZACIÓN DE MOVIMIENTOS (AÑADIDO) --- */
+        .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 10px var(--primary-green); }
         
-        /* 1. Punto Verde (Movimiento válido) */
+        /* --- VISUALIZACIÓN DE MOVIMIENTOS (JUGABILIDAD) --- */
+        
+        /* 1. Punto Verde (Movimiento válido a casilla vacía) */
         .valid-move::after {
             content: ''; position: absolute;
             width: 18px; height: 18px;
             background-color: var(--valid-indicator);
             border-radius: 50%;
-            box-shadow: 0 0 8px var(--primary);
+            box-shadow: 0 0 8px var(--primary-green);
         }
         
-        /* 2. Mira de Captura (Comer pieza) */
+        /* 2. Mira de Captura (Comer pieza enemiga) */
         .capture-move {
-            box-shadow: inset 0 0 15px var(--danger);
+            box-shadow: inset 0 0 15px var(--alert);
         }
         .capture-move::after {
             content: ''; position: absolute;
-            width: 70%; height: 70%;
-            border: 2px dashed var(--danger);
+            width: 80%; height: 80%;
+            border: 2px dashed var(--alert);
             box-sizing: border-box;
             border-radius: 50%;
             animation: spin 4s linear infinite;
         }
 
-        /* PANEL LATERAL */
+        /* --- PANEL LATERAL --- */
         .side-panel {
-            background: #0a0a0a;
-            border-left: 1px solid var(--border);
-            padding: 2rem;
-            display: flex;
-            flex-direction: column;
+            background: var(--bg-panel); border: 1px solid var(--primary-green);
+            padding: 20px; display: flex; flex-direction: column;
         }
 
-        .back-btn {
-            background: transparent;
-            border: 1px solid #444;
-            color: #888;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            font-family: 'Share Tech Mono', monospace;
-            margin-bottom: 1rem;
-            align-self: flex-start;
+        .terminal-output {
+            flex-grow: 1; background: black; border: 1px solid #333;
+            padding: 10px; font-size: 0.85rem; color: #ccc;
+            overflow-y: auto; font-family: 'Courier New', monospace;
+            margin-bottom: 20px; height: 300px;
         }
-        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .line { margin-bottom: 5px; }
+        .line.sys { color: var(--primary-green); }
+        .line.err { color: var(--alert); }
 
-        .terminal-log {
-            background: #000;
-            border: 1px solid #333;
-            flex-grow: 1;
-            max-height: 300px;
-            padding: 10px;
-            font-size: 0.8rem;
-            color: #aaa;
-            overflow-y: auto;
-            margin-bottom: 2rem;
+        .btn-action {
+            width: 100%; padding: 12px;
+            background: transparent; border: 1px solid var(--primary-green);
+            color: var(--primary-green); font-family: 'Share Tech Mono';
+            cursor: pointer; margin-bottom: 10px; text-transform: uppercase;
+            font-weight: bold; transition: 0.3s;
         }
-        .log-entry { margin-bottom: 5px; }
-        .log-entry::before { content: "> "; color: var(--primary); }
-        .log-entry.err { color: var(--danger); }
-        .log-entry.sys { color: var(--primary); }
-
-        /* INPUT SEGURO */
-        .cipher-box {
-            border: 2px dashed #444;
-            padding: 1.5rem;
-            position: relative;
-            transition: all 0.5s;
-        }
-        .cipher-box.unlocked {
-            border-color: var(--primary);
-            border-style: solid;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
-        }
+        .btn-action:hover { background: var(--primary-green); color: black; }
+        .btn-action:disabled { border-color: #555; color: #555; cursor: not-allowed; background: transparent; }
 
         .cipher-input {
-            width: 100%;
-            background: #111;
-            border: 1px solid #333;
-            color: white;
-            padding: 1rem;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 10px;
+            width: 100%; background: #111; border: 1px solid var(--primary-green);
+            color: white; padding: 10px; margin-bottom: 10px;
+            font-family: monospace; text-align: center;
         }
-        .cipher-input:disabled { background: #080808; color: #444; cursor: not-allowed; }
 
-        .btn-submit {
-            width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: black;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-submit:disabled { background: #333; color: #666; cursor: not-allowed; }
-
-        /* OVERLAYS */
+        /* --- OVERLAYS --- */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none; justify-content: center; align-items: center; z-index: 10;
-            backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.95); z-index: 100;
+            display: none; justify-content: center; align-items: center;
         }
         .overlay.active { display: flex; }
-
-        .data-packet {
-            border: 2px solid var(--primary);
-            padding: 2rem;
-            background: #000;
-            text-align: center;
-            max-width: 500px;
-            animation: glitch 0.3s;
+        .data-box {
+            border: 2px solid var(--primary-green); padding: 40px;
+            text-align: center; background: #000; box-shadow: 0 0 30px var(--primary-green);
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* Responsive */
         @media (max-width: 900px) {
-            #game-interface { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
-            .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
-            .square { font-size: 30px; }
-            .side-panel { padding: 1rem; }
+            #game-interface { grid-template-columns: 1fr; }
+            .board { grid-template-columns: repeat(8, 40px); grid-template-rows: repeat(8, 40px); }
+            .square { font-size: 28px; }
+            .capture-move::after { width: 100%; height: 100%; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
-        <div style="font-size: 0.8rem; color: #666;">SYS_ADMIN_ACCESS: <span style="color:var(--danger)">RESTRICTED</span></div>
+        <h1>SISTEMA_VIGILANCIA_V4</h1>
+        <div class="sys-info">
+            UPTIME: 404h 21m<br>
+            ENCRIPTACIÓN: AES-256<br>
+            USUARIO: INVITADO
+        </div>
     </header>
 
-    <div id="mission-select-screen" class="screen active">
-        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
-            // SELECCIONAR_VULNERABILIDAD
-        </h2>
+    <div id="menu-screen" class="screen active">
+        <div class="problem-grid">
+            
+            <div class="problem-card" onclick="loadLevel(1)">
+                <div class="card-header"><span class="problem-id"># NODE_01</span><span class="status-dot"></span></div>
+                <div class="log-text">ERROR 503: Servicio de autenticación no responde.<br>Gateway inaccesible.<br>Solicitando credenciales manuales...</div>
+                <div class="metadata"><span>PORT: 8080</span><span>LOCK: ACTIVE</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(2)">
+                <div class="card-header"><span class="problem-id"># NODE_02</span><span class="status-dot"></span></div>
+                <div class="log-text">Tráfico interceptado.<br>Checksum inválido.<br>Datos ilegibles en el stream de datos.</div>
+                <div class="metadata"><span>TYPE: STREAM</span><span>ENC: UNKNOWN</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(3)">
+                <div class="card-header"><span class="problem-id"># NODE_03</span><span class="status-dot"></span></div>
+                <div class="log-text">Violación de segmento detectada.<br>Volcado de pila incompleto.<br>Se requiere análisis de estructura interna.</div>
+                <div class="metadata"><span>ADDR: 0x0F4A</span><span>MEM: CORRUPT</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(4)">
+                <div class="card-header"><span class="problem-id"># NODE_04</span><span class="status-dot"></span></div>
+                <div class="log-text">Alerta de seguridad: Protocolo interrumpido.<br>Exceso de peticiones en cola.<br>Sistema inestable.</div>
+                <div class="metadata"><span>PID: 4421</span><span>STATUS: HALTED</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(5)">
+                <div class="card-header"><span class="problem-id"># NODE_05</span><span class="status-dot"></span></div>
+                <div class="log-text">Anomalía en capa de transporte.<br>Latencia inusual detectada en clúster externo.<br>Origen de datos oculto.</div>
+                <div class="metadata"><span>NET: TCP/IP</span><span>FLAG: SYN_ACK</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(6)">
+                <div class="card-header"><span class="problem-id"># NODE_06</span><span class="status-dot"></span></div>
+                <div class="log-text">¡CRÍTICO! Archivo del sistema bloqueado.<br>Firma digital no reconocida.<br>Acceso administrativo revocado.</div>
+                <div class="metadata"><span>LEVEL: KERNEL</span><span>PERM: DENIED</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="game-interface" class="screen">
+        <div class="board-container">
+            <div id="board" class="board"></div>
+
+            <div id="victory-overlay" class="overlay">
+                <div class="data-box">
+                    <h2 style="color:var(--primary-green); margin-bottom:10px;">ACCESO CONCEDIDO</h2>
+                    <p style="color:#ccc; margin-bottom:20px;">Hash desencriptado:</p>
+                    <div id="hash-display" style="font-size:1.5rem; font-weight:bold; margin-bottom:20px; border:1px dashed var(--primary-green); padding:10px;">---</div>
+                    <button class="btn-action" onclick="closeOverlay()">CERRAR Y COPIAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <button class="btn-action" onclick="returnToMenu()" style="border-color:#555; color:#888;">&lt; DESCONECTAR</button>
+            <div style="margin:10px 0; color:#555;">// CONSOLA DEL SISTEMA</div>
+            <div id="terminal" class="terminal-output"></div>
+
+            <div style="margin-top:auto;">
+                <p style="font-size:0.8rem; margin-bottom:5px; color:#555;">INPUT SEGURO:</p>
+                <input type="text" id="solution-input" class="cipher-input" placeholder="BLOQUEADO" disabled>
+                <button id="submit-btn" class="btn-action" onclick="verifySolution()" disabled>INJECT_PAYLOAD</button>
+                <div id="feedback-msg" style="text-align:center; height:20px; font-weight:bold; font-size:0.8rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN DE NIVELES (Mapeados para el ejemplo)
+        const levels = {
+            1: {
+                initial: [
+                    ['', '', '', '', 'b', '', '', ''],
+                    ['', '', 'p', '', 'B', '', 'p', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', 'P', '', '', 'p', 'P', ''],
+                    ['', 'P', '', 'P', '', 'P', '', 'P'],
+                    ['', '', 'p', '', 'K', '', 'p', ''],
+                    ['', '', 'P', '', 'B', '', 'P', ''],
+                    ['', '', '', '', 'k', '', '', '']
+                ],
+                moves: [
+                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
+                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
+                ],
+                code: "SQL-INJECT-01", answer: "ADMIN"
+            },
+            2: {
+                initial: [
+                    ['', '', 'k', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', 'K', '', '', ''],
+                    ['', '', '', 'N', 'B', '', '', ''],
+                    ['', '', '', '', 'N', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                moves: [
+                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
+                ],
+                code: "CESAR-ROT13", answer: "SECRET"
+            },
+            3: {
+                initial: [
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],
+                    ['', '', 'p', 'p', '', '', '', 'p'],
+                    ['', '', '', 'p', '', '', 'p', 'Q'],
+                    ['', '', '', 'R', '', 'p', '', ''],
+                    ['', '', '', '', 'B', 'B', 'P', ''],
+                    ['', '', '', 'P', 'R', '', 'P', ''],
+                    ['', '', '', '', '', '', 'P', 'K'],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                moves: [
+                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
+                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
+                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
+                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
+                ],
+                code: "STACK-OVERFLOW", answer: "ROOT"
+            }
+        };
+        // Replicamos niveles para 4, 5 y 6
+        levels[4] = levels[1];
+        levels[5] = levels[2];
+        levels[6] = levels[3];
+
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
-        <div class="mission-grid">
-            <div class="mission-card" onclick="loadMission(1)">
-                <div class="mission-icon">🔒</div>
-                <div class="mission-title">NODE_01</div>
-                <div class="mission-desc">ERROR 503: Servicio de autenticación no responde. Gateway inaccesible.</div>
-                <div class="mission-footer"><span>PORT: 8080</span><span>STATUS: ACTIVE</span></div>
-            </div>
+        let currentState = { level: 1, pos: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
 
-            <div class="mission-card" onclick="loadMission(2)">
-                <div class="mission-icon">📡</div>
-                <div class="mission-title">NODE_02</div>
-                <div class="mission-desc">Tráfico interceptado. Checksum incorrecto en el stream de datos.</div>
-                <div class="mission-footer"><span>TYPE: STREAM</span><span>ENC: UNKNOWN</span></div>
-            </div>
+        // --- SISTEMA DE GESTIÓN ---
 
-            <div class="mission-card" onclick="loadMission(3)">
-                <div class="mission-icon">💾</div>
-                <div class="mission-title">NODE_03</div>
-                <div class="mission-desc">Violación de segmento. Volcado de memoria incompleto.</div>
-                <div class="mission-footer"><span>ADDR: 0x0F4A</span><span>MEM: CORRUPT</span></div>
-            </div>
+        function loadLevel(lvl) {
+            currentState.level = lvl;
+            currentState.pos = JSON.parse(JSON.stringify(levels[lvl].initial));
+            currentState.moveIdx = 0;
+            currentState.selection = null;
+            currentState.locked = false;
+            currentState.validMoves = [];
+            
+            document.getElementById('menu-screen').classList.remove('active');
+            document.getElementById('game-interface').classList.add('active');
+            
+            lockInput();
+            document.getElementById('terminal').innerHTML = '';
+            log(`Iniciando conexión segura a NODE_0${lvl}...`, 'sys');
+            drawBoard();
+        }
 
-            <div class="mission-card" onclick="loadMission(4)">
-                <div
+        function returnToMenu() {
+            document.getElementById('game-interface').classList.remove('active');
+            document.getElementById('menu-screen').classList.add('active');
+        }
+
+        function drawBoard() {
+            const board = document.getElementById('board');
+            board.innerHTML = '';
+            
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    
+                    const p =
