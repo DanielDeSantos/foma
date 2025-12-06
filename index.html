@@ -451,7 +451,8 @@
             if (solvedLevels.has(id)) {
                 showWarning(
                     "PROBLEMA YA SOLUCIONADO", 
-                    "Ya has resuelto este problema. ¿Deseas volver a intentar resolver el problema?",
+                    "Ya has resuelto este problema.
+                    ¿Seguro que quieres volver a intentar resolver el problema?",
                     () => startLevel(id)
                 );
                 return;
@@ -780,7 +781,8 @@
 
                 if (hasOdd && hasEven) {
                     title = "¡PRUEBA SUPERADA!";
-                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. Pronto nos pondremos en contacto contigo.";
+                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo.
+                        Pronto nos pondremos en contacto contigo.";
                     icon = "🤝";
                     // Update Header
                     const globalStatus = document.getElementById('global-status');
