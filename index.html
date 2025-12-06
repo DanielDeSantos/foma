@@ -733,7 +733,7 @@
         }
 
         function missionComplete() {
-            log("REI ENEMIC CAPTURAT. XIFRATGE TRENCAT.", false, true);
+            log("REI ENEMIC CAPTURAT.", false, true);
             const mission = levels[currentMissionId];
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
@@ -797,8 +797,8 @@
 
                 if (hasOdd && hasEven) {
                     title = "PROVA SUPERADA!";
-                    msg = "Has demostrat domini tàctic en ambdós flancs. La prova de nivell ha estat superada exitosament.";
-                    icon = "🏆";
+                    msg = "Has demostrat ser un bon candidat i et concedirem una entrevista de treball. Aviat ens posarem en contacte amb vos.";
+                    icon = "🤝";
                     // Update Header
                     const globalStatus = document.getElementById('global-status');
                     globalStatus.innerText = "SUPERADA";
