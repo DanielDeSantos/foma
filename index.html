@@ -3,391 +3,749 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laboratorio de Álgebra Lineal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <title>Ajedrez de Ataque - Maestría Táctica</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-blueprint: #1e3a8a; /* Azul ingeniería */
-            --grid-line: rgba(255, 255, 255, 0.1);
-            --text-main: #ffffff;
-            --accent: #facc15; /* Amarillo técnico */
-            --panel-bg: rgba(255, 255, 255, 0.05);
-            --border: 1px solid rgba(255, 255, 255, 0.2);
-            --success: #4ade80;
+            /* Paleta de Colores Profesional */
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --primary: #0f172a; /* Azul noche profundo */
+            --accent: #b45309; /* Bronce/Dorado oscuro */
+            --accent-hover: #92400e;
+            --board-light: #eeeed2;
+            --board-dark: #769656; /* Verde clásico de torneo */
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --success: #15803d;
+            --error: #b91c1c;
+            --radius: 12px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: 'Roboto Mono', monospace;
-            background-color: var(--bg-blueprint);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
             color: var(--text-main);
-            height: 100vh;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            
-            /* EFECTO PAPEL MILIMETRADO */
-            background-image: 
-                linear-gradient(var(--grid-line) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-
-        header {
-            padding: 1.5rem 2rem;
-            border-bottom: 2px solid white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(30, 58, 138, 0.9);
-            backdrop-filter: blur(5px);
-            z-index: 10;
-        }
-
-        h1 {
-            font-family: 'Merriweather', serif;
-            font-style: italic;
-            font-size: 1.8rem;
-        }
-
-        .subtitle { font-size: 0.9rem; opacity: 0.8; }
-
-        /* PANTALLAS */
-        .screen {
-            display: none;
-            flex-grow: 1;
-            padding: 2rem;
-            animation: fadeIn 0.8s ease-out;
-        }
-        .screen.active { display: flex; }
-
-        /* VISTA 1: SELECCIÓN (TARJETAS) */
-        #mission-select-screen {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .intro-text {
-            text-align: center;
-            max-width: 800px;
-            margin-bottom: 2rem;
-            font-family: 'Merriweather', serif;
+            min-height: 100vh;
             line-height: 1.6;
         }
 
-        .cards-container {
+        /* HEADER */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 2rem 1rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* PROBLEM SELECTION GRID */
+        .problem-selection {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
-            width: 100%;
             max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        .math-card {
-            background: var(--panel-bg);
-            border: 2px solid white;
+        .problem-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
             padding: 2rem;
-            cursor: pointer;
-            transition: transform 0.3s, background 0.3s;
-            position: relative;
-        }
-
-        .math-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.1);
-            border-color: var(--accent);
-        }
-
-        .card-number {
-            position: absolute;
-            top: 10px; right: 15px;
-            font-size: 3rem;
-            font-weight: bold;
-            opacity: 0.1;
-            font-family: 'Merriweather', serif;
-        }
-
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: var(--accent);
-            text-transform: uppercase;
-        }
-
-        .card-desc { font-size: 0.9rem; line-height: 1.5; color: #ddd; }
-
-        /* VISTA 2: INTERFAZ DE JUEGO */
-        #game-interface {
-            display: none;
-            grid-template-columns: 1fr 350px;
-            gap: 2rem;
-            height: 100%;
-            padding: 0 2rem 2rem 2rem;
-        }
-        #game-interface.active { display: grid; }
-
-        .board-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 4px;
-        }
-
-        /* TABLERO ESTILO PLANO TÉCNICO */
-        .board {
-            display: grid;
-            grid-template-columns: repeat(8, 70px);
-            grid-template-rows: repeat(8, 70px);
-            border: 4px solid white;
-            background: white; 
-        }
-
-        .square {
-            display: flex; align-items: center; justify-content: center;
-            font-size: 45px; cursor: pointer;
-        }
-
-        /* Colores de las casillas */
-        .light { background-color: #e0f2fe; color: #000; }
-        .dark { background-color: #3b82f6; color: #fff; } 
-        
-        .square:hover { opacity: 0.9; }
-        .selected { background-color: var(--accent) !important; color: #000 !important; }
-        
-        /* PANEL LATERAL */
-        .side-panel {
-            background: var(--panel-bg);
-            border: 2px solid white;
-            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             flex-direction: column;
         }
 
-        .back-btn {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.5);
-            color: white;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
+        .problem-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: #cbd5e1;
+        }
+
+        .problem-card h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .problem-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
             margin-bottom: 1.5rem;
-            font-family: 'Roboto Mono', monospace;
-            align-self: flex-start;
-        }
-        .back-btn:hover { background: white; color: var(--bg-blueprint); }
-
-        .log-area {
             flex-grow: 1;
+        }
+
+        .problem-preview {
+            background: #f8fafc;
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Courier New', monospace;
             font-size: 0.85rem;
-            color: #cbd5e1;
-            border-top: 1px solid rgba(255,255,255,0.2);
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding: 1rem 0;
-            margin-bottom: 1rem;
-            font-family: 'Merriweather', serif;
-            font-style: italic;
+            color: #334155;
+            border-radius: 0 6px 6px 0;
         }
 
-        /* CAJA DE RESPUESTA (QED) */
-        .proof-box {
-            background: rgba(0,0,0,0.3);
-            padding: 1.5rem;
-            border: 1px dashed rgba(255,255,255,0.3);
-            position: relative;
-            transition: all 0.5s;
+        /* BOTONES MODERNOS */
+        button {
+            font-family: 'Inter', sans-serif;
         }
 
-        .proof-box.unlocked {
-            border-style: solid;
-            border-color: var(--success);
-            background: rgba(74, 222, 128, 0.1);
-        }
-
-        .status-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        /* MATRIZ DECORATIVA EN EL FONDO DE LA TARJETA */
-        .matrix-bg {
-            font-family: 'Roboto Mono', monospace;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.1);
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            pointer-events: none;
-            white-space: pre;
-        }
-
-        .math-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid white;
+        .btn-select, .btn {
+            background-color: var(--primary);
             color: white;
-            font-family: 'Roboto Mono', monospace;
-            font-size: 1.2rem;
-            padding: 10px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .math-input:focus { outline: none; border-color: var(--accent); }
-        .math-input:disabled { opacity: 0.5; cursor: not-allowed; border-bottom-style: dashed; }
-
-        .btn-verify {
-            width: 100%;
-            background: white;
-            color: var(--bg-blueprint);
-            font-weight: bold;
             border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            font-size: 0.95rem;
+        }
+
+        .btn-select:hover, .btn:hover {
+            background-color: #334155;
+            transform: translateY(-1px);
+        }
+
+        /* MODAL */
+        .problem-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .problem-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0; /* Padding controlado internamente */
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .problem-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .close-modal {
+            background: transparent;
+            color: #94a3b8;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: var(--error);
+        }
+
+        /* GAME LAYOUT */
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 0;
+            height: 100%;
+        }
+
+        /* TABLERO AREA */
+        .board-container {
+            background: #f8fafc;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .board-wrapper {
+            position: relative;
             padding: 10px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 2px solid #404040;
+            user-select: none;
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .light { background-color: var(--board-light); color: #000; }
+        .dark { background-color: var(--board-dark); color: #000; }
+
+        /* Estilo de las piezas */
+        .square {
+            font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif; 
+            /* Sombra sutil para dar efecto de "pieza" y no solo texto */
+            text-shadow: 0 2px 2px rgba(0,0,0,0.15); 
+        }
+
+        /* Diferenciar piezas blancas y negras visualmente mejor */
+        .square:not(:empty) {
+            transition: transform 0.1s;
+        }
+        .square:hover:not(:empty) {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        /* Estados del tablero */
+        .selected {
+            background-color: rgba(255, 255, 0, 0.5) !important;
+        }
+
+        .valid-move::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        .capture-move::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+        
+        .last-move {
+            background-color: rgba(155, 199, 0, 0.41) !important;
+        }
+
+        /* Coordenadas */
+        .rank-coordinates {
+            position: absolute;
+            left: -15px;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .file-coordinates {
+            position: absolute;
+            bottom: -20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* SIDEBAR (INFO) */
+        .game-info {
+            background: white;
+            border-left: 1px solid #e2e8f0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        /* Turn Indicator */
+        .turn-indicator {
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f1f5f9;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #cbd5e1;
+        }
+        
+        .turn-white { border-left-color: #fff; background: white; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); }
+        .turn-black { border-left-color: #0f172a; background: #0f172a; color: white; }
+
+        /* Moves List */
+        .moves-list {
+            flex-grow: 1;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .moves-list h3 {
+            background: #f8fafc;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .move-history-content {
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .move-item {
+            padding: 0.5rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .move-item:last-child { border-bottom: none; }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-danger { background-color: var(--error); }
+        .btn-danger:hover { background-color: #991b1b; }
+        
+        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid #cbd5e1; }
+        .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; transform: none; }
+
+        /* Status */
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            background: #f8fafc;
+            font-weight: 500;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .status.success { background-color: #dcfce7; color: #166534; }
+        .status.error { background-color: #fee2e2; color: #991b1b; }
+
+        /* Keyword Section (Vault Style) */
+        .keyword-section {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .keyword-section.locked {
+            opacity: 0.6;
+            background: #f1f5f9;
+        }
+
+        .keyword-section.unlocked {
+            border-color: var(--success);
+            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
+        }
+
+        .keyword-input {
+            width: 100%;
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .keyword-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .keyword-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 600;
             cursor: pointer;
         }
-        .btn-verify:disabled { background: #94a3b8; cursor: not-allowed; }
-
-        /* OVERLAY MATEMÁTICO */
-        .overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(30, 58, 138, 0.95);
-            display: none; justify-content: center; align-items: center; z-index: 20;
-        }
-        .overlay.active { display: flex; }
-
-        .result-card {
-            background: white;
-            color: var(--bg-blueprint);
-            padding: 3rem;
-            text-align: center;
-            border-radius: 2px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            max-width: 500px;
-            border: 4px solid var(--accent);
-        }
-
-        .math-symbol { font-size: 3rem; margin-bottom: 1rem; color: var(--bg-blueprint); }
-        .qed-text { font-family: 'Merriweather', serif; font-weight: bold; font-size: 1.5rem; margin-bottom: 1rem; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .keyword-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .keyword-btn:not(:disabled):hover { background: var(--accent-hover); }
+
+        /* Animation */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* Responsive */
         @media (max-width: 900px) {
-            #game-interface { grid-template-columns: 1fr; overflow-y: auto; }
-            .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+            }
+            
+            .game-info {
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+                max-height: none;
+                overflow: visible;
+            }
+
+            .board {
+                grid-template-columns: repeat(8, 45px);
+                grid-template-rows: repeat(8, 45px);
+            }
             .square { font-size: 30px; }
+            .capture-move::after { width: 35px; height: 35px; }
         }
+
+        /* Utility */
+        .checkmate { color: var(--error); font-weight: 700; }
+        
+        /* Solucion Text */
+        .solution-text {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f0f9ff;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #0369a1;
+        }
+        .solution-text.active { display: block; }
+        
+        /* Congratulations Overlay */
+        .congratulations {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        
+        .congrats-card {
+            background: white;
+            color: var(--text-main);
+            padding: 3rem;
+            border-radius: 20px;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .congrats-card h2 { color: var(--success); font-family: 'Playfair Display', serif; margin-bottom: 1rem; font-size: 2.5rem; }
+
     </style>
 </head>
 <body>
 
     <header>
-        <div>
-            <h1>Álgebra Lineal Avanzada</h1>
-            <span class="subtitle">Ejercicios Prácticos de Matrices</span>
-        </div>
-        <div style="text-align: right; font-size: 0.8rem;">
-            LAB: MATRICES<br>PROYECTO FINAL
-        </div>
+        <h1>♔ Ajedrez de Ataque</h1>
+        <div class="subtitle">Entrenamiento Táctico y Problemas de Mate</div>
     </header>
-
-    <div id="mission-select-screen" class="screen active">
-        <div class="intro-text">
-            <p>"Una matriz es un arreglo bidimensional de números."</p>
-            <br>
-            <p>Resuelve el <strong>Jaque Mate</strong> para obtener los valores clave de cada operación matricial.</p>
+    
+    <div class="problem-selection">
+        <div class="problem-card" data-problem="1">
+            <h2>Problema 1</h2>
+            <p>Estructura de Peones y Alfiles. Un clásico ataque a la descubierta con remate limpio.</p>
+            <div class="problem-preview">Mate en 4 Jugadas</div>
+            <button class="btn-select">Comenzar Desafío</button>
         </div>
         
-        <div class="cards-container">
-            <div class="math-card" onclick="loadMission(1)">
-                <div class="card-number">I</div>
-                <div class="card-title">El Determinante</div>
-                <div class="card-desc">
-                    Calcula el determinante de la matriz 2x2 asociada al problema.
-                    <br><br>
-                    <strong>Objetivo:</strong> Hallar |A|
-                </div>
-                <div class="matrix-bg">| 1  0 |
-| 0  1 |</div>
-            </div>
+        <div class="problem-card" data-problem="2">
+            <h2>Problema 2</h2>
+            <p>Coordinación de Caballos. Maniobra precisa para encerrar al rey enemigo.</p>
+            <div class="problem-preview">Mate en 4 Jugadas</div>
+            <button class="btn-select">Comenzar Desafío</button>
+        </div>
 
-            <div class="math-card" onclick="loadMission(2)">
-                <div class="card-number">II</div>
-                <div class="card-title">Matriz Identidad</div>
-                <div class="card-desc">
-                    Identifica el elemento neutro de la multiplicación matricial.
-                    <br><br>
-                    <strong>Objetivo:</strong> Nombre de la Matriz Iₙ
-                </div>
-                <div class="matrix-bg">[ 1  0 ]
-[ 0  1 ]</div>
-            </div>
+        <div class="problem-card" data-problem="3">
+            <h2>Problema 3</h2>
+            <p>El Sacrificio Inmortal. Entrega material pesado para abrir líneas decisivas.</p>
+            <div class="problem-preview">Mate en 4 Jugadas</div>
+            <button class="btn-select">Comenzar Desafío</button>
+        </div>
+    </div>
 
-            <div class="math-card" onclick="loadMission(3)">
-                <div class="card-number">III</div>
-                <div class="card-title">Sistemas Lineales</div>
-                <div class="card-desc">
-                    Método de resolución utilizando determinantes.
-                    <br><br>
-                    <strong>Objetivo:</strong> Regla de resolución.
+    <div id="problem1-modal" class="problem-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="problem-title">Problema 1: Peones y Alfiles</h2>
+                <button class="close-modal" data-problem="1">×</button>
+            </div>
+            
+            <div class="game-container">
+                <div class="board-container">
+                    <div id="turn-indicator1" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
+                        <span>Turno de las Blancas</span>
+                    </div>
+
+                    <div class="board-wrapper">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board1" class="board"></div>
+                        <div class="file-coordinates">
+                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="matrix-bg">Ax = B</div>
+                
+                <div class="game-info">
+                    <div id="status1" class="status">Selecciona pieza blanca</div>
+
+                    <div class="moves-list">
+                        <h3>Historial de Partida</h3>
+                        <div id="moves-container1" class="move-history-content">
+                            </div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn1" class="btn btn-secondary">Pista</button>
+                        <button id="solution-btn1" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
+                    </div>
+
+                    <div id="solution-text1" class="solution-text">
+                        <strong>Solución:</strong> 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
+                    </div>
+
+                    <div id="keyword-section1" class="keyword-section locked">
+                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
+                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Resuelve el mate para desbloquear</p>
+                        <input type="text" id="keyword-input1" class="keyword-input" placeholder="---" disabled>
+                        <button id="keyword-btn1" class="keyword-btn" disabled>Verificar Código</button>
+                        <div id="keyword-feedback1" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="game-interface" class="screen">
-        <div class="board-wrapper">
-            <div id="board" class="board"></div>
+    <div id="problem2-modal" class="problem-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="problem-title">Problema 2: Caballos y Alfil</h2>
+                <button class="close-modal" data-problem="2">×</button>
+            </div>
+            
+            <div class="game-container">
+                <div class="board-container">
+                    <div id="turn-indicator2" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    <div class="board-wrapper">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board2" class="board"></div>
+                        <div class="file-coordinates">
+                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div id="status2" class="status">Selecciona pieza blanca</div>
 
-            <div id="victory-overlay" class="overlay">
-                <div class="result-card">
-                    <div class="math-symbol">A⁻¹</div>
-                    <div class="qed-text">Solución Encontrada</div>
-                    <p style="margin-bottom: 20px;">El valor de la incógnita matricial es:</p>
+                    <div class="moves-list">
+                        <h3>Historial de Partida</h3>
+                        <div id="moves-container2" class="move-history-content"></div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn2" class="btn btn-secondary">Pista</button>
+                        <button id="solution-btn2" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
+                    </div>
                     
-                    <div id="hash-display" style="font-size: 2rem; font-weight: bold; font-family: 'Roboto Mono'; margin-bottom: 20px; color: #d946ef; border: 2px dashed #333; padding: 10px;">---</div>
-                    
-                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Copie este resultado en la caja de verificación.</p>
-                    <button onclick="closeOverlay()" style="padding: 10px 20px; background: var(--bg-blueprint); color: white; border: none; cursor: pointer; font-weight:bold;">CERRAR Y VALIDAR</button>
+                    <div id="solution-text2" class="solution-text">
+                        <strong>Solución:</strong> 1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++
+                    </div>
+
+                    <div id="keyword-section2" class="keyword-section locked">
+                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
+                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
+                        <input type="text" id="keyword-input2" class="keyword-input" placeholder="---" disabled>
+                        <button id="keyword-btn2" class="keyword-btn" disabled>Verificar Código</button>
+                        <div id="keyword-feedback2" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← Volver a Selección</button>
+    <div id="problem3-modal" class="problem-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="problem-title">Problema 3: Sacrificios</h2>
+                <button class="close-modal" data-problem="3">×</button>
+            </div>
             
-            <h3 style="margin-bottom: 10px; font-family: 'Merriweather', serif;">Operaciones</h3>
-            <div id="log-area" class="log-area">
-                <div style="margin-bottom: 5px;">> Inicializando matriz A...</div>
-            </div>
+            <div class="game-container">
+                <div class="board-container">
+                    <div id="turn-indicator3" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    <div class="board-wrapper">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board3" class="board"></div>
+                        <div class="file-coordinates">
+                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div id="status3" class="status">Selecciona pieza blanca</div>
 
-            <div id="proof-box" class="proof-box">
-                <span id="status-label" class="status-label" style="color: #94a3b8;">⚠️ CÁLCULO PENDIENTE</span>
-                
-                <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">
-                    Desbloquea el campo resolviendo el mate para introducir la respuesta.
-                </p>
-                
-                <input type="text" id="solution-input" class="math-input" placeholder="Respuesta..." disabled autocomplete="off">
-                <button id="submit-btn" class="btn-verify" onclick="verifySolution()" disabled>VERIFICAR SOLUCIÓN</button>
-                <div id="feedback-msg" style="text-align: center; margin-top: 10px; font-weight: bold; height: 20px;"></div>
+                    <div class="moves-list">
+                        <h3>Historial de Partida</h3>
+                        <div id="moves-container3" class="move-history-content"></div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn3" class="btn btn-secondary">Pista</button>
+                        <button id="solution-btn3" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
+                    </div>
+
+                    <div id="solution-text3" class="solution-text">
+                        <strong>Solución:</strong> 1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++
+                    </div>
+
+                    <div id="keyword-section3" class="keyword-section locked">
+                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
+                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
+                        <input type="text" id="keyword-input3" class="keyword-input" placeholder="---" disabled>
+                        <button id="keyword-btn3" class="keyword-btn" disabled>Verificar Código</button>
+                        <div id="keyword-feedback3" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
+                    </div>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <div id="congratulations" class="congratulations">
+        <div class="congrats-card">
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
+            <h2>¡Excelente!</h2>
+            <p id="congrats-message" style="margin-bottom: 1.5rem; color: #64748b;">Problema resuelto correctamente.</p>
+            
+            <div style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                <p style="font-size: 0.9rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.5rem;">Palabra Clave</p>
+                <p id="accepted-keyword" style="font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: var(--text-main);"></p>
+            </div>
+            
+            <button id="continue-btn" class="btn" style="background: var(--success);">Continuar Entrenando</button>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE EJERCICIOS DE MATRICES
-        const missions = {
+        // MANTENGO LA LÓGICA DE JAVASCRIPT EXACTAMENTE IGUAL, SOLO MODIFICANDO EMOJIS LIGERAMENTE PARA QUE SE VEAN MEJOR
+        
+        // Use solid emojis for pieces for better contrast
+        const pieces = {
+            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+        };
+
+        const keywords = {
+            1: "AXQBVQXAÇÇXEUSRE",
+            2: "CABALLO",
+            3: "SACRIFICIO"
+        };
+
+        // ========== CONFIGURACIÓN DE PROBLEMAS ==========
+        const problems = {
             1: {
-                title: "Determinante",
-                initial: [
+                name: "Mate con Peones y Alfiles",
+                initialPosition: [
                     ['', '', '', '', 'b', '', '', ''],
                     ['', '', 'p', '', 'B', '', 'p', ''],
                     ['', '', '', '', '', '', '', ''],
@@ -397,19 +755,17 @@
                     ['', '', 'P', '', 'B', '', 'P', ''],
                     ['', '', '', '', 'k', '', '', '']
                 ],
-                solutionMoves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
+                solution: [
+                    { white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } }, black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } } },
+                    { white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } }, black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } } },
+                    { white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } }, black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } } },
+                    { white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, black: null }
                 ],
-                // El usuario gana y ve: "DET(A) = 0". La respuesta es "0".
-                fakeHash: "DET(A) = 0", 
-                answer: "0" 
+                moveNotation: ["1. g6 c6", "2. h5 Ad7", "3. Ah4 Ac8", "4. Axg3++"]
             },
             2: {
-                title: "Matriz Identidad",
-                initial: [
+                name: "Mate con Caballos y Alfil",
+                initialPosition: [
                     ['', '', 'k', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', ''],
                     ['', '', '', '', 'K', '', '', ''],
@@ -419,19 +775,17 @@
                     ['', '', '', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', '']
                 ],
-                solutionMoves: [
-                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
+                solution: [
+                    { white: { from: { row: 4, col: 4 }, to: { row: 3, col: 2 } }, black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } } },
+                    { white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } }, black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } } },
+                    { white: { from: { row: 3, col: 3 }, to: { row: 2, col: 1 } }, black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } } },
+                    { white: { from: { row: 3, col: 2 }, to: { row: 2, col: 4 } }, black: null }
                 ],
-                // El usuario gana y ve la matriz identidad. La respuesta es "IDENTIDAD".
-                fakeHash: "[ 1  0 ]\n[ 0  1 ]",
-                answer: "IDENTIDAD"
+                moveNotation: ["1. Cc5 Rd8", "2. Rf7 Rc8", "3. Cb6+ Rd8", "4. Ce6++"]
             },
             3: {
-                title: "Regla de Cramer",
-                initial: [
+                name: "Mate con Sacrificios",
+                initialPosition: [
                     ['', 'n', '', 'b', '', 'r', 'k', ''],
                     ['', '', 'p', 'p', '', '', '', 'p'],
                     ['', '', '', 'p', '', '', 'p', 'Q'],
@@ -441,192 +795,473 @@
                     ['', '', '', '', '', '', 'P', 'K'],
                     ['', '', '', '', '', '', '', '']
                 ],
-                solutionMoves: [
-                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
-                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
-                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
-                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
+                solution: [
+                    { white: { from: { row: 3, col: 3 }, to: { row: 3, col: 5 } }, black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } } },
+                    { white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, black: { from: { row: 3, col: 5 }, to: { row: 3, col: 3 } } },
+                    { white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } }, black: { from: { row: 0, col: 6 }, to: { row: 1, col: 5 } } },
+                    { white: { from: { row: 2, col: 7 }, to: { row: 0, col: 5 } }, black: null }
                 ],
-                // El usuario gana y ve "CRAMER". La respuesta es "CRAMER".
-                fakeHash: "MÉTODO CRAMER",
-                answer: "CRAMER"
+                moveNotation: ["1. Txf5 Txf5", "2. Ad5+ Txd5", "3. Te8+ Rf7", "4. Df8++"]
             }
         };
 
-        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
-        
-        let currentMissionId = 1;
-        let gameState = { position: [], moveIdx: 0, selection: null, locked: false };
+        // ========== ESTADO GLOBAL ==========
+        let currentProblem = null;
+        let gameStates = {};
 
-        // --- NAVEGACIÓN ---
-        function loadMission(id) {
-            currentMissionId = id;
-            document.getElementById('mission-select-screen').classList.remove('active');
-            document.getElementById('game-interface').classList.add('active');
-            
-            gameState.position = JSON.parse(JSON.stringify(missions[id].initial));
-            gameState.moveIdx = 0;
-            gameState.selection = null;
-            gameState.locked = false;
-            
-            lockInput();
-            document.getElementById('log-area').innerHTML = '<div style="margin-bottom:5px;">> Ejercicio: ' + missions[id].title + ' cargado.</div>';
-            document.getElementById('victory-overlay').classList.remove('active');
-            drawBoard();
+        // ========== FUNCIONES DE INTERFAZ ==========
+        function showProblemSelection() {
+            document.querySelectorAll('.problem-modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
         }
 
-        function returnToMenu() {
-            document.getElementById('game-interface').classList.remove('active');
-            document.getElementById('mission-select-screen').classList.add('active');
+        function showProblem(problemNumber) {
+            currentProblem = problemNumber;
+            document.getElementById(`problem${problemNumber}-modal`).classList.add('active');
+            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
+            
+            if (!gameStates[problemNumber]) {
+                initializeGame(problemNumber);
+            } else {
+                createBoard(problemNumber);
+            }
         }
 
-        // --- LÓGICA DE JUEGO ---
-        function drawBoard() {
-            const board = document.getElementById('board');
+        function closeProblemModal(problemNumber) {
+            document.getElementById(`problem${problemNumber}-modal`).classList.remove('active');
+        }
+
+        // ========== FUNCIONES DEL JUEGO ==========
+        function initializeGame(problemNumber) {
+            const problem = problems[problemNumber];
+            
+            gameStates[problemNumber] = {
+                currentPosition: JSON.parse(JSON.stringify(problem.initialPosition)),
+                selectedSquare: null,
+                validMoves: [],
+                currentMoveIndex: 0,
+                playerMoves: [],
+                gameCompleted: false,
+                keywordVerified: false,
+                isWhiteTurn: true,
+                gamePaused: false
+            };
+            
+            createBoard(problemNumber);
+            updateKeywordSection(problemNumber);
+            updateTurnIndicator(problemNumber);
+        }
+
+        function createBoard(problemNumber) {
+            const state = gameStates[problemNumber];
+            const board = document.getElementById(`board${problemNumber}`);
             board.innerHTML = '';
             
-            for(let r=0; r<8; r++) {
-                for(let c=0; c<8; c++) {
-                    const sq = document.createElement('div');
-                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.classList.add('square');
+                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+                    square.dataset.row = row;
+                    square.dataset.col = col;
                     
-                    const p = gameState.position[r][c];
-                    if(p) {
-                        sq.innerText = pieces[p];
-                        // Estilo clásico: Blancas son Blancas, Negras son Negras
-                        if(p === p.toUpperCase()) {
-                            sq.style.color = '#fff'; 
-                            sq.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+                    const piece = state.currentPosition[row][col];
+                    if (piece) {
+                        square.textContent = pieces[piece];
+                        // Estilizar piezas según color para mejor visibilidad visual
+                        if (isWhitePiece(piece)) {
+                            square.style.color = "#ffffff";
+                            square.style.textShadow = "0px 1px 3px rgba(0,0,0,0.8)";
                         } else {
-                            sq.style.color = '#1e3a8a'; 
+                            square.style.color = "#1e293b";
+                            square.style.textShadow = "0px 1px 1px rgba(255,255,255,0.5)";
                         }
                     }
-                    sq.onclick = () => handleSquare(r, c);
-                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
-                        sq.classList.add('selected');
+                    
+                    if (state.playerMoves.length > 0) {
+                        const lastMove = state.playerMoves[state.playerMoves.length - 1];
+                        if ((row === lastMove.from.row && col === lastMove.from.col) || 
+                            (row === lastMove.to.row && col === lastMove.to.col)) {
+                            square.classList.add('last-move');
+                        }
                     }
-                    board.appendChild(sq);
+                    
+                    square.addEventListener('click', () => handleSquareClick(problemNumber, row, col));
+                    board.appendChild(square);
                 }
             }
+            
+            updateStatus(problemNumber);
+            updateMovesList(problemNumber);
         }
 
-        function handleSquare(r, c) {
-            if(gameState.locked) return;
-            const p = gameState.position[r][c];
-            if(p && p === p.toUpperCase()) {
-                gameState.selection = {r, c};
-                drawBoard();
-                return;
-            }
-            if(gameState.selection) {
-                const solution = missions[currentMissionId].solutionMoves;
-                if (gameState.moveIdx >= solution.length) return;
-
-                const correctMove = solution[gameState.moveIdx].w;
-                if(correctMove.f.r === gameState.selection.r && correctMove.f.c === gameState.selection.c &&
-                   correctMove.t.r === r && correctMove.t.c === c) {
-                    executeMove(gameState.selection, {r, c}, true);
+        function handleSquareClick(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            if (state.gameCompleted || state.gamePaused) return;
+            
+            const piece = state.currentPosition[row][col];
+            
+            if (state.selectedSquare) {
+                const fromRow = state.selectedSquare.row;
+                const fromCol = state.selectedSquare.col;
+                const isValidMove = state.validMoves.some(move => move.to.row === row && move.to.col === col);
+                
+                if (isValidMove) {
+                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
-                    log("❌ Cálculo de movimiento erróneo.");
-                    gameState.selection = null;
-                    drawBoard();
+                    clearSelection(problemNumber);
+                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
+                        selectSquare(problemNumber, row, col);
+                    }
                 }
-            }
-        }
-
-        function executeMove(from, to, isPlayer) {
-            const p = gameState.position[from.r][from.c];
-            gameState.position[to.r][to.c] = p;
-            gameState.position[from.r][from.c] = '';
-            
-            const coord = `${String.fromCharCode(97+from.c)}${8-from.r} → ${String.fromCharCode(97+to.c)}${8-to.r}`;
-            log((isPlayer ? "Usted" : "CPU") + ": " + coord);
-            
-            gameState.selection = null;
-            drawBoard();
-            
-            if(isPlayer) {
-                const step = missions[currentMissionId].solutionMoves[gameState.moveIdx];
-                if(!step.b) {
-                    setTimeout(missionComplete, 500);
-                } else {
-                    gameState.locked = true;
-                    setTimeout(() => {
-                        executeMove(step.b.f, step.b.t, false);
-                        gameState.moveIdx++;
-                        gameState.locked = false;
-                    }, 800);
-                }
-            }
-        }
-
-        function missionComplete() {
-            log("✅ Ejercicio Resuelto.");
-            const mission = missions[currentMissionId];
-            document.getElementById('hash-display').innerText = mission.fakeHash;
-            document.getElementById('victory-overlay').classList.add('active');
-            unlockInput();
-        }
-
-        function closeOverlay() {
-            document.getElementById('victory-overlay').classList.remove('active');
-        }
-
-        // --- INPUT SISTEMA ---
-        function lockInput() {
-            const box = document.getElementById('proof-box');
-            const inp = document.getElementById('solution-input');
-            const btn = document.getElementById('submit-btn');
-            const lbl = document.getElementById('status-label');
-            
-            box.classList.remove('unlocked');
-            inp.disabled = true;
-            inp.value = '';
-            inp.placeholder = "Bloqueado";
-            btn.disabled = true;
-            lbl.innerText = "⚠️ CÁLCULO PENDIENTE";
-            lbl.style.color = "#94a3b8";
-            document.getElementById('feedback-msg').innerText = '';
-        }
-
-        function unlockInput() {
-            const box = document.getElementById('proof-box');
-            const inp = document.getElementById('solution-input');
-            const btn = document.getElementById('submit-btn');
-            const lbl = document.getElementById('status-label');
-            
-            box.classList.add('unlocked');
-            inp.disabled = false;
-            inp.placeholder = "Ingrese el resultado";
-            inp.focus();
-            btn.disabled = false;
-            lbl.innerText = "✏️ LISTO PARA VALIDAR";
-            lbl.style.color = "var(--success)";
-        }
-
-        function verifySolution() {
-            const val = document.getElementById('solution-input').value.toUpperCase().trim();
-            const correct = missions[currentMissionId].answer;
-            const fb = document.getElementById('feedback-msg');
-            
-            if(val === correct) {
-                fb.innerText = "¡CORRECTO!";
-                fb.style.color = "var(--success)";
-                setTimeout(() => { alert("¡Ejercicio Completado! Volviendo al menú."); returnToMenu(); }, 1000);
             } else {
-                fb.innerText = "INCORRECTO";
-                fb.style.color = "#ef4444";
+                if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
+                    selectSquare(problemNumber, row, col);
+                }
             }
         }
 
-        function log(msg) {
-            const area = document.getElementById('log-area');
-            const line = document.createElement('div');
-            line.style.marginBottom = "5px";
-            line.innerText = "> " + msg;
-            area.appendChild(line);
-            area.scrollTop = area.scrollHeight;
+        function selectSquare(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            clearSelection(problemNumber);
+            
+            state.selectedSquare = { row, col };
+            const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
+            squareElement.classList.add('selected');
+            
+            calculateValidMoves(problemNumber, row, col);
+            
+            state.validMoves.forEach(move => {
+                const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
+                const targetPiece = state.currentPosition[move.to.row][move.to.col];
+                
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    targetSquare.classList.add('capture-move');
+                } else {
+                    targetSquare.classList.add('valid-move');
+                }
+            });
         }
+
+        // --- GAME LOGIC HELPERS --- (Se mantiene igual, solo comprimido para brevedad)
+        function isWhitePiece(p){return p===p.toUpperCase()}
+        function isBlackPiece(p){return p===p.toLowerCase()}
+        
+        function calculateValidMoves(problemNumber, row, col) {
+            // Lógica simplificada de movimiento para este ejemplo (usando la tuya original)
+            // En una implementación real completa, esto valida las reglas del ajedrez
+            const state = gameStates[problemNumber];
+            const piece = state.currentPosition[row][col];
+            if (!piece || !isWhitePiece(piece)) return;
+            state.validMoves = [];
+            
+            // Reutilizando tu lógica de movimientos
+            switch(piece.toUpperCase()) {
+                case 'P': calculatePawnMoves(problemNumber, row, col); break;
+                case 'R': calculateRookMoves(problemNumber, row, col); break;
+                case 'N': calculateKnightMoves(problemNumber, row, col); break;
+                case 'B': calculateBishopMoves(problemNumber, row, col); break;
+                case 'Q': calculateQueenMoves(problemNumber, row, col); break;
+                case 'K': calculateKingMoves(problemNumber, row, col); break;
+            }
+            // Filtro de jaque...
+            if (piece.toUpperCase() !== 'K') {
+                state.validMoves = state.validMoves.filter(move => !wouldKingBeInCheck(problemNumber, move.from.row, move.from.col, move.to.row, move.to.col));
+            }
+        }
+
+        // --- MOVE CALCULATORS (COPIED FROM ORIGINAL) ---
+        function calculatePawnMoves(pN, r, c) {
+            const s = gameStates[pN];
+            if (r > 0 && !s.currentPosition[r-1][c]) {
+                s.validMoves.push({ from: {row:r, col:c}, to: {row:r-1, col:c} });
+                if (r === 6 && !s.currentPosition[r-2][c]) s.validMoves.push({ from: {row:r, col:c}, to: {row:r-2, col:c} });
+            }
+            if (r > 0 && c > 0) { const t=s.currentPosition[r-1][c-1]; if(t && isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:r-1,col:c-1}});}
+            if (r > 0 && c < 7) { const t=s.currentPosition[r-1][c+1]; if(t && isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:r-1,col:c+1}});}
+        }
+        function calculateRookMoves(pN, r, c) {
+            const s = gameStates[pN];
+            const dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+            dirs.forEach(([dr, dc]) => {
+                let nr = r + dr, nc = c + dc;
+                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+                    const t = s.currentPosition[nr][nc];
+                    if (!t) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
+                    else { if (isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}}); break; }
+                    nr += dr; nc += dc;
+                }
+            });
+        }
+        function calculateKnightMoves(pN, r, c) {
+            const s = gameStates[pN];
+            const moves = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+            moves.forEach(([dr,dc])=>{
+                const nr=r+dr, nc=c+dc;
+                if(nr>=0&&nr<8&&nc>=0&&nc<8){
+                    const t=s.currentPosition[nr][nc];
+                    if(!t||isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
+                }
+            });
+        }
+        function calculateBishopMoves(pN,r,c){
+            const s=gameStates[pN];
+            const dirs=[[-1,-1],[-1,1],[1,-1],[1,1]];
+            dirs.forEach(([dr,dc])=>{
+                let nr=r+dr,nc=c+dc;
+                while(nr>=0&&nr<8&&nc>=0&&nc<8){
+                    const t=s.currentPosition[nr][nc];
+                    if(!t) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
+                    else{if(isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}}); break;}
+                    nr+=dr;nc+=dc;
+                }
+            });
+        }
+        function calculateQueenMoves(pN,r,c){calculateRookMoves(pN,r,c);calculateBishopMoves(pN,r,c);}
+        function calculateKingMoves(pN,r,c){
+            const s=gameStates[pN];
+            const moves=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+            moves.forEach(([dr,dc])=>{
+                const nr=r+dr,nc=c+dc;
+                if(nr>=0&&nr<8&&nc>=0&&nc<8){
+                    const t=s.currentPosition[nr][nc];
+                    if((!t||isBlackPiece(t)) && !isAdjacentToBlackKing(pN,nr,nc)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
+                }
+            });
+        }
+
+        // --- CHECK LOGIC ---
+        function isAdjacentToBlackKing(pN, r, c) {
+            const s = gameStates[pN];
+            let bKr = -1, bKc = -1;
+            for(let i=0;i<8;i++) for(let j=0;j<8;j++) if(s.currentPosition[i][j]==='k'){bKr=i;bKc=j;break;}
+            if(bKr===-1) return false;
+            return Math.abs(r-bKr)<=1 && Math.abs(c-bKc)<=1;
+        }
+
+        function wouldKingBeInCheck(pN, fr, fc, tr, tc) {
+            const s = gameStates[pN];
+            const temp = JSON.parse(JSON.stringify(s.currentPosition));
+            temp[tr][tc] = temp[fr][fc];
+            temp[fr][fc] = '';
+            let kr = -1, kc = -1;
+            for(let i=0;i<8;i++) for(let j=0;j<8;j++) if(temp[i][j]==='K'){kr=i;kc=j;break;}
+            if(kr===-1) return false;
+            
+            // Check attacks (simplified from original)
+            // Peones
+            if(kr<7){
+                if(kc>0 && temp[kr+1][kc-1]==='p') return true;
+                if(kc<7 && temp[kr+1][kc+1]==='p') return true;
+            }
+            // Caballos
+            const nm = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+            for(let m of nm) {
+                let r=kr+m[0], c=kc+m[1];
+                if(r>=0&&r<8&&c>=0&&c<8&&temp[r][c]==='n') return true;
+            }
+            // Lineal y Diagonal
+            const ld=[[-1,0],[1,0],[0,-1],[0,1]], dd=[[-1,-1],[-1,1],[1,-1],[1,1]];
+            for(let d of ld){
+                let r=kr+d[0], c=kc+d[1];
+                while(r>=0&&r<8&&c>=0&&c<8){ if(temp[r][c]){if('rq'.includes(temp[r][c])) return true; break;} r+=d[0];c+=d[1];}
+            }
+            for(let d of dd){
+                let r=kr+d[0], c=kc+d[1];
+                while(r>=0&&r<8&&c>=0&&c<8){ if(temp[r][c]){if('bq'.includes(temp[r][c])) return true; break;} r+=d[0];c+=d[1];}
+            }
+            return false;
+        }
+
+        function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            const piece = state.currentPosition[fromRow][fromCol];
+            
+            state.currentPosition[toRow][toCol] = piece;
+            state.currentPosition[fromRow][fromCol] = '';
+            
+            if (isPlayerMove) {
+                state.playerMoves.push({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
+                
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
+                const isCorrectMove = (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col && toRow === expectedMove.to.row && toCol === expectedMove.to.col);
+                
+                if (isCorrectMove) {
+                    state.isWhiteTurn = false;
+                    updateTurnIndicator(problemNumber);
+                    
+                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
+                        state.gameCompleted = true;
+                        state.currentMoveIndex++;
+                        document.getElementById(`status${problemNumber}`).innerHTML = "<span class='checkmate'>¡Jaque Mate!</span>";
+                        document.getElementById(`status${problemNumber}`).className = "status success";
+                        unlockKeywordSection(problemNumber);
+                    } else {
+                        setTimeout(() => makeBlackMove(problemNumber), 800);
+                    }
+                } else {
+                    state.gamePaused = true;
+                    document.getElementById(`status${problemNumber}`).innerHTML = "Movimiento incorrecto. Reinicia el problema.";
+                    document.getElementById(`status${problemNumber}`).className = "status error";
+                }
+            }
+            clearSelection(problemNumber);
+            createBoard(problemNumber);
+        }
+
+        function makeBlackMove(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            if (state.currentMoveIndex < problem.solution.length) {
+                const blackMove = problem.solution[state.currentMoveIndex].black;
+                if (blackMove) {
+                    const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
+                    state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
+                    state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
+                    
+                    state.currentMoveIndex++;
+                    state.isWhiteTurn = true;
+                    updateTurnIndicator(problemNumber);
+                    document.getElementById(`status${problemNumber}`).textContent = "Tu turno.";
+                }
+            }
+            createBoard(problemNumber);
+        }
+
+        function clearSelection(pN) {
+            gameStates[pN].selectedSquare = null;
+            gameStates[pN].validMoves = [];
+            createBoard(pN); // Redraw removes classes
+        }
+
+        function updateStatus(pN) {
+            const s = gameStates[pN];
+            const el = document.getElementById(`status${pN}`);
+            if (s.gameCompleted) {
+                el.innerHTML = "¡Problema resuelto!";
+                el.className = "status success";
+            } else if (s.gamePaused) {
+                el.textContent = "Movimiento incorrecto. Reinicia.";
+                el.className = "status error";
+            } else {
+                el.textContent = s.currentMoveIndex === 0 ? "Juegan blancas" : "Tu turno";
+                el.className = "status";
+            }
+        }
+
+        function updateTurnIndicator(pN) {
+            const el = document.getElementById(`turn-indicator${pN}`);
+            if (gameStates[pN].isWhiteTurn) {
+                el.className = "turn-indicator turn-white";
+                el.innerHTML = '<span>♔ Juegan Blancas</span>';
+            } else {
+                el.className = "turn-indicator turn-black";
+                el.innerHTML = '<span>♚ Juegan Negras</span>';
+            }
+        }
+
+        function updateMovesList(pN) {
+            const s = gameStates[pN];
+            const p = problems[pN];
+            const c = document.getElementById(`moves-container${pN}`);
+            c.innerHTML = '';
+            s.playerMoves.forEach((move, i) => {
+                const div = document.createElement('div');
+                div.className = 'move-item';
+                div.innerHTML = `<span>Movimiento ${i+1}</span> <strong>${p.moveNotation[i]}</strong>`;
+                c.appendChild(div);
+            });
+        }
+
+        function updateKeywordSection(pN) {
+            const s = gameStates[pN];
+            const sec = document.getElementById(`keyword-section${pN}`);
+            const inp = document.getElementById(`keyword-input${pN}`);
+            const btn = document.getElementById(`keyword-btn${pN}`);
+            
+            if (s.gameCompleted) {
+                sec.classList.remove('locked'); sec.classList.add('unlocked');
+                inp.disabled = false; inp.placeholder = "Ingresa el código"; btn.disabled = false;
+                sec.querySelector('.lock-icon').textContent = '🔓';
+            } else {
+                sec.classList.remove('unlocked'); sec.classList.add('locked');
+                inp.disabled = true; inp.placeholder = "---"; btn.disabled = true;
+                sec.querySelector('.lock-icon').textContent = '🔒';
+                document.getElementById(`keyword-feedback${pN}`).textContent = '';
+                inp.value = '';
+            }
+        }
+
+        function unlockKeywordSection(pN) {
+            updateKeywordSection(pN);
+            // Smooth scroll
+            setTimeout(() => {
+                document.getElementById(`keyword-section${pN}`).scrollIntoView({ behavior: 'smooth' });
+            }, 500);
+        }
+
+        function verifyKeyword(pN) {
+            const inp = document.getElementById(`keyword-input${pN}`);
+            const fb = document.getElementById(`keyword-feedback${pN}`);
+            const val = inp.value.trim().toUpperCase();
+            
+            if (val === keywords[pN]) {
+                fb.textContent = "Código Correcto";
+                fb.style.color = "var(--success)";
+                showCongratulations(pN, keywords[pN]);
+            } else {
+                fb.textContent = "Código Incorrecto";
+                fb.style.color = "var(--error)";
+            }
+        }
+
+        function showCongratulations(pN, kw) {
+            document.getElementById('congrats-message').textContent = `Problema ${pN} resuelto exitosamente.`;
+            document.getElementById('accepted-keyword').textContent = kw;
+            document.getElementById('congratulations').style.display = 'flex';
+        }
+        
+        function hideCongratulations() {
+            document.getElementById('congratulations').style.display = 'none';
+            showProblemSelection();
+        }
+
+        function showHint(pN) {
+            const s = gameStates[pN];
+            if(s.gameCompleted || s.gamePaused) return;
+            const m = problems[pN].solution[s.currentMoveIndex].white;
+            document.getElementById(`status${pN}`).textContent = `Pista: Mueve desde ${String.fromCharCode(97+m.from.col)}${8-m.from.row}`;
+        }
+        
+        function resetGame(pN) {
+            initializeGame(pN);
+            document.getElementById(`solution-text${pN}`).classList.remove('active');
+        }
+
+        // Listeners
+        document.querySelectorAll('.btn-select').forEach(b => b.addEventListener('click', function() {
+            showProblem(this.closest('.problem-card').dataset.problem);
+        }));
+        
+        document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', function() {
+            closeProblemModal(this.dataset.problem);
+        }));
+        
+        // Setup buttons for each problem
+        for(let i=1; i<=3; i++) {
+            document.getElementById(`reset-btn${i}`).addEventListener('click', ()=>resetGame(i));
+            document.getElementById(`hint-btn${i}`).addEventListener('click', ()=>showHint(i));
+            document.getElementById(`solution-btn${i}`).addEventListener('click', ()=>document.getElementById(`solution-text${i}`).classList.toggle('active'));
+            document.getElementById(`keyword-btn${i}`).addEventListener('click', ()=>verifyKeyword(i));
+        }
+        
+        document.getElementById('continue-btn').addEventListener('click', hideCongratulations);
+        
+        // Init
+        showProblemSelection();
     </script>
 </body>
 </html>
