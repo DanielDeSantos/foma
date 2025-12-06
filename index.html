@@ -3,25 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal de Ciberseguridad</title>
+    <title>Terminal de Ciberseguridad - Acceso Restringido</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Paleta de colores Cyberpunk Verde */
-            --bg-main: #050505;
-            --bg-panel: #0a0a0a;
-            --primary-green: #00ff41; /* Verde Terminal Clásico */
-            --secondary-green: #008f11; /* Verde más oscuro */
-            --text-dim: #32a852;
+            --bg-main: #020402;
+            --bg-panel: #0d110d;
+            --primary-green: #00ff41; 
+            --secondary-green: #003b00; 
+            --text-dim: #2e8b57;
             --border-color: #00ff41;
-            --glow-spread: 10px;
+            --alert: #ff3333;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Share Tech Mono', monospace;
@@ -29,87 +24,60 @@
             color: var(--primary-green);
             min-height: 100vh;
             padding: 20px;
-            
-            /* Efecto sutil de líneas de escaneo CRT */
-            background-image: linear-gradient(
-                rgba(0, 255, 65, 0.02) 1px, 
-                transparent 1px
-            );
+            background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px);
             background-size: 100% 4px;
         }
 
-        /* Efecto de parpadeo del cursor */
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-
-        /* Header estilo terminal */
+        /* Header */
         header {
             margin-bottom: 40px;
             border-bottom: 2px solid var(--primary-green);
             padding-bottom: 20px;
-            text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
         }
 
         h1 {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            text-shadow: 0 0 var(--glow-spread) var(--primary-green);
+            font-size: 2.2rem;
+            text-shadow: 0 0 10px var(--primary-green);
+            letter-spacing: 2px;
         }
 
-        h1::before {
-            content: ">_ ";
-        }
-
-        h1::after {
-            content: "|";
-            animation: blink 1s infinite;
-        }
-
-        .status-bar {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
+        .sys-info {
+            text-align: right;
+            font-size: 0.8rem;
             color: var(--text-dim);
+            line-height: 1.5;
         }
 
-        /* Grid de problemas */
+        /* Grid */
         .problem-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
-        /* Tarjeta de Problema */
+        /* Tarjetas */
         .problem-card {
             background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            padding: 20px;
+            border: 1px solid var(--text-dim);
+            padding: 25px;
             position: relative;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 250px;
         }
 
-        /* Efecto Hover */
         .problem-card:hover {
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), inset 0 0 10px rgba(0, 255, 65, 0.2);
+            border-color: var(--primary-green);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
             transform: translateY(-5px);
-            background-color: #0f0f0f;
-        }
-
-        /* Decoración de esquina superior izquierda */
-        .problem-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 0;
-            border-top: 30px solid var(--primary-green);
-            border-right: 30px solid transparent;
-            opacity: 0.7;
+            background-color: #0f1a0f;
         }
 
         .card-header {
@@ -121,63 +89,73 @@
             padding-bottom: 10px;
         }
 
-        .problem-number {
-            font-size: 1.5rem;
+        .problem-id {
+            font-size: 1.2rem;
             font-weight: bold;
-            text-transform: uppercase;
-            text-shadow: 0 0 5px var(--primary-green);
+            color: var(--primary-green);
         }
 
-        .difficulty {
-            font-size: 0.8rem;
-            color: var(--bg-main);
-            background-color: var(--primary-green);
-            padding: 2px 8px;
-            font-weight: bold;
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--alert);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--alert);
+            animation: pulse 2s infinite;
         }
 
-        .problem-desc {
-            color: var(--text-dim);
-            margin-bottom: 20px;
+        .log-text {
+            color: #888;
+            font-size: 0.9rem;
             line-height: 1.4;
+            flex-grow: 1;
+            /* Simula texto de terminal */
+            font-family: 'Courier New', Courier, monospace; 
         }
 
-        .tech-data {
+        .log-text::before { content: "> "; color: var(--primary-green); }
+
+        .metadata {
+            display: flex;
+            justify-content: space-between;
             font-size: 0.75rem;
-            color: var(--secondary-green);
-            margin-top: auto;
+            color: var(--text-dim);
+            margin-top: 20px;
+            border-top: 1px solid var(--secondary-green);
+            padding-top: 10px;
         }
-        
-        /* Botón de acción */
-        .btn-access {
-            width: 100%;
-            padding: 10px;
+
+        .btn-connect {
+            position: absolute;
+            bottom: 25px;
+            right: 25px;
             background: transparent;
             border: 1px solid var(--primary-green);
             color: var(--primary-green);
+            padding: 5px 15px;
             font-family: 'Share Tech Mono', monospace;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.3s;
-            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s;
         }
 
-        .btn-access:hover {
-            background: var(--primary-green);
-            color: var(--bg-main);
-            box-shadow: 0 0 15px var(--primary-green);
+        .problem-card:hover .btn-connect {
+            opacity: 1;
         }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Sistema de Desafíos</h1>
-        <div class="status-bar">
-            <span>USUARIO: ROOT</span>
-            <span>ESTADO DE RED: SEGURO</span>
-            <span>NODOS ACTIVOS: 6</span>
+        <h1>SISTEMA_VIGILANCIA_V4</h1>
+        <div class="sys-info">
+            UPTIME: 404h 21m<br>
+            ENCRIPTACIÓN: AES-256<br>
+            USUARIO: INVITADO
         </div>
     </header>
 
@@ -185,92 +163,104 @@
 
         <div class="problem-card">
             <div class="card-header">
-                <div class="problem-number">Problema 1</div>
-                <span class="difficulty">FÁCIL</span>
+                <span class="problem-id"># NODE_01</span>
+                <span class="status-dot"></span>
             </div>
-            <div class="problem-desc">
-                <p>Inyección SQL básica detectada en el portal de login. Bypass requerido.</p>
+            <div class="log-text">
+                ERROR 503: Servicio de autenticación no responde.<br>
+                Gateway inaccesible.<br>
+                Solicitando credenciales manuales...
             </div>
-            <div class="tech-data">
-                HASH: 0x4A7F2...<br>
-                PUERTO: 8080 [ABIERTO]
+            <div class="metadata">
+                <span>PORT: 8080</span>
+                <span>LOCK: ACTIVE</span>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
+            <button class="btn-connect">CONECTAR</button>
         </div>
 
         <div class="problem-card">
             <div class="card-header">
-                <div class="problem-number">Problema 2</div>
-                <span class="difficulty">MEDIO</span>
+                <span class="problem-id"># NODE_02</span>
+                <span class="status-dot"></span>
             </div>
-            <div class="problem-desc">
-                <p>El servidor utiliza un cifrado César débil para las comunicaciones internas. Descifrar el mensaje.</p>
+            <div class="log-text">
+                Tráfico interceptado.<br>
+                El contenido del paquete no coincide con la suma de verificación (checksum).<br>
+                Datos ilegibles.
             </div>
-            <div class="tech-data">
-                CIFRADO: ROT13<br>
-                DATA_STREAM: ENCRIPTADO
+            <div class="metadata">
+                <span>TYPE: STREAM</span>
+                <span>ENC: UNKNOWN</span>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
+            <button class="btn-connect">CONECTAR</button>
         </div>
 
         <div class="problem-card">
             <div class="card-header">
-                <div class="problem-number">Problema 3</div>
-                <span class="difficulty">MEDIO</span>
+                <span class="problem-id"># NODE_03</span>
+                <span class="status-dot"></span>
             </div>
-            <div class="problem-desc">
-                <p>Análisis forense de memoria. Encontrar la clave privada RSA oculta en el dump hexadecimal.</p>
+            <div class="log-text">
+                Violación de segmento detectada.<br>
+                Volcado de pila incompleto.<br>
+                Se requiere análisis de estructura interna.
             </div>
-            <div class="tech-data">
-                TIPO: MEMORY_DUMP<br>
-                TAMAÑO: 512MB
+            <div class="metadata">
+                <span>ADDR: 0x0F4A</span>
+                <span>MEM: CORRUPT</span>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
+            <button class="btn-connect">CONECTAR</button>
         </div>
 
         <div class="problem-card">
             <div class="card-header">
-                <div class="problem-number">Problema 4</div>
-                <span class="difficulty">DIFÍCIL</span>
+                <span class="problem-id"># NODE_04</span>
+                <span class="status-dot"></span>
             </div>
-            <div class="problem-desc">
-                <p>Desbordamiento de búfer (Buffer Overflow) en el servicio FTP. Obtener una shell remota.</p>
+            <div class="log-text">
+                Alerta de seguridad: Protocolo de transferencia interrumpido.<br>
+                Exceso de peticiones en cola.<br>
+                Sistema inestable.
             </div>
-            <div class="tech-data">
-                ARQUITECTURA: x86<br>
-                ASLR: ACTIVADO
+            <div class="metadata">
+                <span>PID: 4421</span>
+                <span>STATUS: HALTED</span>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
-        </div>
-
-         <div class="problem-card">
-            <div class="card-header">
-                <div class="problem-number">Problema 5</div>
-                <span class="difficulty">FÁCIL</span>
-            </div>
-            <div class="problem-desc">
-                <p>Rastreo de paquetes de red. Identificar la IP de origen del ataque DDoS.</p>
-            </div>
-            <div class="tech-data">
-                PROTOCOLO: TCP/UDP<br>
-                TRÁFICO: SATURADO
-            </div>
-            <button class="btn-access">INICIAR_HACK</button>
+            <button class="btn-connect">CONECTAR</button>
         </div>
 
         <div class="problem-card">
             <div class="card-header">
-                <div class="problem-number">Problema 6</div>
-                <span class="difficulty">EXTREMO</span>
+                <span class="problem-id"># NODE_05</span>
+                <span class="status-dot"></span>
             </div>
-            <div class="problem-desc">
-                <p>Ingeniería inversa de un malware tipo Ransomware. Crear un descifrador.</p>
+            <div class="log-text">
+                Anomalía en la capa de transporte.<br>
+                Latencia inusual detectada en clúster externo.<br>
+                Origen de datos oculto.
             </div>
-            <div class="tech-data">
-                TARGET: KERNEL_MODE<br>
-                OBFUSCACIÓN: ALTA
+            <div class="metadata">
+                <span>NET: TCP/IP</span>
+                <span>FLAG: SYN_ACK</span>
             </div>
-            <button class="btn-access">INICIAR_HACK</button>
+            <button class="btn-connect">CONECTAR</button>
+        </div>
+
+        <div class="problem-card">
+            <div class="card-header">
+                <span class="problem-id"># NODE_06</span>
+                <span class="status-dot"></span>
+            </div>
+            <div class="log-text">
+                ¡CRÍTICO! Archivo del sistema bloqueado.<br>
+                Firma digital no reconocida.<br>
+                Acceso administrativo revocado.
+            </div>
+            <div class="metadata">
+                <span>LEVEL: KERNEL</span>
+                <span>PERM: DENIED</span>
+            </div>
+            <button class="btn-connect">CONECTAR</button>
         </div>
 
     </main>
