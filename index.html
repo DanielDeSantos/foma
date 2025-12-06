@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal de Ciberseguridad - Acceso Restringido</title>
+    <title>Terminal de Ciberseguridad - Acceso Root</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,7 +13,7 @@
             --secondary-green: #003b00; 
             --text-dim: #2e8b57;
             --alert: #ff3333;
-            --valid-move: rgba(0, 255, 65, 0.4);
+            --valid-move-indicator: rgba(0, 255, 65, 0.6);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -57,7 +57,7 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- MENU GRID --- */
+        /* --- MENU GRID (6 TARJETAS) --- */
         .problem-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -71,16 +71,17 @@
             border: 1px solid var(--text-dim);
             padding: 25px;
             position: relative;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            height: 250px;
+            justify-content: space-between;
+            height: 260px;
             cursor: pointer;
         }
 
         .problem-card:hover {
             border-color: var(--primary-green);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.15);
             transform: translateY(-5px);
             background-color: #0f1a0f;
         }
@@ -94,8 +95,12 @@
             padding-bottom: 10px;
         }
 
-        .problem-id { font-size: 1.2rem; font-weight: bold; color: var(--primary-green); }
-        
+        .problem-id {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
         .status-dot {
             height: 10px; width: 10px;
             background-color: var(--alert);
@@ -105,16 +110,33 @@
         }
 
         .log-text {
-            color: #888; font-size: 0.9rem; line-height: 1.4; flex-grow: 1;
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            flex-grow: 1;
             font-family: 'Courier New', Courier, monospace; 
         }
+
         .log-text::before { content: "> "; color: var(--primary-green); }
 
         .metadata {
-            display: flex; justify-content: space-between;
-            font-size: 0.75rem; color: var(--text-dim);
-            margin-top: 20px; border-top: 1px solid var(--secondary-green); padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 20px;
+            border-top: 1px solid var(--secondary-green);
+            padding-top: 10px;
         }
+
+        .btn-connect {
+            position: absolute; bottom: 25px; right: 25px;
+            background: transparent; border: 1px solid var(--primary-green);
+            color: var(--primary-green); padding: 5px 15px;
+            font-family: 'Share Tech Mono', monospace; text-transform: uppercase;
+            cursor: pointer; opacity: 0; transition: opacity 0.3s;
+        }
+        .problem-card:hover .btn-connect { opacity: 1; }
 
         /* --- INTERFAZ DE JUEGO --- */
         #game-interface {
@@ -148,31 +170,31 @@
         .light { background-color: #0a140a; color: var(--primary-green); }
         .dark { background-color: #020502; color: var(--primary-green); }
         
-        /* ESTILOS DE INDICADORES DE MOVIMIENTO */
+        /* Highlight Selección */
         .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 10px var(--primary-green); }
         
-        /* Punto verde para movimiento válido */
+        /* VISUALIZACIÓN DE MOVIMIENTOS */
+        /* Punto para movimiento normal */
         .valid-move::after {
-            content: '';
-            position: absolute;
-            width: 15px; height: 15px;
-            background-color: var(--primary-green);
+            content: ''; position: absolute;
+            width: 18px; height: 18px;
+            background-color: var(--valid-move-indicator);
             border-radius: 50%;
-            box-shadow: 0 0 10px var(--primary-green);
-            opacity: 0.7;
+            box-shadow: 0 0 8px var(--primary-green);
         }
         
-        /* Indicador de captura (comer pieza) */
+        /* Indicador de Captura (Mira) */
         .capture-move {
             box-shadow: inset 0 0 15px var(--alert);
         }
         .capture-move::after {
-            content: '';
-            position: absolute;
-            width: 70px; height: 70px;
+            content: ''; position: absolute;
+            width: 100%; height: 100%;
             border: 2px dashed var(--alert);
             box-sizing: border-box;
-            animation: spin 4s linear infinite;
+            border-radius: 50%;
+            transform: scale(0.8);
+            animation: spin 3s linear infinite;
         }
 
         /* --- PANEL LATERAL --- */
@@ -227,7 +249,7 @@
             #game-interface { grid-template-columns: 1fr; }
             .board { grid-template-columns: repeat(8, 40px); grid-template-rows: repeat(8, 40px); }
             .square { font-size: 28px; }
-            .capture-move::after { width: 40px; height: 40px; }
+            .capture-move::after { width: 100%; height: 100%; }
         }
     </style>
 </head>
@@ -244,30 +266,49 @@
 
     <div id="menu-screen" class="screen active">
         <div class="problem-grid">
+            
             <div class="problem-card" onclick="loadLevel(1)">
-                <div class="card-header">
-                    <span class="problem-id"># NODE_01</span>
-                    <span class="status-dot"></span>
-                </div>
+                <div class="card-header"><span class="problem-id"># NODE_01</span><span class="status-dot"></span></div>
                 <div class="log-text">ERROR 503: Servicio de autenticación no responde.<br>Gateway inaccesible.<br>Solicitando credenciales manuales...</div>
                 <div class="metadata"><span>PORT: 8080</span><span>LOCK: ACTIVE</span></div>
+                <button class="btn-connect">CONECTAR</button>
             </div>
+
             <div class="problem-card" onclick="loadLevel(2)">
-                <div class="card-header">
-                    <span class="problem-id"># NODE_02</span>
-                    <span class="status-dot"></span>
-                </div>
-                <div class="log-text">Tráfico interceptado.<br>Checksum inválido.<br>Datos ilegibles en el stream.</div>
+                <div class="card-header"><span class="problem-id"># NODE_02</span><span class="status-dot"></span></div>
+                <div class="log-text">Tráfico interceptado.<br>El contenido del paquete no coincide con la suma de verificación (checksum).<br>Datos ilegibles.</div>
                 <div class="metadata"><span>TYPE: STREAM</span><span>ENC: UNKNOWN</span></div>
+                <button class="btn-connect">CONECTAR</button>
             </div>
+
             <div class="problem-card" onclick="loadLevel(3)">
-                <div class="card-header">
-                    <span class="problem-id"># NODE_03</span>
-                    <span class="status-dot"></span>
-                </div>
-                <div class="log-text">Violación de segmento detectada.<br>Volcado de pila incompleto.<br>Se requiere análisis de estructura.</div>
+                <div class="card-header"><span class="problem-id"># NODE_03</span><span class="status-dot"></span></div>
+                <div class="log-text">Violación de segmento detectada.<br>Volcado de pila incompleto.<br>Se requiere análisis de estructura interna.</div>
                 <div class="metadata"><span>ADDR: 0x0F4A</span><span>MEM: CORRUPT</span></div>
+                <button class="btn-connect">CONECTAR</button>
             </div>
+
+            <div class="problem-card" onclick="loadLevel(4)">
+                <div class="card-header"><span class="problem-id"># NODE_04</span><span class="status-dot"></span></div>
+                <div class="log-text">Alerta de seguridad: Protocolo de transferencia interrumpido.<br>Exceso de peticiones en cola.<br>Sistema inestable.</div>
+                <div class="metadata"><span>PID: 4421</span><span>STATUS: HALTED</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(5)">
+                <div class="card-header"><span class="problem-id"># NODE_05</span><span class="status-dot"></span></div>
+                <div class="log-text">Anomalía en la capa de transporte.<br>Latencia inusual detectada en clúster externo.<br>Origen de datos oculto.</div>
+                <div class="metadata"><span>NET: TCP/IP</span><span>FLAG: SYN_ACK</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
+            <div class="problem-card" onclick="loadLevel(6)">
+                <div class="card-header"><span class="problem-id"># NODE_06</span><span class="status-dot"></span></div>
+                <div class="log-text">¡CRÍTICO! Archivo del sistema bloqueado.<br>Firma digital no reconocida.<br>Acceso administrativo revocado.</div>
+                <div class="metadata"><span>LEVEL: KERNEL</span><span>PERM: DENIED</span></div>
+                <button class="btn-connect">CONECTAR</button>
+            </div>
+
         </div>
     </div>
 
@@ -300,7 +341,7 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DE NIVELES ---
+        // CONFIGURACIÓN DE NIVELES (Mapeados para el ejemplo)
         const levels = {
             1: {
                 initial: [
@@ -313,14 +354,13 @@
                     ['', '', 'P', '', 'B', '', 'P', ''],
                     ['', '', '', '', 'k', '', '', '']
                 ],
-                moves: [ // Solución: 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
+                moves: [
                     { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
                     { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
                     { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
                     { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
                 ],
-                code: "SQL-INJECT-01",
-                answer: "ADMIN"
+                code: "SQL-INJECT-01", answer: "ADMIN"
             },
             2: {
                 initial: [
@@ -339,8 +379,7 @@
                     { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
                 ],
-                code: "CESAR-ROT13",
-                answer: "SECRET"
+                code: "CESAR-ROT13", answer: "SECRET"
             },
             3: {
                 initial: [
@@ -359,16 +398,18 @@
                     { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
                     { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
                 ],
-                code: "STACK-OVERFLOW",
-                answer: "ROOT"
+                code: "STACK-OVERFLOW", answer: "ROOT"
             }
         };
+        // Replicamos niveles para 4, 5 y 6 (para que funcionen los botones)
+        levels[4] = levels[1];
+        levels[5] = levels[2];
+        levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
         let currentState = { level: 1, pos: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
 
-        // --- SISTEMA DE VISUALIZACIÓN ---
         function loadLevel(lvl) {
             currentState.level = lvl;
             currentState.pos = JSON.parse(JSON.stringify(levels[lvl].initial));
@@ -382,7 +423,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Iniciando conexión a NODE_0${lvl}...`, 'sys');
+            log(`Conectando a NODE_0${lvl}...`, 'sys');
             drawBoard();
         }
 
@@ -403,24 +444,21 @@
                     const p = currentState.pos[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
-                        // Estilo Matrix: Blancas brillan más, Negras son oscuras
                         if(p === p.toUpperCase()) {
                             sq.style.color = '#fff';
                             sq.style.textShadow = '0 0 5px var(--primary-green)';
                         } else {
-                            sq.style.color = '#004d00'; // Verde muy oscuro
+                            sq.style.color = '#004d00';
                         }
                     }
 
-                    // Click handler
                     sq.onclick = () => handleSquare(r, c);
 
-                    // Renderizar selección
                     if(currentState.selection && currentState.selection.r === r && currentState.selection.c === c) {
                         sq.classList.add('selected');
                     }
-
-                    // Renderizar POSIBLES MOVIMIENTOS (La característica nueva)
+                    
+                    // MOSTRAR INDICADORES VISUALES
                     const moveType = getMoveType(r, c);
                     if(moveType === 'move') sq.classList.add('valid-move');
                     if(moveType === 'capture') sq.classList.add('capture-move');
@@ -431,91 +469,80 @@
         }
 
         function getMoveType(r, c) {
-            // Verifica si la casilla (r,c) está en la lista de validMoves
             const move = currentState.validMoves.find(m => m.r === r && m.c === c);
             return move ? move.type : null;
         }
 
-        // --- LÓGICA DE MOVIMIENTOS (CHESS ENGINE LITE) ---
+        // Lógica de Movimientos Válidos (Engine)
         function calculatePossibleMoves(r, c, piece) {
             let moves = [];
             const type = piece.toUpperCase();
             const isWhite = piece === piece.toUpperCase();
             
-            // Helper para añadir movimiento si es válido
             const add = (tr, tc) => {
-                if(tr<0||tr>7||tc<0||tc>7) return false; // Fuera del tablero
+                if(tr<0||tr>7||tc<0||tc>7) return false;
                 const target = currentState.pos[tr][tc];
                 if(!target) {
                     moves.push({r:tr, c:tc, type:'move'});
-                    return true; // Continuar (para piezas de largo alcance)
+                    return true;
                 } else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) {
                     moves.push({r:tr, c:tc, type:'capture'});
-                    return false; // Bloqueado por captura
+                    return false; 
                 }
-                return false; // Bloqueado por pieza propia
+                return false; 
             };
 
-            if(type === 'P') { // Peón (Asumiendo blancas van arriba->abajo visualmente "8 a 1")
-                // Nota: En array, row 0 es arriba (negro), row 7 es abajo (blanco). Blancas mueven row--.
+            if(type === 'P') { // Peón
                 const dir = -1; 
                 if(!currentState.pos[r+dir][c]) {
                     moves.push({r:r+dir, c:c, type:'move'});
                     if(r===6 && !currentState.pos[r+(dir*2)][c]) moves.push({r:r+(dir*2), c:c, type:'move'});
                 }
-                // Capturas
                 if(c>0 && currentState.pos[r+dir][c-1] && currentState.pos[r+dir][c-1]===currentState.pos[r+dir][c-1].toLowerCase()) 
                     moves.push({r:r+dir, c:c-1, type:'capture'});
                 if(c<7 && currentState.pos[r+dir][c+1] && currentState.pos[r+dir][c+1]===currentState.pos[r+dir][c+1].toLowerCase()) 
                     moves.push({r:r+dir, c:c+1, type:'capture'});
             }
-            
-            if(type === 'R' || type === 'Q') { // Torre/Reina
+            if(type === 'R' || type === 'Q') {
                 [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => {
                     for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
                 });
             }
-            
-            if(type === 'B' || type === 'Q') { // Alfil/Reina
+            if(type === 'B' || type === 'Q') {
                 [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
                     for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
                 });
             }
-            
-            if(type === 'N') { // Caballo
+            if(type === 'N') {
                 [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => add(r+dr, c+dc));
             }
-
-            if(type === 'K') { // Rey
+            if(type === 'K') {
                 [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => add(r+dr, c+dc));
             }
-
             return moves;
         }
 
-        // --- MANEJO DE CLICS ---
         function handleSquare(r, c) {
             if(currentState.locked) return;
 
             const p = currentState.pos[r][c];
             const isWhite = p && p === p.toUpperCase();
 
-            // 1. Seleccionar Pieza Blanca
+            // 1. Selección y Cálculo
             if(isWhite) {
                 currentState.selection = {r, c};
-                // CALCULAR MOVIMIENTOS VÁLIDOS PARA MOSTRAR PUNTOS
                 currentState.validMoves = calculatePossibleMoves(r, c, p);
                 drawBoard();
                 return;
             }
 
-            // 2. Mover Pieza (si ya hay selección y clic en destino válido)
+            // 2. Ejecución de Movimiento
             if(currentState.selection) {
-                // Verificar si el clic es un movimiento válido calculado
+                // Verificar si es un movimiento válido posible
                 const validMove = currentState.validMoves.find(m => m.r === r && m.c === c);
                 
                 if(validMove) {
-                    // Verificar si es el movimiento CORRECTO del puzzle
+                    // Verificar si es el movimiento correcto del puzzle
                     const puzzleMove = levels[currentState.level].moves[currentState.moveIdx].w;
                     
                     if(puzzleMove.f.r === currentState.selection.r && puzzleMove.f.c === currentState.selection.c &&
@@ -530,7 +557,6 @@
                         drawBoard();
                     }
                 } else {
-                    // Clic fuera de rango
                     currentState.selection = null;
                     currentState.validMoves = [];
                     drawBoard();
@@ -546,7 +572,7 @@
             log(`${isPlayer?'USR':'SYS'}: ${coords(from)} -> ${coords(to)}`, isPlayer?'sys':'');
             
             currentState.selection = null;
-            currentState.validMoves = []; // Limpiar puntos
+            currentState.validMoves = [];
             drawBoard();
 
             if(isPlayer) {
@@ -564,7 +590,6 @@
             }
         }
 
-        // --- FINALIZACIÓN ---
         function levelComplete() {
             log("ACCESO ROOT OBTENIDO.", 'sys');
             document.getElementById('hash-display').innerText = levels[currentState.level].code;
