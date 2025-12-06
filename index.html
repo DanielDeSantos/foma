@@ -13,7 +13,7 @@
             --secondary-green: #003b00; 
             --text-dim: #2e8b57;
             --alert: #ff3333;
-            --valid-move-indicator: rgba(0, 255, 65, 0.6);
+            --valid-indicator: rgba(0, 255, 65, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,6 +24,7 @@
             color: var(--primary-green);
             min-height: 100vh;
             padding: 20px;
+            /* Efecto CRT Scanlines */
             background-image: linear-gradient(rgba(0, 255, 65, 0.03) 1px, transparent 1px);
             background-size: 100% 4px;
             overflow-x: hidden;
@@ -57,7 +58,7 @@
         .screen.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- MENU GRID (6 TARJETAS) --- */
+        /* --- MENU GRID (6 NODOS) --- */
         .problem-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -173,28 +174,28 @@
         /* Highlight Selección */
         .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 10px var(--primary-green); }
         
-        /* VISUALIZACIÓN DE MOVIMIENTOS */
-        /* Punto para movimiento normal */
+        /* --- VISUALIZACIÓN DE MOVIMIENTOS --- */
+        
+        /* 1. Punto Verde (Movimiento válido) */
         .valid-move::after {
             content: ''; position: absolute;
             width: 18px; height: 18px;
-            background-color: var(--valid-move-indicator);
+            background-color: var(--valid-indicator);
             border-radius: 50%;
             box-shadow: 0 0 8px var(--primary-green);
         }
         
-        /* Indicador de Captura (Mira) */
+        /* 2. Mira de Captura (Comer pieza) */
         .capture-move {
             box-shadow: inset 0 0 15px var(--alert);
         }
         .capture-move::after {
             content: ''; position: absolute;
-            width: 100%; height: 100%;
+            width: 80%; height: 80%;
             border: 2px dashed var(--alert);
             box-sizing: border-box;
             border-radius: 50%;
-            transform: scale(0.8);
-            animation: spin 3s linear infinite;
+            animation: spin 4s linear infinite;
         }
 
         /* --- PANEL LATERAL --- */
@@ -249,7 +250,6 @@
             #game-interface { grid-template-columns: 1fr; }
             .board { grid-template-columns: repeat(8, 40px); grid-template-rows: repeat(8, 40px); }
             .square { font-size: 28px; }
-            .capture-move::after { width: 100%; height: 100%; }
         }
     </style>
 </head>
@@ -401,14 +401,17 @@
                 code: "STACK-OVERFLOW", answer: "ROOT"
             }
         };
-        // Replicamos niveles para 4, 5 y 6 (para que funcionen los botones)
+        // Replicamos niveles para 4, 5 y 6
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
+        // Estado Global
         let currentState = { level: 1, pos: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
+
+        // --- FUNCIONES PRINCIPALES ---
 
         function loadLevel(lvl) {
             currentState.level = lvl;
@@ -423,7 +426,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Conectando a NODE_0${lvl}...`, 'sys');
+            log(`Iniciando conexión a NODE_0${lvl}...`, 'sys');
             drawBoard();
         }
 
@@ -454,11 +457,12 @@
 
                     sq.onclick = () => handleSquare(r, c);
 
+                    // Renderizar selección
                     if(currentState.selection && currentState.selection.r === r && currentState.selection.c === c) {
                         sq.classList.add('selected');
                     }
-                    
-                    // MOSTRAR INDICADORES VISUALES
+
+                    // Renderizar ayudas visuales (puntos y miras)
                     const moveType = getMoveType(r, c);
                     if(moveType === 'move') sq.classList.add('valid-move');
                     if(moveType === 'capture') sq.classList.add('capture-move');
@@ -473,7 +477,7 @@
             return move ? move.type : null;
         }
 
-        // Lógica de Movimientos Válidos (Engine)
+        // --- MOTOR DE AJEDREZ LITE (Cálculo de movimientos) ---
         function calculatePossibleMoves(r, c, piece) {
             let moves = [];
             const type = piece.toUpperCase();
@@ -503,25 +507,26 @@
                 if(c<7 && currentState.pos[r+dir][c+1] && currentState.pos[r+dir][c+1]===currentState.pos[r+dir][c+1].toLowerCase()) 
                     moves.push({r:r+dir, c:c+1, type:'capture'});
             }
-            if(type === 'R' || type === 'Q') {
+            if(type === 'R' || type === 'Q') { // Torre / Reina
                 [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => {
                     for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
                 });
             }
-            if(type === 'B' || type === 'Q') {
+            if(type === 'B' || type === 'Q') { // Alfil / Reina
                 [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
                     for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
                 });
             }
-            if(type === 'N') {
+            if(type === 'N') { // Caballo
                 [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => add(r+dr, c+dc));
             }
-            if(type === 'K') {
+            if(type === 'K') { // Rey
                 [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => add(r+dr, c+dc));
             }
             return moves;
         }
 
+        // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(currentState.locked) return;
 
@@ -538,11 +543,11 @@
 
             // 2. Ejecución de Movimiento
             if(currentState.selection) {
-                // Verificar si es un movimiento válido posible
+                // Verificar si es un movimiento matemáticamente válido
                 const validMove = currentState.validMoves.find(m => m.r === r && m.c === c);
                 
                 if(validMove) {
-                    // Verificar si es el movimiento correcto del puzzle
+                    // Verificar si es el movimiento CORRECTO del puzzle
                     const puzzleMove = levels[currentState.level].moves[currentState.moveIdx].w;
                     
                     if(puzzleMove.f.r === currentState.selection.r && puzzleMove.f.c === currentState.selection.c &&
