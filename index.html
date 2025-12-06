@@ -106,6 +106,20 @@
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
+        .mission-card.solved {
+            border-color: var(--primary);
+            opacity: 0.7;
+        }
+        
+        .mission-card.solved::after {
+            content: "✓ SOLUCIONADO";
+            position: absolute;
+            bottom: 10px; right: 10px;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
         .mission-card::before {
             content: "LOCKED";
             position: absolute;
@@ -116,6 +130,11 @@
             padding: 5px 30px;
             transform: rotate(45deg);
             font-weight: bold;
+        }
+        
+        .mission-card.solved::before {
+            content: "OPEN";
+            background: var(--primary);
         }
 
         .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); text-shadow: 0 0 10px var(--primary-dim); }
@@ -289,7 +308,9 @@
 
     <header>
         <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
-        <div style="font-size: 0.8rem; color: #666;">SYS_ADMIN_ACCESS: <span style="color:var(--danger)">RESTRICTED</span></div>
+        <div style="font-size: 0.9rem; color: #666; font-weight: bold;">
+            PRUEBA_DE_NIVEL: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
+        </div>
     </header>
 
     <div id="mission-select-screen" class="screen active">
@@ -299,46 +320,46 @@
         
         <div class="mission-grid">
             
-            <div class="mission-card" onclick="loadMission(1)">
+            <div id="card-1" class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">NODE_01</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
-                <div class="mission-footer"><span>PIEZA: PEÓN</span><span>TEMA: RUPTURA</span></div>
+                <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
-            <div class="mission-card" onclick="loadMission(2)">
+            <div id="card-2" class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">NODE_02</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
-                <div class="mission-footer"><span>PIEZA: CABALLO</span><span>TEMA: AHOGADO</span></div>
+                <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
             </div>
             
-            <div class="mission-card" onclick="loadMission(3)">
+            <div id="card-3" class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">NODE_03</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
-                <div class="mission-footer"><span>PIEZA: ALFIL</span><span>TEMA: CLAVADA</span></div>
+                <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
             </div>
             
-            <div class="mission-card" onclick="loadMission(4)">
+            <div id="card-4" class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">NODE_04</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
-                <div class="mission-footer"><span>PIEZA: TORRE</span><span>TEMA: PASILLO</span></div>
+                <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
             </div>
             
-            <div class="mission-card" onclick="loadMission(5)">
+            <div id="card-5" class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">NODE_05</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
-                <div class="mission-footer"><span>PIEZA: DAMA</span><span>TEMA: DOBLE</span></div>
+                <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
             </div>
             
-            <div class="mission-card" onclick="loadMission(6)">
+            <div id="card-6" class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">NODE_06</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
-                <div class="mission-footer"><span>PIEZA: REY</span><span>TEMA: RED</span></div>
+                <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
             </div>
 
         </div>
@@ -446,14 +467,17 @@
             }
         };
 
+        // Niveles 4, 5 y 6 repiten lógica para demostración
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
+        // ESTADO GLOBAL
         let currentMissionId = 1;
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
+        let solvedLevels = new Set(); // Almacena los IDs de niveles resueltos
 
         // --- SISTEMA DE JUEGO ---
 
@@ -504,7 +528,6 @@
                         sq.classList.add('selected');
                     }
 
-                    // INDICADORES DE MOVIMIENTO
                     const moveType = getMoveType(r, c);
                     if(moveType === 'move') sq.classList.add('valid-move');
                     if(moveType === 'capture') sq.classList.add('capture-move');
@@ -519,31 +542,27 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN ---
+        // --- MOTOR DE VALIDACIÓN (Jaque/Movimientos) ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
-            
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
             const pawnChar = attackerColor === 'white' ? 'P' : 'p';
             if(pawnAttackRow >= 0 && pawnAttackRow < 8) {
                 if(c > 0 && boardToCheck[pawnAttackRow][c-1] === pawnChar) return true;
                 if(c < 7 && boardToCheck[pawnAttackRow][c+1] === pawnChar) return true;
             }
-
             const knightChar = attackerColor === 'white' ? 'N' : 'n';
             const knightMoves = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
             for(let m of knightMoves) {
                 let nr=r+m[0], nc=c+m[1];
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === knightChar) return true;
             }
-
             const kingChar = attackerColor === 'white' ? 'K' : 'k';
             const kingMoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let m of kingMoves) {
                 let nr=r+m[0], nc=c+m[1];
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === kingChar) return true;
             }
-
             const rookChar = attackerColor === 'white' ? 'R' : 'r';
             const queenChar = attackerColor === 'white' ? 'Q' : 'q';
             const linearDirs = [[0,1],[0,-1],[1,0],[-1,0]];
@@ -553,14 +572,10 @@
                     let nr=r+d[0]*i, nc=c+d[1]*i;
                     if(nr<0||nr>7||nc<0||nc>7) break;
                     let p = boardToCheck[nr][nc];
-                    if(p) {
-                        if(p===rookChar || p===queenChar) return true;
-                        break; 
-                    }
+                    if(p) { if(p===rookChar || p===queenChar) return true; break; }
                     i++;
                 }
             }
-
             const bishopChar = attackerColor === 'white' ? 'B' : 'b';
             const diagDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let d of diagDirs) {
@@ -569,10 +584,7 @@
                     let nr=r+d[0]*i, nc=c+d[1]*i;
                     if(nr<0||nr>7||nc<0||nc>7) break;
                     let p = boardToCheck[nr][nc];
-                    if(p) {
-                        if(p===bishopChar || p===queenChar) return true;
-                        break;
-                    }
+                    if(p) { if(p===bishopChar || p===queenChar) return true; break; }
                     i++;
                 }
             }
@@ -584,17 +596,12 @@
             const p = tempBoard[fromR][fromC];
             tempBoard[toR][toC] = p;
             tempBoard[fromR][fromC] = '';
-
             let myKing = null;
             const myColor = (p === p.toUpperCase()) ? 'white' : 'black';
             const enemyColor = (myColor === 'white') ? 'black' : 'white';
-
             for(let r=0; r<8; r++) {
                 for(let c=0; c<8; c++) {
-                    if(tempBoard[r][c] === (myColor==='white'?'K':'k')) {
-                        myKing = {r,c};
-                        break;
-                    }
+                    if(tempBoard[r][c] === (myColor==='white'?'K':'k')) { myKing = {r,c}; break; }
                 }
             }
             if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) return false; 
@@ -605,24 +612,16 @@
             let moves = [];
             const type = piece.toUpperCase();
             const isWhite = piece === piece.toUpperCase();
-            
             const tryAdd = (tr, tc) => {
                 if(tr<0||tr>7||tc<0||tc>7) return false; 
                 const target = gameState.position[tr][tc];
                 let moveType = null;
-                if(!target) {
-                    moveType = 'move';
-                } else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) {
-                    moveType = 'capture';
-                } else {
-                    return false; 
-                }
-                if(testMove(r, c, tr, tc)) {
-                    moves.push({r:tr, c:tc, type:moveType});
-                }
+                if(!target) { moveType = 'move'; } 
+                else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) { moveType = 'capture'; } 
+                else { return false; }
+                if(testMove(r, c, tr, tc)) { moves.push({r:tr, c:tc, type:moveType}); }
                 return (moveType === 'move'); 
             };
-
             if(type === 'P') { 
                 const dir = -1;
                 if(r+dir>=0 && !gameState.position[r+dir][c]) {
@@ -642,29 +641,16 @@
                     }
                 }
             }
-            if(type === 'R' || type === 'Q') {
-                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => {
-                    for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break;
-                });
-            }
-            if(type === 'B' || type === 'Q') {
-                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
-                    for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break;
-                });
-            }
-            if(type === 'N') {
-                [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc));
-            }
-            if(type === 'K') {
-                [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc));
-            }
+            if(type === 'R' || type === 'Q') { [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'B' || type === 'Q') { [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'N') { [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
+            if(type === 'K') { [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
             return moves;
         }
 
         // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(gameState.locked) return;
-            
             const p = gameState.position[r][c];
             if(p && p === p.toUpperCase()) {
                 gameState.selection = {r, c};
@@ -672,13 +658,10 @@
                 drawBoard();
                 return;
             }
-            
             if(gameState.selection) {
                 const validMove = gameState.validMoves.find(m => m.r === r && m.c === c);
-                
                 if(validMove) {
                     const puzzleMove = levels[currentMissionId].moves[gameState.moveIdx].w;
-                    
                     if(puzzleMove.f.r === gameState.selection.r && puzzleMove.f.c === gameState.selection.c &&
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
@@ -769,15 +752,37 @@
                 feedback.style.color = "var(--primary)";
                 log("Credencial verificada. Archivo guardado.", false, true);
                 
-                // Mostrar Ventana Modal de Éxito
+                // MARCAR COMO RESUELTO
+                solvedLevels.add(currentMissionId);
+                document.getElementById(`card-${currentMissionId}`).classList.add('solved');
+                
+                // CHEQUEAR CONDICIÓN GLOBAL
+                checkGlobalWinCondition();
+
                 setTimeout(() => {
                     document.getElementById('success-overlay').classList.add('active');
                 }, 1000);
-                
             } else {
                 feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
                 log("Intento de inyección fallido.", true);
+            }
+        }
+
+        function checkGlobalWinCondition() {
+            let hasOdd = false;
+            let hasEven = false;
+            
+            solvedLevels.forEach(id => {
+                if(id % 2 === 0) hasEven = true;
+                else hasOdd = true;
+            });
+
+            if(hasOdd && hasEven) {
+                const globalStatus = document.getElementById('global-status');
+                globalStatus.innerText = "SUPERADA";
+                globalStatus.style.color = "var(--primary)";
+                globalStatus.style.textShadow = "0 0 10px var(--primary)";
             }
         }
         
