@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Cifrado - Acceso Restringido</title>
+    <title>Protocolo de Cifrado - Selección de Misión</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-body: #050505;
             --bg-panel: #0a0a0a;
-            --primary: #00ff41; /* Verde Matrix/Terminal */
+            --primary: #00ff41; /* Verde Matrix */
             --primary-dim: rgba(0, 255, 65, 0.1);
             --danger: #ff003c;
             --text-main: #e0e0e0;
@@ -19,14 +19,16 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Share Tech Mono', monospace; /* Fuente estilo Hacker */
+            font-family: 'Share Tech Mono', monospace;
             background-color: var(--bg-body);
             color: var(--text-main);
             height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* EFECTO CRT (Monitor viejo) */
+        /* EFECTO CRT */
         body::before {
             content: " ";
             display: block;
@@ -39,7 +41,7 @@
         }
 
         header {
-            padding: 1rem 2rem;
+            padding: 1.5rem;
             border-bottom: 1px solid var(--primary);
             display: flex;
             justify-content: space-between;
@@ -49,70 +51,82 @@
             z-index: 3;
         }
 
-        h1 {
-            color: var(--primary);
-            text-shadow: 0 0 10px var(--primary);
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-        }
+        h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
 
-        /* GRID PRINCIPAL */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            height: calc(100vh - 70px);
+        /* PANTALLAS (Vistas) */
+        .screen {
+            display: none;
+            flex-grow: 1;
             position: relative;
             z-index: 3;
-        }
-
-        /* SIDEBAR (SELECCIÓN) */
-        .sidebar {
-            background: #080808;
-            border-right: 1px solid var(--border);
             padding: 2rem;
-            display: flex;
+            animation: fadeIn 0.5s;
+        }
+        .screen.active { display: flex; }
+
+        /* VISTA 1: SELECCIÓN DE MISIONES (GRID) */
+        #mission-select-screen {
             flex-direction: column;
-            gap: 1.5rem;
-            overflow-y: auto;
+            align-items: center;
         }
 
-        .level-card {
+        .mission-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 2rem;
+        }
+
+        .mission-card {
+            background: #000;
             border: 1px solid var(--border);
-            padding: 1rem;
+            padding: 2rem;
+            position: relative;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
+            overflow: hidden;
         }
 
-        .level-card:hover {
+        .mission-card:hover {
             border-color: var(--primary);
-            background: var(--primary-dim);
+            box-shadow: 0 0 20px var(--primary-dim);
+            transform: translateY(-5px);
         }
 
-        .level-card.active {
-            border-color: var(--primary);
-            box-shadow: 0 0 15px var(--primary-dim);
-        }
-
-        .level-status {
+        .mission-card::before {
+            content: "CONFIDENTIAL";
             position: absolute;
-            top: 10px; right: 10px;
-            font-size: 0.8rem;
+            top: 20px; right: -30px;
+            background: var(--danger);
+            color: black;
+            font-size: 0.7rem;
+            padding: 5px 30px;
+            transform: rotate(45deg);
+            font-weight: bold;
         }
-        .status-locked { color: var(--danger); }
-        .status-open { color: var(--primary); }
 
-        /* AREA DE JUEGO */
-        .game-area {
-            display: grid;
+        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); }
+        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; }
+        .mission-desc { color: #888; font-size: 0.9rem; line-height: 1.4; }
+        
+        /* VISTA 2: INTERFAZ DE JUEGO */
+        #game-interface {
+            display: none; /* Controlado por JS */
             grid-template-columns: 1fr 350px;
-            background: #000;
+            gap: 20px;
+            height: 100%;
+            padding: 0;
         }
+        #game-interface.active { display: grid; }
 
-        .board-container {
+        /* TABLERO */
+        .board-area {
             display: flex;
             justify-content: center;
             align-items: center;
+            background: #080808;
             position: relative;
         }
 
@@ -121,70 +135,68 @@
             grid-template-columns: repeat(8, 70px);
             grid-template-rows: repeat(8, 70px);
             border: 2px solid var(--primary);
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
         }
 
         .square {
             display: flex; align-items: center; justify-content: center;
             font-size: 45px; cursor: pointer;
-            position: relative;
         }
 
-        /* Colores del tablero estilo Terminal */
         .light { background-color: #0f2615; color: var(--primary); }
         .dark { background-color: #030f06; color: var(--primary); }
         
-        .square:hover { box-shadow: inset 0 0 10px var(--primary); }
+        .square:hover { box-shadow: inset 0 0 15px var(--primary); }
         .selected { background-color: rgba(255, 255, 0, 0.2) !important; }
         .last-move { background-color: rgba(255, 255, 255, 0.1) !important; }
 
-        /* PANEL DE CONTROL DERECHO */
-        .control-panel {
+        /* PANEL LATERAL */
+        .side-panel {
+            background: #0a0a0a;
             border-left: 1px solid var(--border);
-            background: #050505;
             padding: 2rem;
             display: flex;
             flex-direction: column;
         }
 
+        .back-btn {
+            background: transparent;
+            border: 1px solid #444;
+            color: #888;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 1rem;
+            align-self: flex-start;
+        }
+        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+
         .terminal-log {
             background: #000;
             border: 1px solid #333;
-            height: 200px;
+            flex-grow: 1;
+            max-height: 300px;
             padding: 10px;
             font-size: 0.8rem;
             color: #aaa;
             overflow-y: auto;
             margin-bottom: 2rem;
-            font-family: 'Share Tech Mono', monospace;
         }
-        
+        .log-entry { margin-bottom: 5px; }
         .log-entry::before { content: "> "; color: var(--primary); }
 
-        /* EL INPUT "CAJA FUERTE" */
+        /* INPUT SEGURO */
         .cipher-box {
-            margin-top: auto;
             border: 2px dashed #444;
             padding: 1.5rem;
             position: relative;
             transition: all 0.5s;
         }
-
         .cipher-box.unlocked {
             border-color: var(--primary);
             border-style: solid;
             box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
         }
-
-        .cipher-label {
-            position: absolute;
-            top: -12px; left: 20px;
-            background: #050505;
-            padding: 0 10px;
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .cipher-box.unlocked .cipher-label { color: var(--primary); font-weight: bold; }
 
         .cipher-input {
             width: 100%;
@@ -197,13 +209,7 @@
             text-align: center;
             margin-bottom: 10px;
         }
-        
-        .cipher-input:disabled {
-            background: #0a0a0a;
-            color: #444;
-            cursor: not-allowed;
-            border-color: #222;
-        }
+        .cipher-input:disabled { background: #080808; color: #444; cursor: not-allowed; }
 
         .btn-submit {
             width: 100%;
@@ -213,131 +219,125 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            text-transform: uppercase;
-            font-family: 'Share Tech Mono', monospace;
-            opacity: 1;
-            transition: opacity 0.3s;
         }
-        
-        .btn-submit:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
+        .btn-submit:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-        /* OVERLAY DE MENSAJE CIFRADO */
+        /* OVERLAYS */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center; align-items: center;
-            z-index: 10;
+            display: none; justify-content: center; align-items: center; z-index: 10;
             backdrop-filter: blur(5px);
         }
         .overlay.active { display: flex; }
 
         .data-packet {
             border: 2px solid var(--primary);
-            padding: 3rem;
+            padding: 2rem;
             background: #000;
             text-align: center;
-            max-width: 600px;
-            box-shadow: 0 0 50px var(--primary-dim);
-            animation: glitch 0.3s cubic-bezier(.25, .46, .45, .94) both;
+            max-width: 500px;
+            animation: glitch 0.3s;
         }
 
-        .encrypted-string {
-            font-size: 2rem;
-            color: var(--primary);
-            margin: 20px 0;
-            padding: 10px;
-            border: 1px dashed var(--primary);
-            word-break: break-all;
-        }
-
-        .helper-text { color: #888; margin-bottom: 20px; font-size: 0.9rem; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes glitch { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-2px, -2px); } 40% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
 
         /* Responsive */
-        @media (max-width: 1100px) {
-            .main-grid { grid-template-columns: 250px 1fr; }
-            .board { grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); }
-            .square { font-size: 35px; }
+        @media (max-width: 900px) {
+            #game-interface { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
+            .square { font-size: 30px; }
+            .side-panel { padding: 1rem; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>PROTOCOL_CHESS_V3.0</h1>
-        <div style="color: var(--danger)">ESTADO: NO SEGURO</div>
+        <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
+        <div style="font-size: 0.8rem; color: #666;">SYS_ADMIN_ACCESS: <span style="color:var(--danger)">RESTRICTED</span></div>
     </header>
 
-    <div class="main-grid">
-        <div class="sidebar">
-            <div class="level-card active" onclick="loadLevel(1)">
-                <div class="level-status status-open">[ABIERTO]</div>
-                <h3>Nivel 1: Handshake</h3>
-                <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Mate en 4 para interceptar la clave.</p>
-            </div>
-            
-            <div class="level-card" onclick="loadLevel(2)">
-                <div class="level-status status-locked">[ENCRIPTADO]</div>
-                <h3>Nivel 2: Injection</h3>
-                <p style="color: #666; font-size: 0.9rem; margin-top: 5px;">Requiere Nivel 1 completo.</p>
-            </div>
-        </div>
-
-        <div class="game-area">
-            
-            <div class="board-container">
-                <div id="board" class="board"></div>
-                
-                <div id="victory-overlay" class="overlay">
-                    <div class="data-packet">
-                        <h2 style="color: white; margin-bottom: 10px;">ACCESO AL NÚCLEO CONCEDIDO</h2>
-                        <p class="helper-text">El sistema ha escupido el siguiente hash cifrado. Descífralo.</p>
-                        
-                        <div class="encrypted-string" id="hash-display">---</div>
-                        
-                        <p style="color: var(--danger); font-size: 0.8rem;">[ ! ] COPIA EL HASH. CIERRA ESTA VENTANA E INTRODUCE LA SOLUCIÓN EN EL PANEL LATERAL.</p>
-                        
-                        <button onclick="closeOverlay()" style="margin-top: 20px; background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer;">CERRAR Y DESCIFRAR</button>
-                    </div>
+    <div id="mission-select-screen" class="screen active">
+        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1200px;">
+            // SELECCIONAR_VECTOR_DE_ATAQUE
+        </h2>
+        
+        <div class="mission-grid">
+            <div class="mission-card" onclick="loadMission(1)">
+                <div class="mission-icon">♟️</div>
+                <div class="mission-title">ARCHIVO 01: PEÓN</div>
+                <div class="mission-desc">
+                    Intercepta la comunicación enemiga utilizando una estructura de peones. 
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
                 </div>
             </div>
 
-            <div class="control-panel">
-                <div style="margin-bottom: 10px; color: #666;">// SYSTEM LOG</div>
-                <div id="terminal" class="terminal-log">
-                    <div class="log-entry">Inicializando conexión...</div>
-                    <div class="log-entry">Esperando input del usuario...</div>
+            <div class="mission-card" onclick="loadMission(2)">
+                <div class="mission-icon">♞</div>
+                <div class="mission-title">ARCHIVO 02: INCURSIÓN</div>
+                <div class="mission-desc">
+                    Hackea el servidor central mediante una maniobra de caballería ligera.
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
                 </div>
+            </div>
 
-                <div style="flex-grow: 1;"></div>
-
-                <div id="cipher-box" class="cipher-box">
-                    <span class="cipher-label" id="cipher-label">🔒 SISTEMA BLOQUEADO</span>
-                    <p style="font-size: 0.8rem; color: #555; margin-bottom: 10px;">
-                        Debes realizar Jaque Mate para habilitar la entrada de datos.
-                    </p>
-                    
-                    <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled>
-                    
-                    <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>
-                        VALIDAR CREDENCIALES
-                    </button>
-                    
-                    <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
+            <div class="mission-card" onclick="loadMission(3)">
+                <div class="mission-icon">💥</div>
+                <div class="mission-title">ARCHIVO 03: SACRIFICIO</div>
+                <div class="mission-desc">
+                    Sobrecarga el sistema con un sacrificio de material pesado.
+                    <br><br>
+                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="game-interface" class="screen">
+        <div class="board-area">
+            <div id="board" class="board"></div>
+
+            <div id="victory-overlay" class="overlay">
+                <div class="data-packet">
+                    <h2 style="color: white; margin-bottom: 15px;">ACCESO AL NÚCLEO CONCEDIDO</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Hash desencriptado:</p>
+                    <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
+                    <p style="font-size: 0.8rem; color: var(--danger); margin-bottom: 20px;">[ ! ] COPIA EL HASH Y ÚSALO EN EL PANEL LATERAL.</p>
+                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <button class="back-btn" onclick="returnToMenu()">← ABORTAR MISIÓN</button>
+            
+            <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
+            <div id="terminal" class="terminal-log">
+                <div class="log-entry">Esperando conexión...</div>
+            </div>
+
+            <div style="flex-grow: 1;"></div>
+            <div id="cipher-box" class="cipher-box">
+                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
+                
+                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">
+                    Jaque Mate requerido para desbloquear la entrada de datos.
+                </p>
+                
+                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
+                <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // CONFIGURACIÓN DE NIVELES
-        // answer: Es la respuesta que el usuario debe escribir (lo que descifra)
-        // encryptedHash: Lo que se le muestra al ganar (el problema a resolver)
-        const levels = {
+        // --- DATOS DE LAS MISIONES ---
+        const missions = {
             1: {
                 initial: [
                     ['', '', '', '', 'b', '', '', ''],
@@ -349,88 +349,94 @@
                     ['', '', 'P', '', 'B', '', 'P', ''],
                     ['', '', '', '', 'k', '', '', '']
                 ],
-                // Solución Ajedrez: 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
-                moves: [
-                    { white: {f:{r:3,c:6}, t:{r:2,c:6}}, black: {f:{r:1,c:2}, t:{r:2,c:2}} },
-                    { white: {f:{r:4,c:7}, t:{r:3,c:7}}, black: {f:{r:0,c:4}, t:{r:1,c:3}} },
-                    { white: {f:{r:1,c:4}, t:{r:4,c:7}}, black: {f:{r:1,c:3}, t:{r:0,c:2}} },
-                    { white: {f:{r:4,c:7}, t:{r:5,c:6}}, black: null }
+                solutionMoves: [
+                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, // 1. g6 c6
+                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, // 2. h5 Ad7
+                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, // 3. Ah4 Ac8
+                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }                         // 4. Axg3++
                 ],
-                encryptedHash: "4A-75-61-6E", // Ejemplo: Hexadecimal
-                answer: "JUAN" // La respuesta esperada
+                fakeHash: "A-X-Q-B-V", // Lo que se muestra al ganar
+                answer: "AXQBV"        // Lo que el usuario debe escribir
+            },
+            2: {
+                initial: [
+                    ['', '', 'k', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', 'K', '', '', ''],
+                    ['', '', '', 'N', 'B', '', '', ''],
+                    ['', '', '', '', 'N', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                solutionMoves: [
+                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
+                ],
+                fakeHash: "C-A-B-A-L-L-O",
+                answer: "CABALLO"
+            },
+            3: {
+                initial: [
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],
+                    ['', '', 'p', 'p', '', '', '', 'p'],
+                    ['', '', '', 'p', '', '', 'p', 'Q'],
+                    ['', '', '', 'R', '', 'p', '', ''],
+                    ['', '', '', '', 'B', 'B', 'P', ''],
+                    ['', '', '', 'P', 'R', '', 'P', ''],
+                    ['', '', '', '', '', '', 'P', 'K'],
+                    ['', '', '', '', '', '', '', '']
+                ],
+                solutionMoves: [
+                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
+                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
+                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
+                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
+                ],
+                fakeHash: "S-A-C-R-I-F-I-C-I-O",
+                answer: "SACRIFICIO"
             }
         };
 
-        let currentLevel = 1;
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
+        
+        // ESTADO GLOBAL
+        let currentMissionId = 1;
         let gameState = {
             position: [],
             moveIdx: 0,
             selection: null,
-            locked: false, // Bloqueo del tablero (turno CPU)
-            inputUnlocked: false // Bloqueo del input de texto
+            locked: false
         };
-        
-        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
 
-        // INICIALIZACIÓN
-        function init() {
-            loadLevel(1);
-        }
-
-        function loadLevel(lvl) {
-            currentLevel = lvl;
-            // Clonar posición inicial
-            gameState.position = JSON.parse(JSON.stringify(levels[lvl].initial));
+        // --- NAVEGACIÓN ---
+        function loadMission(id) {
+            currentMissionId = id;
+            document.getElementById('mission-select-screen').classList.remove('active');
+            document.getElementById('game-interface').classList.add('active');
+            
+            // Reiniciar juego
+            gameState.position = JSON.parse(JSON.stringify(missions[id].initial));
             gameState.moveIdx = 0;
             gameState.selection = null;
             gameState.locked = false;
             
-            // RE-BLOQUEAR EL INPUT AL INICIAR NIVEL
+            // Bloquear input
             lockInput();
+            document.getElementById('terminal').innerHTML = '<div class="log-entry">Inicializando protocolo de misión...</div>';
+            document.getElementById('victory-overlay').classList.remove('active');
             
-            log(`Cargando Nivel ${lvl}...`);
             drawBoard();
         }
 
-        // CONTROL DEL INPUT DE CIFRADO (LO QUE PEDISTE)
-        function lockInput() {
-            gameState.inputUnlocked = false;
-            const box = document.getElementById('cipher-box');
-            const input = document.getElementById('solution-input');
-            const btn = document.getElementById('submit-btn');
-            const label = document.getElementById('cipher-label');
-
-            box.classList.remove('unlocked');
-            input.disabled = true;
-            input.value = '';
-            input.placeholder = "ACCESO DENEGADO";
-            btn.disabled = true;
-            label.innerText = "🔒 SISTEMA BLOQUEADO";
-            label.style.color = "#666";
-            
-            log("Firewall activo. Input deshabilitado.");
+        function returnToMenu() {
+            document.getElementById('game-interface').classList.remove('active');
+            document.getElementById('mission-select-screen').classList.add('active');
         }
 
-        function unlockInput() {
-            gameState.inputUnlocked = true;
-            const box = document.getElementById('cipher-box');
-            const input = document.getElementById('solution-input');
-            const btn = document.getElementById('submit-btn');
-            const label = document.getElementById('cipher-label');
-
-            box.classList.add('unlocked');
-            input.disabled = false;
-            input.placeholder = "INTRODUCE RESPUESTA DESCIFRADA";
-            btn.disabled = false;
-            label.innerText = "🔓 SISTEMA VULNERABLE";
-            label.style.color = "var(--primary)";
-            
-            // Efecto de sonido o visual aquí si quisieras
-            input.focus();
-            log("Firewall neutralizado. Puerto de datos abierto.");
-        }
-
-        // LÓGICA DE AJEDREZ (Simplificada)
+        // --- LÓGICA DE JUEGO ---
         function drawBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
@@ -443,14 +449,12 @@
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
-                        // Estilo para diferenciar bandos visualmente
-                        sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e'; 
+                        sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
                         sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
                     }
-
-                    sq.onclick = () => handleSquare(r,c);
                     
-                    // Highlight selección
+                    sq.onclick = () => handleSquare(r, c);
+                    
                     if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
                         sq.classList.add('selected');
                     }
@@ -461,26 +465,29 @@
         }
 
         function handleSquare(r, c) {
-            if(gameState.locked) return; // Esperando a la CPU
-
+            if(gameState.locked) return;
+            
             const p = gameState.position[r][c];
-            // Si selecciona pieza blanca
+            // Seleccionar blancas
             if(p && p === p.toUpperCase()) {
-                gameState.selection = {r,c};
+                gameState.selection = {r, c};
                 drawBoard();
                 return;
             }
-
-            // Si intenta mover
+            
+            // Mover
             if(gameState.selection) {
-                // Verificar si el movimiento coincide con la solución
-                const correctMove = levels[currentLevel].moves[gameState.moveIdx].white;
+                const solution = missions[currentMissionId].solutionMoves;
+                // Verificar si quedan movimientos
+                if (gameState.moveIdx >= solution.length) return;
+
+                const correctMove = solution[gameState.moveIdx].w;
                 
+                // Verificar si el movimiento es correcto
                 if(correctMove.f.r === gameState.selection.r && correctMove.f.c === gameState.selection.c &&
                    correctMove.t.r === r && correctMove.t.c === c) {
                     
-                    // Ejecutar Movimiento
-                    executeMove(gameState.selection, {r,c}, true);
+                    executeMove(gameState.selection, {r, c}, true);
                     
                 } else {
                     log("Movimiento inválido. Protocolo fallido.", true);
@@ -495,42 +502,35 @@
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
             
-            log(`${isPlayer ? 'USR' : 'CPU'} movió: ${coords(from)} a ${coords(to)}`);
+            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`);
+            
             gameState.selection = null;
             drawBoard();
-
+            
             if(isPlayer) {
-                checkWinCondition();
+                const step = missions[currentMissionId].solutionMoves[gameState.moveIdx];
+                if(!step.b) {
+                    // JAQUE MATE
+                    setTimeout(missionComplete, 500);
+                } else {
+                    // Turno CPU
+                    gameState.locked = true;
+                    setTimeout(() => {
+                        executeMove(step.b.f, step.b.t, false);
+                        gameState.moveIdx++;
+                        gameState.locked = false;
+                    }, 800);
+                }
             }
         }
 
-        function checkWinCondition() {
-            const currentStep = levels[currentLevel].moves[gameState.moveIdx];
+        function missionComplete() {
+            log("AMENAZA NEUTRALIZADA. OBTENIENDO HASH...", false, true);
+            const mission = missions[currentMissionId];
             
-            // Si no hay respuesta negra, es Mate
-            if(!currentStep.black) {
-                levelComplete();
-            } else {
-                // Turno CPU
-                gameState.locked = true;
-                setTimeout(() => {
-                    executeMove(currentStep.black.f, currentStep.black.t, false);
-                    gameState.moveIdx++;
-                    gameState.locked = false;
-                }, 800);
-            }
-        }
-
-        function levelComplete() {
-            log("JAQUE MATE EJECUTADO.", false, true);
+            document.getElementById('hash-display').innerText = mission.fakeHash;
+            document.getElementById('victory-overlay').classList.add('active');
             
-            // 1. Mostrar Overlay con el hash
-            const overlay = document.getElementById('victory-overlay');
-            const hashDisplay = document.getElementById('hash-display');
-            hashDisplay.innerText = levels[currentLevel].encryptedHash;
-            overlay.classList.add('active');
-            
-            // 2. DESBLOQUEAR EL INPUT (Aquí ocurre la magia)
             unlockInput();
         }
 
@@ -538,42 +538,71 @@
             document.getElementById('victory-overlay').classList.remove('active');
         }
 
+        // --- SISTEMA DE INPUT ---
+        function lockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.remove('unlocked');
+            inp.disabled = true;
+            inp.value = '';
+            inp.placeholder = "ACCESO DENEGADO";
+            btn.disabled = true;
+            status.innerText = "🔒 INPUT BLOQUEADO";
+            status.style.color = "#666";
+            document.getElementById('feedback-msg').innerText = '';
+        }
+
+        function unlockInput() {
+            const box = document.getElementById('cipher-box');
+            const inp = document.getElementById('solution-input');
+            const btn = document.getElementById('submit-btn');
+            const status = document.getElementById('cipher-status');
+            
+            box.classList.add('unlocked');
+            inp.disabled = false;
+            inp.placeholder = "INTRODUZCA HASH";
+            inp.focus();
+            btn.disabled = false;
+            status.innerText = "🔓 PUERTO ABIERTO";
+            status.style.color = "var(--primary)";
+        }
+
         function verifySolution() {
-            const input = document.getElementById('solution-input');
+            const val = document.getElementById('solution-input').value.toUpperCase().replace(/-/g, '').trim();
+            const correct = missions[currentMissionId].answer;
             const feedback = document.getElementById('feedback-msg');
             
-            if(input.value.toUpperCase().trim() === levels[currentLevel].answer) {
-                feedback.innerText = "ACCESO CONCEDIDO - CARGANDO NIVEL...";
+            if(val === correct) {
+                feedback.innerText = "ACCESO CONCEDIDO.";
                 feedback.style.color = "var(--primary)";
-                log("Contraseña correcta. Escalando privilegios...");
-                // Aquí cargarías el siguiente nivel
+                log("Credencial verificada. Archivo guardado.", false, true);
+                setTimeout(() => {
+                    alert("¡Misión Cumplida! Volviendo al menú.");
+                    returnToMenu();
+                }, 1000);
             } else {
-                feedback.innerText = "CONTRASEÑA INCORRECTA";
+                feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
-                log("Intento de acceso fallido.", true);
-                input.value = '';
+                log("Intento de inyección fallido.", true);
             }
         }
 
-        // UTILIDADES
-        function log(msg, error = false, success = false) {
-            const terminal = document.getElementById('terminal');
-            const div = document.createElement('div');
-            div.className = 'log-entry';
-            div.innerText = msg;
-            if(error) div.style.color = 'var(--danger)';
-            if(success) div.style.color = 'var(--primary)';
-            terminal.appendChild(div);
-            terminal.scrollTop = terminal.scrollHeight;
+        // --- UTILS ---
+        function log(msg, err=false, success=false) {
+            const t = document.getElementById('terminal');
+            const d = document.createElement('div');
+            d.className = 'log-entry';
+            d.innerText = msg;
+            if(err) d.style.color = 'var(--danger)';
+            if(success) d.style.color = 'var(--primary)';
+            t.appendChild(d);
+            t.scrollTop = t.scrollHeight;
         }
 
-        function coords(obj) {
-            const cols = ['a','b','c','d','e','f','g','h'];
-            return `${cols[obj.c]}${8-obj.r}`;
-        }
-
-        // Start
-        init();
+        function coords(o) { return `${String.fromCharCode(97+o.c)}${8-o.r}`; }
 
     </script>
 </body>
