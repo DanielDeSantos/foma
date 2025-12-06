@@ -3,1003 +3,1582 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Problemas de Ajedrez: Mate en 4 Jugadas</title>
+    <title>Ajedrez de Ataque - Problemas de Mate</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 1200px;
             margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
         }
-        
+
         h1 {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
             font-size: 2.5rem;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #ffd700, #ffed4e);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
         }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-        
-        .main-content {
+
+        .problem-selection {
             display: flex;
-            flex-wrap: wrap;
-            gap: 30px;
             justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
         }
-        
-        .board-section {
-            flex: 1;
-            min-width: 500px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+        .problem-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 320px;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-        
-        .controls-section {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #e74c3c);
         }
-        
-        .section-title {
+
+        .problem-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .problem-card.active {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        }
+
+        .problem-card h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
             font-size: 1.5rem;
+        }
+
+        .problem-card p {
+            color: #666;
             margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #ffd700;
+            line-height: 1.5;
         }
-        
-        .chessboard {
+
+        .problem-preview {
+            font-size: 16px;
+            margin: 20px 0;
+            min-height: 40px;
+            font-weight: bold;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .btn-select {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
             width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-            border: 10px solid #5d4037;
-            border-radius: 5px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-        
-        .board-row {
+
+        .btn-select:hover {
+            background: linear-gradient(135deg, #2980b9, #21618c);
+            transform: translateY(-2px);
+        }
+
+        /* MODAL STYLES */
+        .problem-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .problem-modal.active {
             display: flex;
+            animation: fadeIn 0.3s ease;
         }
-        
-        .board-cell {
-            width: 12.5%;
-            aspect-ratio: 1;
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1000px;
+            max-height: 95vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5rem;
+            cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
+            z-index: 10;
+            transition: all 0.3s ease;
         }
-        
-        .white-cell {
-            background-color: #f0d9b5;
+
+        .close-modal:hover {
+            background: #c0392b;
+            transform: rotate(90deg);
         }
-        
-        .black-cell {
-            background-color: #b58863;
-        }
-        
-        .board-cell:hover {
-            background-color: rgba(255, 215, 0, 0.3);
-        }
-        
-        .piece {
-            font-size: 2.5rem;
-            user-select: none;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
-        }
-        
-        .white-piece {
-            color: #ffffff;
-        }
-        
-        .black-piece {
-            color: #000000;
-        }
-        
-        .selected {
-            background-color: rgba(106, 190, 255, 0.7) !important;
-        }
-        
-        .valid-move {
-            position: relative;
-        }
-        
-        .valid-move::after {
-            content: '';
-            position: absolute;
-            width: 25%;
-            height: 25%;
-            border-radius: 50%;
-            background-color: rgba(0, 255, 0, 0.5);
-        }
-        
-        .check {
-            background-color: rgba(255, 0, 0, 0.3) !important;
-        }
-        
-        .checkmate {
-            background-color: rgba(255, 0, 0, 0.6) !important;
-        }
-        
-        .control-group {
-            margin-bottom: 25px;
-        }
-        
-        .control-title {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #ffd700;
-        }
-        
-        .button-group {
+
+        .game-container {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 15px;
+            flex-direction: column;
+            gap: 25px;
         }
-        
-        button {
-            padding: 10px 15px;
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            color: #1a1a2e;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-            flex: 1;
-            min-width: 120px;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        button.active {
-            background: linear-gradient(135deg, #4CAF50, #8BC34A);
-            color: white;
-        }
-        
-        select {
-            width: 100%;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid #ffd700;
-            border-radius: 5px;
-            color: white;
-            font-size: 1rem;
-        }
-        
-        select option {
-            background: #1a1a2e;
-        }
-        
-        .status {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 5px;
-            font-size: 1.1rem;
-            text-align: center;
-        }
-        
-        .move-history {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 5px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .move-history h3 {
-            margin-bottom: 10px;
-            color: #ffd700;
-        }
-        
-        .move-list {
-            list-style-type: none;
-        }
-        
-        .move-list li {
-            padding: 5px 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .instructions {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        
-        .instructions h3 {
-            margin-bottom: 15px;
-            color: #ffd700;
-        }
-        
-        .instructions ol {
-            margin-left: 20px;
-            line-height: 1.6;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        
-        .problem-info {
+
+        .game-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
-        .problem-info div {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 10px;
-            border-radius: 5px;
+
+        .problem-title {
+            color: #2c3e50;
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             flex: 1;
-            margin: 0 5px;
-            text-align: center;
         }
-        
+
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #ddd;
+            position: relative;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            border: 3px solid #2c3e50;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .square {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 35px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .square:hover {
+            transform: scale(1.05);
+            z-index: 2;
+        }
+
+        .light {
+            background-color: #f0d9b5;
+        }
+
+        .dark {
+            background-color: #b58863;
+        }
+
+        .selected {
+            background-color: rgba(255, 235, 59, 0.7) !important;
+            box-shadow: inset 0 0 0 3px #ff9800;
+        }
+
+        .valid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(76, 175, 80, 0.6);
+            border-radius: 50%;
+            border: 2px solid #2e7d32;
+        }
+
+        .capture-move::before {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: transparent;
+            border-radius: 50%;
+            border: 3px solid rgba(231, 76, 60, 0.7);
+            box-sizing: border-box;
+        }
+
+        .invalid-move::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(231, 76, 60, 0.6);
+            border-radius: 50%;
+            border: 2px solid #c0392b;
+        }
+
+        .last-move {
+            background-color: rgba(52, 152, 219, 0.4) !important;
+        }
+
+        .file-coordinates {
+            display: flex;
+            justify-content: space-around;
+            width: 480px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .rank-coordinates {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            height: 480px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .coords-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #27ae60, #219653);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+        }
+
+        .status {
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 30px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border-left: 5px solid #3498db;
+        }
+
+        .success {
+            color: #27ae60;
+            border-left-color: #27ae60;
+            background: #d5f4e6;
+        }
+
+        .error {
+            color: #e74c3c;
+            border-left-color: #e74c3c;
+            background: #fadbd8;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 1rem;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .moves-list {
+            border: 2px solid #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .move-item {
+            padding: 10px;
+            border-bottom: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            transition: background 0.2s ease;
+        }
+
+        .move-item:hover {
+            background: #e9ecef;
+        }
+
+        .move-item:last-child {
+            border-bottom: none;
+        }
+
+        .solution-text {
+            display: none;
+            background: linear-gradient(135deg, #e8f4fd, #d6eaf8);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 5px solid #3498db;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .solution-text.active {
+            display: block;
+        }
+
+        .checkmate {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+
+        .move-explanation {
+            margin-top: 15px;
+            font-style: italic;
+            color: #555;
+            line-height: 1.6;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #2ecc71;
+        }
+
+        .turn-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            background: #f8f9fa;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 480px;
+        }
+
+        .turn-white {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-left: 5px solid #3498db;
+        }
+
+        .turn-black {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            border-left: 5px solid #e74c3c;
+        }
+
+        .turn-piece {
+            font-size: 1.5rem;
+        }
+
+        /* Nuevos estilos para el sistema de palabras clave */
+        .keyword-section {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+            border: 3px solid #e17055;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .keyword-section.locked {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            border-color: #7f8c8d;
+            opacity: 0.7;
+        }
+
+        .keyword-section.unlocked {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0);
+            border-color: #e17055;
+            opacity: 1;
+            animation: unlockAnimation 0.5s ease;
+        }
+
+        @keyframes unlockAnimation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .keyword-input {
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 3px solid #3498db;
+            border-radius: 10px;
+            width: 300px;
+            margin: 15px 0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .keyword-input:disabled {
+            background: #ecf0f1;
+            border-color: #bdc3c7;
+            color: #7f8c8d;
+            cursor: not-allowed;
+        }
+
+        .keyword-input:focus {
+            outline: none;
+            border-color: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+            transform: scale(1.05);
+        }
+
+        .keyword-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .keyword-btn:disabled {
+            background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .keyword-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .congratulations {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.8s ease;
+        }
+
+        .congratulations-content {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            color: #2c3e50;
+        }
+
+        .congratulations h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+
+        .congratulations p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .celebration {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .lock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #7f8c8d;
+        }
+
+        .unlock-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #27ae60;
+            animation: spin 1s ease;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
-            .main-content {
+            .problem-selection {
                 flex-direction: column;
+                align-items: center;
             }
             
-            .board-section, .controls-section {
-                min-width: 100%;
+            .problem-card {
+                width: 100%;
+                max-width: 400px;
             }
             
-            .problem-info {
+            .modal-content {
+                padding: 20px;
+            }
+            
+            .board {
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(8, 40px);
+            }
+            
+            .square {
+                font-size: 25px;
+            }
+            
+            .file-coordinates {
+                width: 320px;
+            }
+            
+            .rank-coordinates {
+                height: 320px;
+            }
+            
+            .turn-indicator {
+                width: 320px;
+            }
+            
+            .controls {
                 flex-direction: column;
-                gap: 10px;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 200px;
+            }
+
+            .keyword-input {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .keyword-btn {
+                width: 100%;
+                margin-left: 0;
+            }
+            
+            .game-header {
+                flex-direction: column;
+                align-items: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Problemas de Ajedrez: Mate en 4 Jugadas</h1>
-            <p class="subtitle">Las blancas juegan primero y deben dar mate en exactamente 4 jugadas</p>
-        </header>
-        
-        <div class="main-content">
-            <section class="board-section">
-                <h2 class="section-title">Tablero de Ajedrez</h2>
-                <div class="problem-info">
-                    <div>Jugadas: <span id="moveCount">0</span>/8</div>
-                    <div>Turno: <span id="turnIndicator">Blancas</span></div>
-                    <div>Problema: <span id="problemNumber">1</span>/3</div>
-                </div>
-                <div class="chessboard" id="chessboard">
-                    <!-- El tablero se generará con JavaScript -->
-                </div>
-                <div class="status" id="status">
-                    Estado: Las blancas juegan primero. Encuentra el mate en 4 jugadas.
-                </div>
-                <div class="move-history">
-                    <h3>Historial de Jugadas</h3>
-                    <ul class="move-list" id="moveList">
-                        <!-- Las jugadas se añadirán aquí -->
-                    </ul>
-                </div>
-            </section>
-            
-            <section class="controls-section">
-                <h2 class="section-title">Controles</h2>
-                
-                <div class="control-group">
-                    <h3 class="control-title">Problemas de Mate en 4</h3>
-                    <div class="button-group">
-                        <button id="prevProblem">Problema Anterior</button>
-                        <button id="nextProblem">Siguiente Problema</button>
-                    </div>
-                    <select id="problemSelector">
-                        <option value="1">Problema 1: Mate con dama y torre</option>
-                        <option value="2">Problema 2: Mate con dos alfiles</option>
-                        <option value="3">Problema 3: Mate con caballo y alfil</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <h3 class="control-title">Acciones</h3>
-                    <div class="button-group">
-                        <button id="resetProblem">Reiniciar Problema</button>
-                        <button id="hint">Pista</button>
-                        <button id="showSolution">Mostrar Solución</button>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <h3 class="control-title">Editor de Respuestas Negras</h3>
-                    <div class="button-group">
-                        <button id="editMode">Editar Respuestas</button>
-                        <button id="playMode" class="active">Modo Juego</button>
-                    </div>
-                    <p>En modo edición puedes definir cómo responderán las negras.</p>
-                </div>
-                
-                <div class="control-group">
-                    <h3 class="control-title">Configurar Respuesta Negra</h3>
-                    <div id="blackResponseConfig">
-                        <!-- Se generará dinámicamente -->
-                    </div>
-                </div>
-            </section>
+    <h1>♔ Ajedrez de Ataque - Problemas de Mate ♚</h1>
+    
+    <!-- Selección de Problemas -->
+    <div class="problem-selection">
+        <div class="problem-card" data-problem="1">
+            <h2>Problema 1</h2>
+            <p>Mate en 4 jugadas con peones y alfiles</p>
+            <div class="problem-preview">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</div>
+            <button class="btn-select">Seleccionar Problema</button>
         </div>
         
-        <div class="instructions">
-            <h3>Instrucciones de Uso</h3>
-            <ol>
-                <li>Las BLANCAS juegan primero y son controladas por TI</li>
-                <li>Las NEGRAS responden automáticamente según movimientos predefinidos</li>
-                <li>Selecciona una pieza blanca para ver sus movimientos válidos (puntos verdes)</li>
-                <li>Haz clic en una casilla verde para mover la pieza blanca seleccionada</li>
-                <li>Las negras responderán automáticamente después de tu movimiento</li>
-                <li>El objetivo es dar MATE en exactamente 4 JUGADAS (8 movimientos en total)</li>
-                <li>Si das mate antes o después de 4 jugadas, el problema se reiniciará</li>
-                <li>Los reyes NO pueden ser capturados - solo se puede dar jaque mate</li>
-            </ol>
+        <div class="problem-card" data-problem="2">
+            <h2>Problema 2</h2>
+            <p>Mate en 4 jugadas con caballos y alfil</p>
+            <div class="problem-preview">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</div>
+            <button class="btn-select">Seleccionar Problema</button>
+        </div>
+
+        <div class="problem-card" data-problem="3">
+            <h2>Problema 3</h2>
+            <p>Mate en 4 jugadas con sacrificios</p>
+            <div class="problem-preview">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</div>
+            <button class="btn-select">Seleccionar Problema</button>
+        </div>
+    </div>
+
+    <!-- Modal para Problema 1 -->
+    <div id="problem1-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="1">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 1 - Mate con Peones y Alfiles</h2>
+                </div>
+                
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator1" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board1" class="board"></div>
+                    </div>
+                    
+                    <div id="status1" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn1" class="btn">Pista</button>
+                        <button id="solution-btn1" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section1" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input1" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn1" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback1" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text1" class="solution-text">
+                            <h3>Solución del Problema 1:</h3>
+                            <p class="checkmate">1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Peón g5-g6; Peón c7-c6<br>
+                                    2. Peón h4-h5; Alfil e8-d7<br>
+                                    3. Alfil e7-h4; Alfil d7-c8<br>
+                                    4. Alfil h4xg3++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Problema 2 -->
+    <div id="problem2-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="2">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 2 - Mate con Caballos y Alfil</h2>
+                </div>
+                
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator2" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board2" class="board"></div>
+                    </div>
+                    
+                    <div id="status2" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn2" class="btn">Pista</button>
+                        <button id="solution-btn2" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section2" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input2" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn2" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback2" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text2" class="solution-text">
+                            <h3>Solución del Problema 2:</h3>
+                            <p class="checkmate">1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Caballo e4-c5; Rey c8-d8<br>
+                                    2. Rey e6-f7; Rey d8-c8<br>
+                                    3. Caballo d5-b6+ (jaque); Rey c8-d8<br>
+                                    4. Caballo c5-e6++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Problema 3 -->
+    <div id="problem3-modal" class="problem-modal">
+        <div class="modal-content">
+            <button class="close-modal" data-problem="3">×</button>
+            <div class="game-container">
+                <div class="game-header">
+                    <h2 class="problem-title">Problema 3 - Mate con Sacrificios</h2>
+                </div>
+                
+                <div class="board-container">
+                    <!-- Indicador de turno (encima del tablero) -->
+                    <div id="turn-indicator3" class="turn-indicator turn-white">
+                        <span class="turn-piece">♔</span>
+                        <span>Turno de las Blancas</span>
+                    </div>
+                    
+                    <div class="file-coordinates">
+                        <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+                    </div>
+                    <div class="coords-container">
+                        <div class="rank-coordinates">
+                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+                        </div>
+                        <div id="board3" class="board"></div>
+                    </div>
+                    
+                    <div id="status3" class="status">¡Selecciona una pieza blanca para comenzar!</div>
+                    
+                    <div class="controls">
+                        <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
+                        <button id="hint-btn3" class="btn">Pista</button>
+                        <button id="solution-btn3" class="btn">Ver Solución</button>
+                    </div>
+                    
+                    <div class="legend">
+                        <div><strong>♔♕♖♗♘♙:</strong> Blancas</div>
+                        <div><strong>♚♛♜♝♞♟:</strong> Negras</div>
+                    </div>
+                </div>
+                
+                <div class="game-info">
+                    <div>
+                        <div id="keyword-section3" class="keyword-section locked">
+                            <div class="lock-icon">🔒</div>
+                            <h3>¡Completa el mate para desbloquear!</h3>
+                            <p>Cuando des jaque mate, podrás ingresar la palabra secreta:</p>
+                            <input type="text" id="keyword-input3" class="keyword-input" placeholder="Bloqueado hasta completar el mate" disabled>
+                            <button id="keyword-btn3" class="keyword-btn" disabled>Verificar</button>
+                            <div id="keyword-feedback3" style="margin-top: 10px; font-weight: bold;"></div>
+                        </div>
+                        
+                        <div id="solution-text3" class="solution-text">
+                            <h3>Solución del Problema 3:</h3>
+                            <p class="checkmate">1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++</p>
+                            <div class="move-explanation">
+                                <p><strong>Explicación:</strong> 
+                                    1. Torre d5xf5; Torre f8xf5 (captura)<br>
+                                    2. Alfil e4-d5+ (jaque); Torre f5xd5 (captura)<br>
+                                    3. Torre e3-e8+ (jaque); Rey g8-f7<br>
+                                    4. Dama h6-f8++ ¡Jaque mate!
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="moves-list">
+                        <h3>Movimientos realizados:</h3>
+                        <div id="moves-container3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de Felicitaciones -->
+    <div id="congratulations" class="congratulations">
+        <div class="congratulations-content">
+            <div class="celebration">🎉🥳🎊</div>
+            <h2>¡Felicidades!</h2>
+            <p id="congrats-message">Has resuelto correctamente el problema de ajedrez.</p>
+            <p><strong>Palabra clave aceptada:</strong> <span id="accepted-keyword"></span></p>
+            <button id="continue-btn" class="btn btn-success" style="margin-top: 20px;">Continuar Jugando</button>
         </div>
     </div>
 
     <script>
-        // Representación del tablero
-        let boardState = Array(8).fill().map(() => Array(8).fill(null));
-        let selectedPiece = null;
-        let validMoves = [];
-        let isEditMode = false;
-        let moveHistory = [];
-        let currentProblem = 1;
-        let moveCount = 0;
-        let isWhiteTurn = true;
-        let gameActive = true;
+        // Piezas representadas con emojis
+        const pieces = {
+            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
+            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
+        };
 
-        // Problemas predefinidos de mate en 4
+        // Palabras clave para cada problema
+        const keywords = {
+            1: "AXQBVQXAÇÇXEUSRE", // Palabra clave para el problema 1
+            2: "CABALLO", // Palabra clave para el problema 2
+            3: "SACRIFICIO" // Palabra clave para el problema 3
+        };
+
+        // ========== CONFIGURACIÓN DE PROBLEMAS ==========
         const problems = {
             1: {
-                name: "Mate con dama y torre",
-                board: [
-                    [null, null, null, null, 'bk', null, null, null],
-                    [null, null, null, null, 'bp', 'bp', null, null],
-                    [null, null, null, null, null, null, 'wp', null],
-                    [null, null, null, 'wn', null, null, null, null],
-                    [null, 'wq', null, null, null, null, null, null],
-                    [null, null, null, null, null, 'wb', null, null],
-                    [null, null, 'wp', null, null, null, null, null],
-                    [null, null, null, null, 'wk', 'wr', null, null]
+                name: "Mate con Peones y Alfiles",
+                initialPosition: [
+                    // Fila 0 (8 en ajedrez)
+                    ['', '', '', '', 'b', '', '', ''],
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', 'p', '', 'B', '', 'p', ''],
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', '', '', '', '', ''],
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', 'P', '', '', 'p', 'P', ''],
+                    // Fila 4 (4 en ajedrez)
+                    ['', 'P', '', 'P', '', 'P', '', 'P'],
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', 'p', '', 'K', '', 'p', ''],
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', 'P', '', 'B', '', 'P', ''],
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', 'k', '', '', '']
                 ],
-                solution: ["Dc7", "Rf6", "Th6+", "Rg5", "Dg7+", "Rh4", "Th6#"],
-                blackResponses: {
-                    "Dc7": { from: [0, 4], to: [1, 5] }, // Rey f6
-                    "Th6+": { from: [1, 5], to: [2, 4] }, // Rey g5
-                    "Dg7+": { from: [2, 4], to: [3, 3] }  // Rey h4
-                }
+                solution: [
+                    { 
+                        white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } }, // g5-g6
+                        black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } }, // c7-c6
+                        description: "Peón blanco avanza a g6"
+                    },
+                    { 
+                        white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } }, // h4-h5
+                        black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } }, // Ae8-d7
+                        description: "Peón blanco avanza a h5"
+                    },
+                    { 
+                        white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } }, // Ae7-h4
+                        black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } }, // Ad7-c8
+                        description: "Alfil blanco se mueve a h4"
+                    },
+                    { 
+                        white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, // Ah4xg3++
+                        black: null,
+                        description: "¡Jaque mate!"
+                    }
+                ],
+                moveNotation: [
+                    "1. g6 c6",
+                    "2. h5 Ad7", 
+                    "3. Ah4 Ac8",
+                    "4. Axg3++"
+                ]
             },
             2: {
-                name: "Mate con dos alfiles",
-                board: [
-                    [null, null, null, null, 'bk', null, null, null],
-                    [null, null, 'bp', null, 'bp', null, null, null],
-                    [null, null, null, null, null, 'bp', null, null],
-                    [null, null, 'wp', null, null, null, null, null],
-                    [null, null, null, 'wb', null, 'wb', null, null],
-                    [null, null, null, null, null, null, 'wp', null],
-                    [null, null, null, null, null, null, null, null],
-                    [null, null, null, null, 'wk', null, null, null]
+                name: "Mate con Caballos y Alfil",
+                initialPosition: [
+                    // Fila 0 (8 en ajedrez)
+                    ['', '', 'k', '', '', '', '', ''],  // Rey negro en c8
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', '', '', '', '', '', ''],
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', '', 'K', '', '', ''],  // Rey blanco en e6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', '', 'N', 'B', '', '', ''], // Caballo en d5, Alfil en e5
+                    // Fila 4 (4 en ajedrez)
+                    ['', '', '', '', 'N', '', '', ''],  // Caballo en e4
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', '', '', '', '', '', ''],
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', '', '', '', '', '', ''],
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', '', '', '', '']
                 ],
-                solution: ["Ae5", "Rd7", "Ad6", "Rc8", "Ae6+", "Rb8", "Ab7#"],
-                blackResponses: {
-                    "Ae5": { from: [0, 4], to: [1, 3] }, // Rey d7
-                    "Ad6": { from: [1, 3], to: [0, 2] }, // Rey c8
-                    "Ae6+": { from: [0, 2], to: [0, 1] } // Rey b8
-                }
+                solution: [
+                    { 
+                        white: { from: { row: 4, col: 4 }, to: { row: 3, col: 2 } }, // Ce4-c5
+                        black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // Rc8-d8
+                        description: "Caballo de e4 a c5"
+                    },
+                    { 
+                        white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } }, // Re6-f7
+                        black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } }, // Rd8-c8
+                        description: "Rey blanco a f7"
+                    },
+                    { 
+                        white: { from: { row: 3, col: 3 }, to: { row: 2, col: 1 } }, // Cd5-b6+
+                        black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } }, // Rc8-d8
+                        description: "Caballo de d5 a b6 (jaque)"
+                    },
+                    { 
+                        white: { from: { row: 3, col: 2 }, to: { row: 2, col: 4 } }, // Cc5-e6++
+                        black: null,
+                        description: "¡Jaque mate!"
+                    }
+                ],
+                moveNotation: [
+                    "1. Cc5 Rd8",
+                    "2. Rf7 Rc8", 
+                    "3. Cb6+ Rd8",
+                    "4. Ce6++"
+                ]
             },
             3: {
-                name: "Mate con caballo y alfil",
-                board: [
-                    [null, null, null, null, 'bk', null, null, null],
-                    [null, null, 'bp', null, null, null, null, null],
-                    [null, null, null, null, 'bp', null, null, null],
-                    [null, 'wp', null, 'wn', null, null, null, null],
-                    [null, null, null, null, 'wb', null, null, null],
-                    [null, null, null, null, null, null, null, null],
-                    [null, null, null, null, null, null, 'wp', null],
-                    [null, null, null, null, 'wk', null, null, null]
+                name: "Mate con Sacrificios",
+                initialPosition: [
+                    // Fila 0 (8 en ajedrez)
+                    ['', 'n', '', 'b', '', 'r', 'k', ''],  // Caballo b8, Alfil d8, Torre f8, Rey g8
+                    // Fila 1 (7 en ajedrez)
+                    ['', '', 'p', 'p', '', '', '', 'p'], // Peones c7, d7, h7
+                    // Fila 2 (6 en ajedrez)
+                    ['', '', '', 'p', '', '', 'p', 'Q'],  // Peón d6, Peón g6, Dama h6
+                    // Fila 3 (5 en ajedrez)
+                    ['', '', '', 'R', '', 'p', '', ''],  // Torre d5, Peón f5
+                    // Fila 4 (4 en ajedrez)
+                    ['', '', '', '', 'B', 'B', 'P', ''], // Alfiles e4, f4; Peón g4
+                    // Fila 5 (3 en ajedrez)
+                    ['', '', '', 'P', 'R', '', 'P', ''], // Peón d3; Torre e3; Peón g3
+                    // Fila 6 (2 en ajedrez)
+                    ['', '', '', '', '', '', 'P', 'K'], // Peón g2; Rey h2
+                    // Fila 7 (1 en ajedrez)
+                    ['', '', '', '', '', '', '', '']  // Vacío
                 ],
-                solution: ["Cc6", "Ra7", "Ab5", "Rb8", "Ca7", "Ra8", "Cc8#"],
-                blackResponses: {
-                    "Cc6": { from: [0, 4], to: [1, 0] }, // Rey a7
-                    "Ab5": { from: [1, 0], to: [0, 1] }, // Rey b8
-                    "Ca7": { from: [0, 1], to: [0, 0] }  // Rey a8
-                }
+                solution: [
+                    { 
+                        white: { from: { row: 3, col: 3 }, to: { row: 3, col: 5 } }, // Td5xf5
+                        black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } }, // Tf8xf5
+                        description: "Torre blanca captura peón en f5"
+                    },
+                    { 
+                        white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, // Ae4-d5+
+                        black: { from: { row: 3, col: 5 }, to: { row: 3, col: 3 } }, // Tf5xd5
+                        description: "Alfil a d5 con jaque, torre captura alfil"
+                    },
+                    { 
+                        white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } }, // Te3-e8+
+                        black: { from: { row: 0, col: 6 }, to: { row: 1, col: 5 } }, // Rg8-f7
+                        description: "Torre a e8 con jaque, rey escapa a f7"
+                    },
+                    { 
+                        white: { from: { row: 2, col: 7 }, to: { row: 0, col: 5 } }, // Dh6-f8++
+                        black: null,
+                        description: "¡Jaque mate con la dama!"
+                    }
+                ],
+                moveNotation: [
+                    "1. Txf5 Txf5",
+                    "2. Ad5+ Txd5", 
+                    "3. Te8+ Rf7",
+                    "4. Df8++"
+                ]
             }
         };
 
-        // Inicializar el tablero con un problema
-        function initializeProblem(problemNumber) {
+        // ========== ESTADO GLOBAL ==========
+        let currentProblem = null;
+        let gameStates = {};
+
+        // ========== FUNCIONES DE INTERFAZ ==========
+        function showProblemSelection() {
+            document.querySelectorAll('.problem-modal').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+
+        function showProblem(problemNumber) {
             currentProblem = problemNumber;
+            
+            // Actualizar selección visual
+            document.querySelectorAll('.problem-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`.problem-card[data-problem="${problemNumber}"]`).classList.add('active');
+            
+            // Mostrar modal del problema
+            document.getElementById(`problem${problemNumber}-modal`).classList.add('active');
+            
+            // Ocultar la solución si está visible
+            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
+            
+            // Inicializar el juego si no está inicializado
+            if (!gameStates[problemNumber]) {
+                initializeGame(problemNumber);
+            } else {
+                createBoard(problemNumber);
+            }
+        }
+
+        function closeProblemModal(problemNumber) {
+            document.getElementById(`problem${problemNumber}-modal`).classList.remove('active');
+        }
+
+        // ========== FUNCIONES DEL JUEGO ==========
+        function initializeGame(problemNumber) {
             const problem = problems[problemNumber];
             
-            // Copiar la posición del problema al estado del tablero
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    boardState[row][col] = problem.board[row][col];
-                }
-            }
+            gameStates[problemNumber] = {
+                currentPosition: JSON.parse(JSON.stringify(problem.initialPosition)),
+                selectedSquare: null,
+                validMoves: [],
+                currentMoveIndex: 0,
+                playerMoves: [],
+                gameCompleted: false,
+                keywordVerified: false,
+                isWhiteTurn: true,
+                gamePaused: false
+            };
             
-            // Reiniciar variables de juego
-            selectedPiece = null;
-            validMoves = [];
-            moveHistory = [];
-            moveCount = 0;
-            isWhiteTurn = true;
-            gameActive = true;
-            
-            // Actualizar la interfaz
-            updateMoveCount();
-            updateTurnIndicator();
-            updateProblemNumber();
-            updateMoveHistory();
-            updateBlackResponseConfig();
-            updateStatus(`Problema ${problemNumber}: ${problem.name}. Las blancas juegan primero.`);
-            
-            renderBoard();
+            createBoard(problemNumber);
+            updateKeywordSection(problemNumber);
+            updateTurnIndicator(problemNumber);
         }
 
-        // Reiniciar con alerta
-        function resetWithAlert(message) {
-            alert(message);
-            initializeProblem(currentProblem);
-        }
-
-        // Renderizar el tablero
-        function renderBoard() {
-            const chessboard = document.getElementById('chessboard');
-            chessboard.innerHTML = '';
-            
-            // Determinar si el rey negro está en jaque o jaque mate
-            const blackKingPosition = findKing('b');
-            const isCheck = isKingInCheck('b');
-            const isCheckmate = isCheck && isCheckmateForBlack();
+        function createBoard(problemNumber) {
+            const state = gameStates[problemNumber];
+            const board = document.getElementById(`board${problemNumber}`);
+            board.innerHTML = '';
             
             for (let row = 0; row < 8; row++) {
-                const boardRow = document.createElement('div');
-                boardRow.className = 'board-row';
-                
                 for (let col = 0; col < 8; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = `board-cell ${(row + col) % 2 === 0 ? 'white-cell' : 'black-cell'}`;
-                    cell.dataset.row = row;
-                    cell.dataset.col = col;
+                    const square = document.createElement('div');
+                    square.classList.add('square');
+                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
+                    square.dataset.row = row;
+                    square.dataset.col = col;
                     
-                    // Marcar si es un movimiento válido
-                    if (validMoves.some(move => move.row === row && move.col === col)) {
-                        cell.classList.add('valid-move');
+                    const piece = state.currentPosition[row][col];
+                    if (piece) {
+                        square.textContent = pieces[piece];
                     }
                     
-                    // Marcar si está seleccionado
-                    if (selectedPiece && selectedPiece.row === row && selectedPiece.col === col) {
-                        cell.classList.add('selected');
-                    }
-                    
-                    // Marcar jaque o jaque mate
-                    if (blackKingPosition && blackKingPosition.row === row && blackKingPosition.col === col) {
-                        if (isCheckmate) {
-                            cell.classList.add('checkmate');
-                        } else if (isCheck) {
-                            cell.classList.add('check');
+                    // Resaltar última jugada
+                    if (state.playerMoves.length > 0) {
+                        const lastMove = state.playerMoves[state.playerMoves.length - 1];
+                        if ((row === lastMove.from.row && col === lastMove.from.col) || 
+                            (row === lastMove.to.row && col === lastMove.to.col)) {
+                            square.classList.add('last-move');
                         }
                     }
                     
-                    // Añadir pieza si existe
-                    const piece = boardState[row][col];
-                    if (piece) {
-                        const pieceElement = document.createElement('div');
-                        pieceElement.className = `piece ${piece.startsWith('w') ? 'white-piece' : 'black-piece'}`;
-                        pieceElement.textContent = getPieceSymbol(piece);
-                        cell.appendChild(pieceElement);
-                    }
-                    
-                    if (gameActive && isWhiteTurn && !isEditMode) {
-                        cell.addEventListener('click', () => handleCellClick(row, col));
-                    } else if (isEditMode) {
-                        cell.addEventListener('click', () => handleEditClick(row, col));
-                    }
-                    
-                    boardRow.appendChild(cell);
+                    square.addEventListener('click', () => handleSquareClick(problemNumber, row, col));
+                    board.appendChild(square);
                 }
-                
-                chessboard.appendChild(boardRow);
             }
+            
+            updateStatus(problemNumber);
+            updateMovesList(problemNumber);
         }
 
-        // Obtener símbolo Unicode para la pieza
-        function getPieceSymbol(piece) {
-            const symbols = {
-                'wp': '♙', 'wr': '♖', 'wn': '♘', 'wb': '♗', 'wq': '♕', 'wk': '♔',
-                'bp': '♟', 'br': '♜', 'bn': '♞', 'bb': '♝', 'bq': '♛', 'bk': '♚'
-            };
-            return symbols[piece] || '';
-        }
-
-        // Manejar clic en una celda en modo juego
-        function handleCellClick(row, col) {
-            if (!gameActive || !isWhiteTurn) return;
+        function handleSquareClick(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            if (state.gameCompleted || state.gamePaused) return;
             
-            const piece = boardState[row][col];
+            const piece = state.currentPosition[row][col];
             
-            // Si ya hay una pieza seleccionada, intentar moverla
-            if (selectedPiece) {
+            if (state.selectedSquare) {
+                const fromRow = state.selectedSquare.row;
+                const fromCol = state.selectedSquare.col;
+                
                 // Verificar si el movimiento es válido
-                const isValidMove = validMoves.some(move => move.row === row && move.col === col);
+                const isValidMove = state.validMoves.some(move => 
+                    move.to.row === row && move.to.col === col);
                 
                 if (isValidMove) {
-                    // Verificar que no se está intentando capturar un rey
-                    const targetPiece = boardState[row][col];
-                    if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
-                        updateStatus("¡No puedes capturar reyes! Solo se permite jaque mate.");
-                        return;
-                    }
-                    
-                    // Registrar la jugada blanca
-                    const moveNotation = getMoveNotation(selectedPiece, {row, col});
-                    
-                    // Mover la pieza blanca
-                    boardState[row][col] = boardState[selectedPiece.row][selectedPiece.col];
-                    boardState[selectedPiece.row][selectedPiece.col] = null;
-                    
-                    // Añadir al historial
-                    moveHistory.push(`${Math.floor(moveCount/2) + 1}. ${moveNotation}`);
-                    moveCount++;
-                    
-                    // Verificar si es jaque mate prematuro
-                    if (isCheckmateForBlack()) {
-                        const jugadasCompletas = Math.ceil(moveCount / 2);
-                        if (jugadasCompletas < 4) {
-                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                            return;
-                        } else if (jugadasCompletas > 4) {
-                            resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                            return;
-                        }
-                    }
-                    
-                    // Verificar si se superó el límite de jugadas
-                    if (moveCount >= 8 && !isCheckmateForBlack()) {
-                        resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
-                        return;
-                    }
-                    
-                    // Actualizar estado
-                    selectedPiece = null;
-                    validMoves = [];
-                    
-                    // Verificar si es jaque mate exacto en 4 jugadas
-                    if (isCheckmateForBlack() && moveCount === 7) {
-                        updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                        gameActive = false;
-                        renderBoard();
-                        return;
-                    }
-                    
-                    // Cambiar turno a negras
-                    isWhiteTurn = false;
-                    updateTurnIndicator();
-                    updateMoveCount();
-                    updateMoveHistory();
-                    
-                    // Las negras responden automáticamente
-                    setTimeout(makeBlackMove, 800);
-                } else if (piece && piece.startsWith('w')) {
-                    // Seleccionar una nueva pieza blanca
-                    selectedPiece = { row, col };
-                    validMoves = calculateValidMoves(row, col, piece);
-                    updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
+                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
                 } else {
-                    // Deseleccionar si se hace clic en una celda vacía o pieza negra
-                    selectedPiece = null;
-                    validMoves = [];
-                    updateStatus("Selecciona una pieza blanca para mover.");
+                    clearSelection(problemNumber);
+                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
+                        selectSquare(problemNumber, row, col);
+                    }
                 }
-            } else if (piece && piece.startsWith('w')) {
-                // Seleccionar una pieza blanca
-                selectedPiece = { row, col };
-                validMoves = calculateValidMoves(row, col, piece);
-                updateStatus(`Pieza seleccionada: ${getPieceName(piece)}. Selecciona un movimiento válido.`);
             } else {
-                updateStatus("Selecciona una pieza blanca para mover.");
+                if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
+                    selectSquare(problemNumber, row, col);
+                }
             }
-            
-            renderBoard();
         }
 
-        // Calcular movimientos válidos CORREGIDA
-        function calculateValidMoves(row, col, piece) {
-            const moves = [];
-            const pieceType = piece.substring(1);
-            const isWhite = piece.startsWith('w');
+        function selectSquare(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            clearSelection(problemNumber);
             
-            // Función auxiliar para verificar si se puede mover a una casilla
-            const canMoveTo = (r, c) => {
-                // No se puede mover fuera del tablero
-                if (r < 0 || r >= 8 || c < 0 || c >= 8) return false;
-                
-                const targetPiece = boardState[r][c];
-                
-                // No se puede capturar al rey propio
-                if (targetPiece && ((isWhite && targetPiece === 'wk') || (!isWhite && targetPiece === 'bk'))) {
-                    return false;
-                }
-                
-                // No se puede capturar al rey enemigo (solo jaque mate)
-                if (targetPiece && ((isWhite && targetPiece === 'bk') || (!isWhite && targetPiece === 'wk'))) {
-                    return false;
-                }
-                
-                // Casilla vacía o pieza enemiga
-                return !targetPiece || (isWhite && targetPiece.startsWith('b')) || (!isWhite && targetPiece.startsWith('w'));
-            };
+            state.selectedSquare = { row, col };
+            const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
+            squareElement.classList.add('selected');
             
-            // Peones
-            if (pieceType === 'p') {
-                if (isWhite) {
-                    // Movimiento hacia adelante
-                    if (row > 0 && !boardState[row-1][col]) {
-                        moves.push({row: row-1, col});
-                        // Primer movimiento (2 casillas)
-                        if (row === 6 && !boardState[row-2][col]) {
-                            moves.push({row: row-2, col});
-                        }
-                    }
-                    // Capturas diagonales
-                    if (row > 0 && col > 0 && boardState[row-1][col-1] && boardState[row-1][col-1].startsWith('b')) {
-                        moves.push({row: row-1, col: col-1});
-                    }
-                    if (row > 0 && col < 7 && boardState[row-1][col+1] && boardState[row-1][col+1].startsWith('b')) {
-                        moves.push({row: row-1, col: col+1});
-                    }
+            // Calcular todos los movimientos válidos para la pieza seleccionada
+            calculateValidMoves(problemNumber, row, col);
+            
+            state.validMoves.forEach(move => {
+                const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
+                const targetPiece = state.currentPosition[move.to.row][move.to.col];
+                
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    targetSquare.classList.add('capture-move');
                 } else {
-                    // Movimiento hacia adelante (negras)
-                    if (row < 7 && !boardState[row+1][col]) {
-                        moves.push({row: row+1, col});
-                        // Primer movimiento (2 casillas)
-                        if (row === 1 && !boardState[row+2][col]) {
-                            moves.push({row: row+2, col});
-                        }
-                    }
-                    // Capturas diagonales
-                    if (row < 7 && col > 0 && boardState[row+1][col-1] && boardState[row+1][col-1].startsWith('w')) {
-                        moves.push({row: row+1, col: col-1});
-                    }
-                    if (row < 7 && col < 7 && boardState[row+1][col+1] && boardState[row+1][col+1].startsWith('w')) {
-                        moves.push({row: row+1, col: col+1});
-                    }
+                    targetSquare.classList.add('valid-move');
                 }
-            } 
-            // Torres
-            else if (pieceType === 'r') {
-                const directions = [[-1,0], [1,0], [0,-1], [0,1]];
-                for (const [dr, dc] of directions) {
-                    for (let i = 1; i < 8; i++) {
-                        const newRow = row + dr * i;
-                        const newCol = col + dc * i;
-                        if (!canMoveTo(newRow, newCol)) break;
-                        
-                        moves.push({row: newRow, col: newCol});
-                        
-                        // Si hay una pieza enemiga, no podemos continuar
-                        if (boardState[newRow][newCol]) break;
-                    }
-                }
-            }
-            // Alfiles
-            else if (pieceType === 'b') {
-                const directions = [[-1,-1], [-1,1], [1,-1], [1,1]];
-                for (const [dr, dc] of directions) {
-                    for (let i = 1; i < 8; i++) {
-                        const newRow = row + dr * i;
-                        const newCol = col + dc * i;
-                        if (!canMoveTo(newRow, newCol)) break;
-                        
-                        moves.push({row: newRow, col: newCol});
-                        
-                        // Si hay una pieza enemiga, no podemos continuar
-                        if (boardState[newRow][newCol]) break;
-                    }
-                }
-            }
-            // Caballos
-            else if (pieceType === 'n') {
-                const knightMoves = [
-                    [-2,-1], [-2,1], [-1,-2], [-1,2],
-                    [1,-2], [1,2], [2,-1], [2,1]
-                ];
-                for (const [dr, dc] of knightMoves) {
-                    const newRow = row + dr;
-                    const newCol = col + dc;
-                    if (canMoveTo(newRow, newCol)) {
-                        moves.push({row: newRow, col: newCol});
-                    }
-                }
-            }
-            // Reinas (combinación de torre y alfil)
-            else if (pieceType === 'q') {
-                const directions = [
-                    [-1,0], [1,0], [0,-1], [0,1],
-                    [-1,-1], [-1,1], [1,-1], [1,1]
-                ];
-                for (const [dr, dc] of directions) {
-                    for (let i = 1; i < 8; i++) {
-                        const newRow = row + dr * i;
-                        const newCol = col + dc * i;
-                        if (!canMoveTo(newRow, newCol)) break;
-                        
-                        moves.push({row: newRow, col: newCol});
-                        
-                        // Si hay una pieza enemiga, no podemos continuar
-                        if (boardState[newRow][newCol]) break;
-                    }
-                }
-            }
-            // Reyes
-            else if (pieceType === 'k') {
-                const kingMoves = [
-                    [-1,-1], [-1,0], [-1,1],
-                    [0,-1], [0,1],
-                    [1,-1], [1,0], [1,1]
-                ];
-                for (const [dr, dc] of kingMoves) {
-                    const newRow = row + dr;
-                    const newCol = col + dc;
-                    if (canMoveTo(newRow, newCol)) {
-                        moves.push({row: newRow, col: newCol});
-                    }
-                }
-            }
-            
-            return moves;
+            });
         }
 
-        // El resto del código permanece igual...
-        // [Aquí irían las funciones handleEditClick, algebraicToPosition, getMoveNotation, 
-        // makeBlackMove, findKing, isKingInCheck, isCheckmateForBlack, etc.
-        // que se mantienen igual que en la versión anterior]
-
-        // Manejar clic en modo edición
-        function handleEditClick(row, col) {
-            const piece = boardState[row][col];
-            if (piece && piece.startsWith('b')) {
-                const lastWhiteMove = moveHistory[moveHistory.length - 1];
-                if (lastWhiteMove && lastWhiteMove.includes('.')) {
-                    const moveKey = lastWhiteMove.split('. ')[1];
-                    const problem = problems[currentProblem];
-                    
-                    if (!problem.blackResponses) {
-                        problem.blackResponses = {};
-                    }
-                    
-                    const responseFrom = prompt(`¿Desde dónde debe moverse la pieza negra para responder a ${moveKey}? (ejemplo: "e4")`, "e8");
-                    const responseTo = prompt(`¿A dónde debe moverse? (ejemplo: "e5")`, "e7");
-                    
-                    if (responseFrom && responseTo) {
-                        const fromPos = algebraicToPosition(responseFrom);
-                        const toPos = algebraicToPosition(responseTo);
-                        
-                        if (fromPos && toPos) {
-                            problem.blackResponses[moveKey] = {
-                                from: [fromPos.row, fromPos.col],
-                                to: [toPos.row, toPos.col]
-                            };
-                            updateStatus(`Respuesta configurada: ${responseFrom} -> ${responseTo} para ${moveKey}`);
-                            updateBlackResponseConfig();
-                        }
-                    }
-                } else {
-                    updateStatus("Primero haz un movimiento con blancas para configurar la respuesta.");
-                }
+        function calculateValidMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            const piece = state.currentPosition[row][col];
+            
+            if (!piece || !isWhitePiece(piece)) return;
+            
+            state.validMoves = [];
+            
+            // Calcular movimientos según el tipo de pieza
+            switch(piece.toUpperCase()) {
+                case 'P': // Peón
+                    calculatePawnMoves(problemNumber, row, col);
+                    break;
+                case 'R': // Torre
+                    calculateRookMoves(problemNumber, row, col);
+                    break;
+                case 'N': // Caballo
+                    calculateKnightMoves(problemNumber, row, col);
+                    break;
+                case 'B': // Alfil
+                    calculateBishopMoves(problemNumber, row, col);
+                    break;
+                case 'Q': // Dama
+                    calculateQueenMoves(problemNumber, row, col);
+                    break;
+                case 'K': // Rey
+                    calculateKingMoves(problemNumber, row, col);
+                    break;
+            }
+            
+            // Filtrar movimientos que dejarían al rey en jaque
+            if (piece.toUpperCase() !== 'K') {
+                state.validMoves = state.validMoves.filter(move => 
+                    !wouldKingBeInCheck(problemNumber, move.from.row, move.from.col, move.to.row, move.to.col)
+                );
             }
         }
 
-        // Convertir notación algebraica a posición
-        function algebraicToPosition(alg) {
-            if (alg.length !== 2) return null;
-            const col = alg.charCodeAt(0) - 97;
-            const row = 8 - parseInt(alg[1]);
-            return (col >= 0 && col < 8 && row >= 0 && row < 8) ? { row, col } : null;
-        }
-
-        // Obtener notación algebraica del movimiento
-        function getMoveNotation(from, to) {
-            const piece = boardState[from.row][from.col];
-            const pieceType = piece.substring(1).toUpperCase();
-            const fromCol = String.fromCharCode(97 + from.col);
-            const fromRow = 8 - from.row;
-            const toCol = String.fromCharCode(97 + to.col);
-            const toRow = 8 - to.row;
+        function calculatePawnMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
             
-            if (pieceType === 'P') {
-                return `${toCol}${toRow}`;
-            } else {
-                return `${pieceType}${toCol}${toRow}`;
-            }
-        }
-
-        // Hacer movimiento automático de las negras
-        function makeBlackMove() {
-            if (!gameActive) return;
-            
-            const lastWhiteMove = moveHistory[moveHistory.length - 1];
-            if (!lastWhiteMove) return;
-            
-            const moveKey = lastWhiteMove.split('. ')[1];
-            const problem = problems[currentProblem];
-            
-            if (problem.blackResponses && problem.blackResponses[moveKey]) {
-                const response = problem.blackResponses[moveKey];
-                const fromRow = response.from[0];
-                const fromCol = response.from[1];
-                const toRow = response.to[0];
-                const toCol = response.to[1];
+            // Movimiento hacia adelante (peones blancos se mueven hacia arriba en el tablero)
+            if (row > 0 && !state.currentPosition[row-1][col]) {
+                state.validMoves.push({ from: { row, col }, to: { row: row-1, col } });
                 
-                const piece = boardState[fromRow][fromCol];
-                if (piece && piece.startsWith('b')) {
-                    const validMoves = calculateValidMoves(fromRow, fromCol, piece);
-                    const isValid = validMoves.some(move => move.row === toRow && move.col === toCol);
+                // Movimiento doble desde posición inicial
+                if (row === 6 && !state.currentPosition[row-2][col]) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-2, col } });
+                }
+            }
+            
+            // Capturas diagonales
+            if (row > 0 && col > 0) {
+                const targetPiece = state.currentPosition[row-1][col-1];
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-1, col: col-1 } });
+                }
+            }
+            
+            if (row > 0 && col < 7) {
+                const targetPiece = state.currentPosition[row-1][col+1];
+                if (targetPiece && isBlackPiece(targetPiece)) {
+                    state.validMoves.push({ from: { row, col }, to: { row: row-1, col: col+1 } });
+                }
+            }
+        }
+
+        function calculateRookMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Direcciones: arriba, derecha, abajo, izquierda
+            const directions = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+            
+            for (const [dr, dc] of directions) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
                     
-                    if (isValid) {
-                        // Verificar que no se está intentando capturar un rey
-                        const targetPiece = boardState[toRow][toCol];
-                        if (targetPiece && (targetPiece === 'wk' || targetPiece === 'bk')) {
-                            updateStatus("Error: Las negras no pueden capturar reyes.");
-                            moveHistory.push("--");
-                            moveCount++;
-                            isWhiteTurn = true;
-                            updateTurnIndicator();
-                            updateMoveCount();
-                            updateMoveHistory();
-                            updateStatus("Turno de las blancas. Las negras no pudieron mover.");
-                            renderBoard();
-                            return;
-                        }
-                        
-                        // Mover la pieza negra
-                        boardState[toRow][toCol] = piece;
-                        boardState[fromRow][fromCol] = null;
-                        
-                        // Añadir al historial
-                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
-                        moveCount++;
-                        
-                        // Verificar si es jaque mate después del movimiento negro
-                        if (isCheckmateForBlack()) {
-                            const jugadasCompletas = Math.ceil(moveCount / 2);
-                            if (jugadasCompletas < 4) {
-                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                                return;
-                            } else if (jugadasCompletas > 4) {
-                                resetWithAlert(`¡Jaque mate en ${jugadasCompletas} jugadas! El objetivo es mate en exactamente 4 jugadas. El problema se reiniciará.`);
-                                return;
-                            }
-                        }
-                        
-                        // Verificar si se superó el límite de jugadas
-                        if (moveCount >= 8 && !isCheckmateForBlack()) {
-                            resetWithAlert("¡Has superado las 4 jugadas sin dar mate! El problema se reiniciará.");
-                            return;
-                        }
-                        
-                        // Cambiar turno a blancas
-                        isWhiteTurn = true;
-                        updateTurnIndicator();
-                        updateMoveCount();
-                        updateMoveHistory();
-                        
-                        // Verificar si es jaque mate exacto en 4 jugadas
-                        if (isCheckmateForBlack() && moveCount === 8) {
-                            updateStatus("¡Felicidades! ¡Has logrado el mate en exactamente 4 jugadas!");
-                            gameActive = false;
-                        } else {
-                            updateStatus("Turno de las blancas. Continúa con el mate en 4 jugadas.");
-                        }
+                    if (!targetPiece) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    } else if (isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        break;
                     } else {
-                        updateStatus("Error: Movimiento predefinido de negras no es válido.");
-                        boardState[toRow][toCol] = piece;
-                        boardState[fromRow][fromCol] = null;
-                        moveHistory.push(`${getMoveNotation({row: fromRow, col: fromCol}, {row: toRow, col: toCol})}`);
-                        moveCount++;
-                        isWhiteTurn = true;
-                        updateTurnIndicator();
-                        updateMoveCount();
-                        updateMoveHistory();
-                        updateStatus("Movimiento forzado. Turno de las blancas.");
+                        break;
                     }
-                } else {
-                    updateStatus("Error: No hay pieza negra en la posición predefinida.");
-                    isWhiteTurn = true;
-                    updateTurnIndicator();
-                    updateStatus("Error en respuesta predefinida. Turno de las blancas.");
+                    
+                    r += dr;
+                    c += dc;
                 }
-            } else {
-                updateStatus("No hay respuesta predefinida. Las negras pasan turno.");
-                moveHistory.push("--");
-                moveCount++;
-                isWhiteTurn = true;
-                updateTurnIndicator();
-                updateMoveCount();
-                updateMoveHistory();
-                updateStatus("Turno de las blancas. Las negras no respondieron.");
             }
-            
-            renderBoard();
         }
 
-        // Encontrar la posición del rey
-        function findKing(color) {
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    if (boardState[row][col] === `${color}k`) {
-                        return { row, col };
+        function calculateKnightMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Movimientos en L del caballo
+            const moves = [
+                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                [1, -2], [1, 2], [2, -1], [2, 1]
+            ];
+            
+            for (const [dr, dc] of moves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece || isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
                     }
                 }
             }
-            return null;
         }
 
-        // Verificar si el rey está en jaque
-        function isKingInCheck(color) {
-            const kingPos = findKing(color);
-            if (!kingPos) return false;
+        function calculateBishopMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
             
-            const opponentColor = color === 'w' ? 'b' : 'w';
+            // Direcciones diagonales
+            const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
             
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = boardState[row][col];
-                    if (piece && piece.startsWith(opponentColor)) {
-                        const moves = calculateValidMoves(row, col, piece);
-                        if (moves.some(move => move.row === kingPos.row && move.col === kingPos.col)) {
-                            return true;
+            for (const [dr, dc] of directions) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                    } else if (isBlackPiece(targetPiece)) {
+                        state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
+                        break;
+                    } else {
+                        break;
+                    }
+                    
+                    r += dr;
+                    c += dc;
+                }
+            }
+        }
+
+        function calculateQueenMoves(problemNumber, row, col) {
+            // La dama combina movimientos de torre y alfil
+            calculateRookMoves(problemNumber, row, col);
+            calculateBishopMoves(problemNumber, row, col);
+        }
+
+        function calculateKingMoves(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Todas las direcciones adyacentes
+            const moves = [
+                [-1, -1], [-1, 0], [-1, 1],
+                [0, -1],           [0, 1],
+                [1, -1],  [1, 0],  [1, 1]
+            ];
+            
+            for (const [dr, dc] of moves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const targetPiece = state.currentPosition[r][c];
+                    
+                    if (!targetPiece || isBlackPiece(targetPiece)) {
+                        // Verificar que el rey no se mueva a casillas adyacentes al rey negro
+                        if (!isAdjacentToBlackKing(problemNumber, r, c)) {
+                            state.validMoves.push({ from: { row, col }, to: { row: r, col: c } });
                         }
+                    }
+                }
+            }
+        }
+
+        function isAdjacentToBlackKing(problemNumber, row, col) {
+            const state = gameStates[problemNumber];
+            
+            // Encontrar la posición del rey negro
+            let blackKingRow = -1;
+            let blackKingCol = -1;
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (state.currentPosition[r][c] === 'k') {
+                        blackKingRow = r;
+                        blackKingCol = c;
+                        break;
+                    }
+                }
+                if (blackKingRow !== -1) break;
+            }
+            
+            if (blackKingRow === -1) return false;
+            
+            // Verificar si la casilla está adyacente al rey negro
+            const rowDiff = Math.abs(row - blackKingRow);
+            const colDiff = Math.abs(col - blackKingCol);
+            
+            return rowDiff <= 1 && colDiff <= 1;
+        }
+
+        function wouldKingBeInCheck(problemNumber, fromRow, fromCol, toRow, toCol) {
+            const state = gameStates[problemNumber];
+            
+            // Crear una copia temporal del tablero
+            const tempPosition = JSON.parse(JSON.stringify(state.currentPosition));
+            
+            // Realizar el movimiento temporal
+            const piece = tempPosition[fromRow][fromCol];
+            tempPosition[toRow][toCol] = piece;
+            tempPosition[fromRow][fromCol] = '';
+            
+            // Encontrar la posición del rey blanco
+            let kingRow = -1;
+            let kingCol = -1;
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    if (tempPosition[r][c] === 'K') {
+                        kingRow = r;
+                        kingCol = c;
+                        break;
+                    }
+                }
+                if (kingRow !== -1) break;
+            }
+            
+            if (kingRow === -1) return false;
+            
+            // Verificar si el rey está en jaque
+            return isSquareAttacked(problemNumber, kingRow, kingCol, tempPosition);
+        }
+
+        function isSquareAttacked(problemNumber, row, col, position) {
+            // Verificar ataques de peones
+            if (row < 7) {
+                if (col > 0 && position[row+1][col-1] === 'p') return true;
+                if (col < 7 && position[row+1][col+1] === 'p') return true;
+            }
+            
+            // Verificar ataques de caballos
+            const knightMoves = [
+                [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+                [1, -2], [1, 2], [2, -1], [2, 1]
+            ];
+            
+            for (const [dr, dc] of knightMoves) {
+                const r = row + dr;
+                const c = col + dc;
+                
+                if (r >= 0 && r < 8 && c >= 0 && c < 8 && position[r][c] === 'n') {
+                    return true;
+                }
+            }
+            
+            // Verificar ataques en línea recta (torres y damas)
+            const straightDirections = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            
+            for (const [dr, dc] of straightDirections) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const piece = position[r][c];
+                    if (piece) {
+                        if (piece === 'r' || piece === 'q') return true;
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+            
+            // Verificar ataques diagonales (alfiles y damas)
+            const diagonalDirections = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+            
+            for (const [dr, dc] of diagonalDirections) {
+                let r = row + dr;
+                let c = col + dc;
+                
+                while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                    const piece = position[r][c];
+                    if (piece) {
+                        if (piece === 'b' || piece === 'q') return true;
+                        break;
+                    }
+                    r += dr;
+                    c += dc;
+                }
+            }
+            
+            // Verificar ataques del rey negro (casillas adyacentes)
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    if (dr === 0 && dc === 0) continue;
+                    
+                    const r = row + dr;
+                    const c = col + dc;
+                    
+                    if (r >= 0 && r < 8 && c >= 0 && c < 8 && position[r][c] === 'k') {
+                        return true;
                     }
                 }
             }
@@ -1007,171 +1586,435 @@
             return false;
         }
 
-        // Verificar si es jaque mate para las negras
-        function isCheckmateForBlack() {
-            if (!isKingInCheck('b')) return false;
+        function isWhitePiece(piece) {
+            return piece === piece.toUpperCase();
+        }
+
+        function isBlackPiece(piece) {
+            return piece === piece.toLowerCase();
+        }
+
+        function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const piece = boardState[row][col];
-                    if (piece && piece.startsWith('b')) {
-                        const moves = calculateValidMoves(row, col, piece);
-                        if (moves.length > 0) return false;
+            const piece = state.currentPosition[fromRow][fromCol];
+            
+            // Mover la pieza correctamente
+            state.currentPosition[toRow][toCol] = piece;
+            state.currentPosition[fromRow][fromCol] = '';
+            
+            if (isPlayerMove) {
+                state.playerMoves.push({
+                    from: { row: fromRow, col: fromCol },
+                    to: { row: toRow, col: toCol }
+                });
+                
+                // Verificar si el movimiento coincide con la solución
+                const expectedMove = problem.solution[state.currentMoveIndex].white;
+                const isCorrectMove = (fromRow === expectedMove.from.row && 
+                                      fromCol === expectedMove.from.col && 
+                                      toRow === expectedMove.to.row && 
+                                      toCol === expectedMove.to.col);
+                
+                if (isCorrectMove) {
+                    // Cambiar turno a negras
+                    state.isWhiteTurn = false;
+                    updateTurnIndicator(problemNumber);
+                    
+                    // Verificar si es el último movimiento (mate)
+                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
+                        // Si es el último movimiento y no hay respuesta negra (mate)
+                        state.gameCompleted = true;
+                        state.currentMoveIndex++;
+                        document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                        document.getElementById(`status${problemNumber}`).className = "status success";
+                        
+                        // Desbloquear la sección de palabra clave
+                        unlockKeywordSection(problemNumber);
+                        
+                        // Redirigir automáticamente a la sección de palabra clave
+                        setTimeout(() => {
+                            document.getElementById(`keyword-section${problemNumber}`).scrollIntoView({ 
+                                behavior: 'smooth',
+                                block: 'center'
+                            });
+                        }, 500);
+                    } else {
+                        // Movimiento de las negras
+                        setTimeout(() => makeBlackMove(problemNumber), 1000);
                     }
-                }
-            }
-            
-            return true;
-        }
-
-        // Obtener nombre de la pieza
-        function getPieceName(piece) {
-            const names = {
-                'wp': 'Peón Blanco', 'wr': 'Torre Blanca', 'wn': 'Caballo Blanco', 
-                'wb': 'Alfil Blanco', 'wq': 'Reina Blanca', 'wk': 'Rey Blanco',
-                'bp': 'Peón Negro', 'br': 'Torre Negra', 'bn': 'Caballo Negro', 
-                'bb': 'Alfil Negro', 'bq': 'Reina Negra', 'bk': 'Rey Negro'
-            };
-            return names[piece] || 'Pieza';
-        }
-
-        // Actualizar el estado
-        function updateStatus(message) {
-            document.getElementById('status').textContent = `Estado: ${message}`;
-        }
-
-        // Actualizar contador de jugadas
-        function updateMoveCount() {
-            document.getElementById('moveCount').textContent = moveCount;
-        }
-
-        // Actualizar indicador de turno
-        function updateTurnIndicator() {
-            document.getElementById('turnIndicator').textContent = isWhiteTurn ? 'Blancas' : 'Negras';
-        }
-
-        // Actualizar número de problema
-        function updateProblemNumber() {
-            document.getElementById('problemNumber').textContent = currentProblem;
-        }
-
-        // Actualizar historial de jugadas
-        function updateMoveHistory() {
-            const moveList = document.getElementById('moveList');
-            moveList.innerHTML = '';
-            
-            for (let i = 0; i < moveHistory.length; i++) {
-                const li = document.createElement('li');
-                li.textContent = moveHistory[i];
-                moveList.appendChild(li);
-            }
-            
-            moveList.scrollTop = moveList.scrollHeight;
-        }
-
-        // Actualizar configuración de respuestas negras
-        function updateBlackResponseConfig() {
-            const configDiv = document.getElementById('blackResponseConfig');
-            const problem = problems[currentProblem];
-            
-            let html = '';
-            if (problem.blackResponses) {
-                html += '<p>Respuestas configuradas:</p><ul>';
-                for (const [whiteMove, blackResponse] of Object.entries(problem.blackResponses)) {
-                    const fromPos = positionToAlgebraic(blackResponse.from[0], blackResponse.from[1]);
-                    const toPos = positionToAlgebraic(blackResponse.to[0], blackResponse.to[1]);
-                    html += `<li>${whiteMove} → ${fromPos}${toPos}</li>`;
-                }
-                html += '</ul>';
-            } else {
-                html = '<p>No hay respuestas configuradas. Usa el modo edición para definirlas.</p>';
-            }
-            
-            configDiv.innerHTML = html;
-        }
-
-        // Convertir posición a notación algebraica
-        function positionToAlgebraic(row, col) {
-            const colChar = String.fromCharCode(97 + col);
-            const rowNum = 8 - row;
-            return `${colChar}${rowNum}`;
-        }
-
-        // Mostrar pista
-        function showHint() {
-            const problem = problems[currentProblem];
-            const nextMoveIndex = Math.floor(moveCount / 2);
-            
-            if (nextMoveIndex < problem.solution.length) {
-                updateStatus(`Pista: El siguiente movimiento es ${problem.solution[nextMoveIndex]}`);
-            } else {
-                updateStatus("No hay más pistas disponibles.");
-            }
-        }
-
-        // Mostrar solución completa
-        function showSolution() {
-            const problem = problems[currentProblem];
-            let solutionText = "Solución completa: ";
-            
-            for (let i = 0; i < problem.solution.length; i++) {
-                if (i % 2 === 0) {
-                    solutionText += `${Math.floor(i/2) + 1}. ${problem.solution[i]} `;
                 } else {
-                    solutionText += `${problem.solution[i]} `;
+                    // Movimiento incorrecto - pausar el juego y mostrar mensaje
+                    state.gamePaused = true;
+                    
+                    // Mostrar mensaje de error en el área de estado
+                    const statusElement = document.getElementById(`status${problemNumber}`);
+                    statusElement.innerHTML = `
+                        <div style="text-align: center;">
+                            <p style="color: #e74c3c; margin-bottom: 15px; font-size: 1.2rem;">❌ Movimiento incorrecto</p>
+                            <p style="margin-bottom: 15px;">Has realizado un movimiento que hará que ya no sea posible hacer jaque mate en 4 jugadas. Debes reiniciar el problema.</p>
+                            <button id="restart-btn${problemNumber}" class="btn btn-danger" style="margin-top: 10px;">Reiniciar Problema</button>
+                        </div>
+                    `;
+                    statusElement.className = "status error";
+                    
+                    // AGREGAR ESTA PARTE: Redirigir automáticamente al área de estado
+                    setTimeout(() => {
+                        statusElement.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        // También puedes resaltar visualmente el área de estado
+                        statusElement.style.boxShadow = "0 0 20px rgba(231, 76, 60, 0.5)";
+                        statusElement.style.transition = "box-shadow 0.3s ease";
+                        
+                        setTimeout(() => {
+                            statusElement.style.boxShadow = "none";
+                        }, 2000);
+                    }, 100);
+                    
+                    // Agregar event listener al botón de reinicio
+                    document.getElementById(`restart-btn${problemNumber}`).addEventListener('click', () => {
+                        resetGame(problemNumber);
+                    });
+                    
+                    return;
                 }
             }
             
-            updateStatus(solutionText);
+            clearSelection(problemNumber);
+            createBoard(problemNumber);
         }
 
-        // Cambiar modo
-        function toggleMode(mode) {
-            isEditMode = mode === 'edit';
+        function makeBlackMove(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
             
-            const editBtn = document.getElementById('editMode');
-            const playBtn = document.getElementById('playMode');
+            if (state.currentMoveIndex < problem.solution.length) {
+                const blackMove = problem.solution[state.currentMoveIndex].black;
+                
+                if (blackMove) {
+                    // VERIFICAR que existe una pieza en la posición de origen
+                    const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
+                    
+                    if (piece) {
+                        // Mover la pieza negra
+                        state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
+                        state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
+                        
+                        // Incrementar el índice de movimiento después del movimiento negro
+                        state.currentMoveIndex++;
+                        
+                        // Cambiar turno a blancas
+                        state.isWhiteTurn = true;
+                        updateTurnIndicator(problemNumber);
+                        
+                        createBoard(problemNumber);
+                        document.getElementById(`status${problemNumber}`).textContent = "Las negras han jugado. Es tu turno.";
+                    } else {
+                        console.error(`No se encontró pieza en posición (${blackMove.from.row},${blackMove.from.col})`);
+                    }
+                } else {
+                    // Si no hay movimiento negro (último movimiento de mate), completar el juego
+                    state.gameCompleted = true;
+                    state.currentMoveIndex++;
+                    document.getElementById(`status${problemNumber}`).innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                    document.getElementById(`status${problemNumber}`).className = "status success";
+                    
+                    // Desbloquear la sección de palabra clave
+                    unlockKeywordSection(problemNumber);
+                    
+                    // Redirigir automáticamente a la sección de palabra clave
+                    setTimeout(() => {
+                        document.getElementById(`keyword-section${problemNumber}`).scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                    }, 500);
+                }
+            }
             
-            if (isEditMode) {
-                editBtn.classList.add('active');
-                playBtn.classList.remove('active');
-                updateStatus("Modo Edición: Haz clic en piezas negras para configurar sus respuestas.");
-                gameActive = false;
+            createBoard(problemNumber);
+        }
+
+        function clearSelection(problemNumber) {
+            const state = gameStates[problemNumber];
+            state.selectedSquare = null;
+            state.validMoves = [];
+            
+            const squares = document.querySelectorAll(`#board${problemNumber} .square`);
+            squares.forEach(square => {
+                square.classList.remove('selected');
+                square.classList.remove('valid-move');
+                square.classList.remove('capture-move');
+            });
+        }
+
+        function updateStatus(problemNumber) {
+            const state = gameStates[problemNumber];
+            const statusElement = document.getElementById(`status${problemNumber}`);
+            
+            if (state.gameCompleted) {
+                statusElement.innerHTML = "¡Felicidades! <span class='checkmate'>¡Jaque mate en 4 jugadas!</span>";
+                statusElement.className = "status success";
+            } else if (state.currentMoveIndex === 0) {
+                statusElement.textContent = "¡Selecciona una pieza blanca para comenzar!";
+                statusElement.className = "status";
             } else {
-                playBtn.classList.add('active');
-                editBtn.classList.remove('active');
-                updateStatus("Modo Juego: Las blancas juegan primero. Encuentra el mate en 4 jugadas.");
-                gameActive = true;
+                statusElement.textContent = `Movimiento ${state.currentMoveIndex}/4 completado. Es tu turno.`;
+                statusElement.className = "status";
             }
-            
-            selectedPiece = null;
-            validMoves = [];
-            renderBoard();
         }
 
-        // Inicializar la aplicación
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeProblem(1);
+        function updateTurnIndicator(problemNumber) {
+            const state = gameStates[problemNumber];
+            const turnIndicator = document.getElementById(`turn-indicator${problemNumber}`);
             
-            document.getElementById('editMode').addEventListener('click', () => toggleMode('edit'));
-            document.getElementById('playMode').addEventListener('click', () => toggleMode('play'));
-            document.getElementById('resetProblem').addEventListener('click', () => initializeProblem(currentProblem));
-            document.getElementById('hint').addEventListener('click', showHint);
-            document.getElementById('showSolution').addEventListener('click', showSolution);
-            document.getElementById('prevProblem').addEventListener('click', () => {
-                if (currentProblem > 1) {
-                    initializeProblem(currentProblem - 1);
+            if (state.isWhiteTurn) {
+                turnIndicator.className = "turn-indicator turn-white";
+                turnIndicator.innerHTML = '<span class="turn-piece">♔</span><span>Turno de las Blancas</span>';
+            } else {
+                turnIndicator.className = "turn-indicator turn-black";
+                turnIndicator.innerHTML = '<span class="turn-piece">♚</span><span>Turno de las Negras</span>';
+            }
+        }
+
+        function updateMovesList(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            const movesContainer = document.getElementById(`moves-container${problemNumber}`);
+            movesContainer.innerHTML = '';
+            
+            if (state.playerMoves.length === 0) {
+                movesContainer.innerHTML = '<p>No se han realizado movimientos aún.</p>';
+            } else {
+                state.playerMoves.forEach((move, index) => {
+                    const moveElement = document.createElement('div');
+                    moveElement.className = 'move-item';
+                    if (index === 3) {
+                        moveElement.innerHTML = `<strong class="checkmate">${problem.moveNotation[index]}</strong>`;
+                    } else {
+                        moveElement.textContent = problem.moveNotation[index];
+                    }
+                    movesContainer.appendChild(moveElement);
+                });
+            }
+        }
+
+        // ========== SISTEMA DE PALABRAS CLAVE ==========
+        function updateKeywordSection(problemNumber) {
+            const state = gameStates[problemNumber];
+            const keywordSection = document.getElementById(`keyword-section${problemNumber}`);
+            const keywordInput = document.getElementById(`keyword-input${problemNumber}`);
+            const keywordBtn = document.getElementById(`keyword-btn${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            
+            if (state.gameCompleted) {
+                // Desbloquear
+                keywordSection.classList.remove('locked');
+                keywordSection.classList.add('unlocked');
+                keywordInput.disabled = false;
+                keywordInput.placeholder = "Escribe la palabra aquí";
+                keywordBtn.disabled = false;
+                
+                // Cambiar icono de candado a desbloqueado
+                const iconElement = keywordSection.querySelector('.lock-icon');
+                if (iconElement) {
+                    iconElement.textContent = '🔓';
+                    iconElement.className = 'unlock-icon';
                 }
-            });
-            document.getElementById('nextProblem').addEventListener('click', () => {
-                if (currentProblem < Object.keys(problems).length) {
-                    initializeProblem(currentProblem + 1);
+            } else {
+                // Bloquear
+                keywordSection.classList.remove('unlocked');
+                keywordSection.classList.add('locked');
+                keywordInput.disabled = true;
+                keywordInput.placeholder = "Bloqueado hasta completar el mate";
+                keywordBtn.disabled = true;
+                feedbackElement.textContent = '';
+                
+                // Cambiar icono a candado
+                const iconElement = keywordSection.querySelector('.unlock-icon, .lock-icon');
+                if (iconElement) {
+                    iconElement.textContent = '🔒';
+                    iconElement.className = 'lock-icon';
                 }
-            });
-            document.getElementById('problemSelector').addEventListener('change', function() {
-                initializeProblem(parseInt(this.value));
+            }
+        }
+
+        function unlockKeywordSection(problemNumber) {
+            const keywordSection = document.getElementById(`keyword-section${problemNumber}`);
+            const keywordInput = document.getElementById(`keyword-input${problemNumber}`);
+            const keywordBtn = document.getElementById(`keyword-btn${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            
+            // Animación de desbloqueo
+            keywordSection.classList.remove('locked');
+            keywordSection.classList.add('unlocked');
+            keywordInput.disabled = false;
+            keywordInput.placeholder = "Escribe la palabra aquí";
+            keywordBtn.disabled = false;
+            
+            // Cambiar icono
+            const iconElement = keywordSection.querySelector('.lock-icon');
+            if (iconElement) {
+                iconElement.textContent = '🔓';
+                iconElement.className = 'unlock-icon';
+            }
+            
+            feedbackElement.textContent = '¡Sección desbloqueada! Ingresa la palabra clave.';
+            feedbackElement.style.color = '#27ae60';
+        }
+
+        function verifyKeyword(problemNumber) {
+            const state = gameStates[problemNumber];
+            const inputElement = document.getElementById(`keyword-input${problemNumber}`);
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            const keyword = keywords[problemNumber];
+            
+            const userInput = inputElement.value.trim().toUpperCase();
+            
+            if (!state.gameCompleted) {
+                feedbackElement.textContent = "⚠️ Primero debes completar el mate";
+                feedbackElement.style.color = "#e74c3c";
+                return;
+            }
+            
+            if (userInput === keyword) {
+                feedbackElement.textContent = "✅ ¡Palabra correcta!";
+                feedbackElement.style.color = "#27ae60";
+                state.keywordVerified = true;
+                
+                // Mostrar pantalla de felicitaciones
+                showCongratulations(problemNumber, keyword);
+            } else {
+                feedbackElement.textContent = "❌ Palabra incorrecta. Intenta de nuevo.";
+                feedbackElement.style.color = "#e74c3c";
+            }
+        }
+
+        function showCongratulations(problemNumber, keyword) {
+            const congratsElement = document.getElementById('congratulations');
+            const messageElement = document.getElementById('congrats-message');
+            const keywordElement = document.getElementById('accepted-keyword');
+            
+            messageElement.textContent = `Has resuelto correctamente el Problema ${problemNumber}: ${problems[problemNumber].name}`;
+            keywordElement.textContent = keyword;
+            
+            congratsElement.style.display = 'flex';
+        }
+
+        function hideCongratulations() {
+            const congratsElement = document.getElementById('congratulations');
+            congratsElement.style.display = 'none';
+            
+            // Volver a la selección de problemas
+            showProblemSelection();
+        }
+
+        function showHint(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            if (state.gameCompleted || state.currentMoveIndex >= problem.solution.length || state.gamePaused) return;
+            
+            const expectedMove = problem.solution[state.currentMoveIndex].white;
+            const fromSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.from.row}"][data-col="${expectedMove.from.col}"]`);
+            const toSquare = document.querySelector(`#board${problemNumber} .square[data-row="${expectedMove.to.row}"][data-col="${expectedMove.to.col}"]`);
+            
+            fromSquare.classList.add('selected');
+            toSquare.classList.add('valid-move');
+            
+            document.getElementById(`status${problemNumber}`).textContent = `Pista: Mueve la pieza de ${String.fromCharCode(97 + expectedMove.from.col)}${8 - expectedMove.from.row} a ${String.fromCharCode(97 + expectedMove.to.col)}${8 - expectedMove.to.row}`;
+            document.getElementById(`status${problemNumber}`).className = "status";
+            
+            setTimeout(() => {
+                clearSelection(problemNumber);
+                createBoard(problemNumber);
+            }, 2000);
+        }
+
+        function showSolution(problemNumber) {
+            const solutionText = document.getElementById(`solution-text${problemNumber}`);
+            solutionText.classList.toggle('active');
+        }
+
+        function resetGame(problemNumber) {
+            const state = gameStates[problemNumber];
+            const problem = problems[problemNumber];
+            
+            state.currentPosition = JSON.parse(JSON.stringify(problem.initialPosition));
+            state.selectedSquare = null;
+            state.validMoves = [];
+            state.currentMoveIndex = 0;
+            state.playerMoves = [];
+            state.gameCompleted = false;
+            state.keywordVerified = false;
+            state.isWhiteTurn = true;
+            state.gamePaused = false;
+            createBoard(problemNumber);
+            updateKeywordSection(problemNumber);
+            updateTurnIndicator(problemNumber);
+            
+            // Ocultar la solución si está visible
+            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
+            
+            // Limpiar feedback de palabra clave
+            const feedbackElement = document.getElementById(`keyword-feedback${problemNumber}`);
+            feedbackElement.textContent = '';
+            feedbackElement.className = '';
+            
+            const inputElement = document.getElementById(`keyword-input${problemNumber}`);
+            inputElement.value = '';
+        }
+
+        // ========== EVENT LISTENERS ==========
+        document.querySelectorAll('.btn-select').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const problemNumber = this.closest('.problem-card').dataset.problem;
+                showProblem(problemNumber);
             });
         });
+
+        // Event listeners para cerrar modales
+        document.querySelectorAll('.close-modal').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const problemNumber = this.dataset.problem;
+                closeProblemModal(problemNumber);
+            });
+        });
+
+        // Cerrar modal al hacer clic fuera del contenido
+        document.querySelectorAll('.problem-modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    const problemNumber = this.id.replace('problem', '').replace('-modal', '');
+                    closeProblemModal(problemNumber);
+                }
+            });
+        });
+
+        // Event listeners para los controles de cada problema
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`reset-btn${i}`).addEventListener('click', () => resetGame(i));
+            document.getElementById(`hint-btn${i}`).addEventListener('click', () => showHint(i));
+            document.getElementById(`solution-btn${i}`).addEventListener('click', () => showSolution(i));
+            document.getElementById(`keyword-btn${i}`).addEventListener('click', () => verifyKeyword(i));
+            
+            // También verificar con Enter
+            document.getElementById(`keyword-input${i}`).addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    verifyKeyword(i);
+                }
+            });
+        }
+
+        // Event listener para el botón de continuar
+        document.getElementById('continue-btn').addEventListener('click', hideCongratulations);
+
+        // Inicializar mostrando la selección de problemas
+        showProblemSelection();
     </script>
 </body>
 </html>
