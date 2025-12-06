@@ -97,6 +97,7 @@
             border-color: var(--primary);
             box-shadow: 0 0 20px var(--primary-dim);
             transform: translateY(-5px);
+            /* Patrón de ajedrez sutil en hover */
             background-image: 
                 linear-gradient(45deg, #051a05 25%, transparent 25%), 
                 linear-gradient(-45deg, #051a05 25%, transparent 25%), 
@@ -302,43 +303,43 @@
             <div class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">NODE_01</div>
-                <div class="mission-desc">ADVERTENCIA: Estructura de peones comprometida en el flanco de dama. Promoción detectada.</div>
-                <div class="mission-footer"><span>RANK: PAWN</span><span>THREAT: LOW</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
+                <div class="mission-footer"><span>PIEZA: PEÓN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">NODE_02</div>
-                <div class="mission-desc">ALERTA: Maniobra de flanqueo no lineal. El puesto avanzado está desprotegido.</div>
-                <div class="mission-footer"><span>RANK: KNIGHT</span><span>THREAT: MEDIUM</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
+                <div class="mission-footer"><span>PIEZA: CABALLO</span><span>TEMA: AHOGADO</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">NODE_03</div>
-                <div class="mission-desc">ERROR CRÍTICO: Gran Diagonal abierta. El enroque ha perdido su cobertura.</div>
-                <div class="mission-footer"><span>RANK: BISHOP</span><span>THREAT: HIGH</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
+                <div class="mission-footer"><span>PIEZA: ALFIL</span><span>TEMA: CLAVADA</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">NODE_04</div>
-                <div class="mission-desc">FALLO DE SEGURIDAD: Columna abierta invadida. La séptima fila está comprometida.</div>
-                <div class="mission-footer"><span>RANK: ROOK</span><span>THREAT: HIGH</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
+                <div class="mission-footer"><span>PIEZA: TORRE</span><span>TEMA: PASILLO</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">NODE_05</div>
-                <div class="mission-desc">PELIGRO INMINENTE: Sobrecarga en el centro. Múltiples amenazas simultáneas detectadas.</div>
-                <div class="mission-footer"><span>RANK: QUEEN</span><span>THREAT: SEVERE</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
+                <div class="mission-footer"><span>PIEZA: DAMA</span><span>TEMA: DOBLE</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">NODE_06</div>
-                <div class="mission-desc">SYSTEM HALT: Rey expuesto sin casillas de escape. Red de mate inevitable.</div>
-                <div class="mission-footer"><span>RANK: KING</span><span>THREAT: FATAL</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
+                <div class="mission-footer"><span>PIEZA: REY</span><span>TEMA: RED</span></div>
             </div>
 
         </div>
