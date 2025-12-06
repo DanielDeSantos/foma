@@ -696,7 +696,7 @@
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
                     } else {
-                        log("Error Tàctic: Moviment subòptim.", true);
+                        log("Error Tàctic: Moviment incorrecte.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
