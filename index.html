@@ -3,139 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Cifrado - Selección de Misión</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
+    <title>Proyecto Euler: Lógica y Ajedrez</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-body: #050505;
-            --bg-panel: #0a0a0a;
-            --primary: #00ff41; /* Verde Matrix */
-            --primary-dim: rgba(0, 255, 65, 0.1);
-            --danger: #ff003c;
-            --text-main: #e0e0e0;
-            --border: #333;
+            --bg-blueprint: #1e3a8a; /* Azul plano técnico */
+            --grid-line: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --accent: #facc15; /* Amarillo técnico */
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --border: 1px solid rgba(255, 255, 255, 0.2);
+            --success: #4ade80;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Share Tech Mono', monospace;
-            background-color: var(--bg-body);
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-blueprint);
             color: var(--text-main);
             height: 100vh;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-        }
-
-        /* EFECTO CRT */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
+            
+            /* EFECTO PAPEL MILIMETRADO */
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
 
         header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--primary);
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--bg-panel);
-            position: relative;
-            z-index: 3;
+            background: rgba(30, 58, 138, 0.9);
+            backdrop-filter: blur(5px);
+            z-index: 10;
         }
 
-        h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
+        h1 {
+            font-family: 'Merriweather', serif;
+            font-style: italic;
+            font-size: 1.8rem;
+        }
 
-        /* PANTALLAS (Vistas) */
+        .subtitle { font-size: 0.9rem; opacity: 0.8; }
+
+        /* PANTALLAS */
         .screen {
             display: none;
             flex-grow: 1;
-            position: relative;
-            z-index: 3;
             padding: 2rem;
-            animation: fadeIn 0.5s;
+            animation: fadeIn 0.8s ease-out;
         }
         .screen.active { display: flex; }
 
-        /* VISTA 1: SELECCIÓN DE MISIONES (GRID) */
+        /* VISTA 1: SELECCIÓN (TARJETAS) */
         #mission-select-screen {
             flex-direction: column;
             align-items: center;
         }
 
-        .mission-grid {
+        .intro-text {
+            text-align: center;
+            max-width: 800px;
+            margin-bottom: 2rem;
+            font-family: 'Merriweather', serif;
+            line-height: 1.6;
+        }
+
+        .cards-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             width: 100%;
             max-width: 1200px;
-            margin-top: 2rem;
         }
 
-        .mission-card {
-            background: #000;
-            border: 1px solid var(--border);
+        .math-card {
+            background: var(--panel-bg);
+            border: 2px solid white;
             padding: 2rem;
-            position: relative;
             cursor: pointer;
-            transition: all 0.3s;
-            overflow: hidden;
+            transition: transform 0.3s, background 0.3s;
+            position: relative;
         }
 
-        .mission-card:hover {
-            border-color: var(--primary);
-            box-shadow: 0 0 20px var(--primary-dim);
+        .math-card:hover {
             transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
         }
 
-        .mission-card::before {
-            content: "CONFIDENTIAL";
+        .card-number {
             position: absolute;
-            top: 20px; right: -30px;
-            background: var(--danger);
-            color: black;
-            font-size: 0.7rem;
-            padding: 5px 30px;
-            transform: rotate(45deg);
+            top: 10px; right: 15px;
+            font-size: 3rem;
             font-weight: bold;
+            opacity: 0.1;
+            font-family: 'Merriweather', serif;
         }
 
-        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); }
-        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; }
-        .mission-desc { color: #888; font-size: 0.9rem; line-height: 1.4; }
-        
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .card-desc { font-size: 0.9rem; line-height: 1.5; color: #ddd; }
+
         /* VISTA 2: INTERFAZ DE JUEGO */
         #game-interface {
-            display: none; /* Controlado por JS */
+            display: none;
             grid-template-columns: 1fr 350px;
-            gap: 20px;
+            gap: 2rem;
             height: 100%;
-            padding: 0;
+            padding: 0 2rem 2rem 2rem;
         }
         #game-interface.active { display: grid; }
 
-        /* TABLERO */
-        .board-area {
+        .board-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #080808;
             position: relative;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
         }
 
+        /* TABLERO ESTILO PLANO TÉCNICO */
         .board {
             display: grid;
             grid-template-columns: repeat(8, 70px);
             grid-template-rows: repeat(8, 70px);
-            border: 2px solid var(--primary);
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.1);
+            border: 4px solid white;
+            background: white; /* Para las casillas claras */
         }
 
         .square {
@@ -143,200 +152,220 @@
             font-size: 45px; cursor: pointer;
         }
 
-        .light { background-color: #0f2615; color: var(--primary); }
-        .dark { background-color: #030f06; color: var(--primary); }
+        /* Colores de las casillas */
+        .light { background-color: #e0f2fe; color: #000; }
+        .dark { background-color: #3b82f6; color: #fff; } /* Azul medio */
         
-        .square:hover { box-shadow: inset 0 0 15px var(--primary); }
-        .selected { background-color: rgba(255, 255, 0, 0.2) !important; }
-        .last-move { background-color: rgba(255, 255, 255, 0.1) !important; }
-
+        .square:hover { opacity: 0.9; }
+        .selected { background-color: var(--accent) !important; color: #000 !important; }
+        
         /* PANEL LATERAL */
         .side-panel {
-            background: #0a0a0a;
-            border-left: 1px solid var(--border);
-            padding: 2rem;
+            background: var(--panel-bg);
+            border: 2px solid white;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
         }
 
         .back-btn {
             background: transparent;
-            border: 1px solid #444;
-            color: #888;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
             padding: 0.5rem 1rem;
             cursor: pointer;
-            font-family: 'Share Tech Mono', monospace;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Roboto Mono', monospace;
             align-self: flex-start;
         }
-        .back-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .back-btn:hover { background: white; color: var(--bg-blueprint); }
 
-        .terminal-log {
-            background: #000;
-            border: 1px solid #333;
+        .log-area {
             flex-grow: 1;
-            max-height: 300px;
-            padding: 10px;
-            font-size: 0.8rem;
-            color: #aaa;
-            overflow-y: auto;
-            margin-bottom: 2rem;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding: 1rem 0;
+            margin-bottom: 1rem;
+            font-family: 'Merriweather', serif;
+            font-style: italic;
         }
-        .log-entry { margin-bottom: 5px; }
-        .log-entry::before { content: "> "; color: var(--primary); }
 
-        /* INPUT SEGURO */
-        .cipher-box {
-            border: 2px dashed #444;
+        /* CAJA DE RESPUESTA (QED) */
+        .proof-box {
+            background: rgba(0,0,0,0.3);
             padding: 1.5rem;
+            border: 1px dashed rgba(255,255,255,0.3);
             position: relative;
             transition: all 0.5s;
         }
-        .cipher-box.unlocked {
-            border-color: var(--primary);
+
+        .proof-box.unlocked {
             border-style: solid;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+            border-color: var(--success);
+            background: rgba(74, 222, 128, 0.1);
         }
 
-        .cipher-input {
+        .status-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .math-input {
             width: 100%;
-            background: #111;
-            border: 1px solid #333;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid white;
             color: white;
-            padding: 1rem;
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'Roboto Mono', monospace;
             font-size: 1.2rem;
+            padding: 10px;
             text-align: center;
             margin-bottom: 10px;
         }
-        .cipher-input:disabled { background: #080808; color: #444; cursor: not-allowed; }
+        .math-input:focus { outline: none; border-color: var(--accent); }
+        .math-input:disabled { opacity: 0.5; cursor: not-allowed; border-bottom-style: dashed; }
 
-        .btn-submit {
+        .btn-verify {
             width: 100%;
-            padding: 1rem;
-            background: var(--primary);
-            color: black;
+            background: white;
+            color: var(--bg-blueprint);
             font-weight: bold;
             border: none;
+            padding: 10px;
             cursor: pointer;
         }
-        .btn-submit:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .btn-verify:disabled { background: #94a3b8; cursor: not-allowed; }
 
-        /* OVERLAYS */
+        /* OVERLAY MATEMÁTICO */
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none; justify-content: center; align-items: center; z-index: 10;
-            backdrop-filter: blur(5px);
+            background: rgba(30, 58, 138, 0.95);
+            display: none; justify-content: center; align-items: center; z-index: 20;
         }
         .overlay.active { display: flex; }
 
-        .data-packet {
-            border: 2px solid var(--primary);
-            padding: 2rem;
-            background: #000;
+        .result-card {
+            background: white;
+            color: var(--bg-blueprint);
+            padding: 3rem;
             text-align: center;
+            border-radius: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             max-width: 500px;
-            animation: glitch 0.3s;
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes glitch { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-2px, -2px); } 40% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+        .math-symbol { font-size: 3rem; margin-bottom: 1rem; color: var(--bg-blueprint); }
+        .qed-text { font-family: 'Merriweather', serif; font-weight: bold; font-size: 1.5rem; margin-bottom: 1rem; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Responsive */
         @media (max-width: 900px) {
-            #game-interface { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            #game-interface { grid-template-columns: 1fr; overflow-y: auto; }
             .board { grid-template-columns: repeat(8, 45px); grid-template-rows: repeat(8, 45px); }
             .square { font-size: 30px; }
-            .side-panel { padding: 1rem; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
-        <div style="font-size: 0.8rem; color: #666;">SYS_ADMIN_ACCESS: <span style="color:var(--danger)">RESTRICTED</span></div>
+        <div>
+            <h1>Dpto. de Matemáticas</h1>
+            <span class="subtitle">Laboratorio de Lógica y Algoritmos</span>
+        </div>
+        <div style="text-align: right; font-size: 0.8rem;">
+            v.3.1416<br>PROYECTO: EULER
+        </div>
     </header>
 
     <div id="mission-select-screen" class="screen active">
-        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1200px;">
-            // SELECCIONAR_VECTOR_DE_ATAQUE
-        </h2>
+        <div class="intro-text">
+            <p>"Las matemáticas son el alfabeto con el cual Dios ha escrito el Universo." - Galileo Galilei.</p>
+            <br>
+            <p>Selecciona un <strong>Teorema</strong> para comenzar la demostración.</p>
+        </div>
         
-        <div class="mission-grid">
-            <div class="mission-card" onclick="loadMission(1)">
-                <div class="mission-icon">♟️</div>
-                <div class="mission-title">ARCHIVO 01: PEÓN</div>
-                <div class="mission-desc">
-                    Intercepta la comunicación enemiga utilizando una estructura de peones. 
+        <div class="cards-container">
+            <div class="math-card" onclick="loadMission(1)">
+                <div class="card-number">I</div>
+                <div class="card-title">Secuencia Aritmética</div>
+                <div class="card-desc">
+                    Demostración mediante estructura de Peones y Alfiles.
                     <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                    <strong>Incógnita a despejar:</strong> Número Irracional.
                 </div>
             </div>
 
-            <div class="mission-card" onclick="loadMission(2)">
-                <div class="mission-icon">♞</div>
-                <div class="mission-title">ARCHIVO 02: INCURSIÓN</div>
-                <div class="mission-desc">
-                    Hackea el servidor central mediante una maniobra de caballería ligera.
+            <div class="math-card" onclick="loadMission(2)">
+                <div class="card-number">II</div>
+                <div class="card-title">Geometría Vectorial</div>
+                <div class="card-desc">
+                    Cálculo de movimiento no lineal usando Caballos (Vectores L).
                     <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                    <strong>Incógnita a despejar:</strong> Concepto Geométrico.
                 </div>
             </div>
 
-            <div class="mission-card" onclick="loadMission(3)">
-                <div class="mission-icon">💥</div>
-                <div class="mission-title">ARCHIVO 03: SACRIFICIO</div>
-                <div class="mission-desc">
-                    Sobrecarga el sistema con un sacrificio de material pesado.
+            <div class="math-card" onclick="loadMission(3)">
+                <div class="card-number">III</div>
+                <div class="card-title">Límites al Infinito</div>
+                <div class="card-desc">
+                    Aplicación de la derivada mediante sacrificio de material.
                     <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
+                    <strong>Incógnita a despejar:</strong> Concepto de Cálculo.
                 </div>
             </div>
         </div>
     </div>
 
     <div id="game-interface" class="screen">
-        <div class="board-area">
+        <div class="board-wrapper">
             <div id="board" class="board"></div>
 
             <div id="victory-overlay" class="overlay">
-                <div class="data-packet">
-                    <h2 style="color: white; margin-bottom: 15px;">ACCESO AL NÚCLEO CONCEDIDO</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Hash desencriptado:</p>
-                    <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
-                    <p style="font-size: 0.8rem; color: var(--danger); margin-bottom: 20px;">[ ! ] COPIA EL HASH Y ÚSALO EN EL PANEL LATERAL.</p>
-                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
+                <div class="result-card">
+                    <div class="math-symbol">∑</div>
+                    <div class="qed-text">Q.E.D. Demostrado</div>
+                    <p style="margin-bottom: 20px;">La variable resultante es:</p>
+                    
+                    <div id="hash-display" style="font-size: 2.5rem; font-weight: bold; font-family: 'Roboto Mono'; margin-bottom: 20px; color: #d946ef;">---</div>
+                    
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Anote este resultado en el Cuaderno de Campo lateral.</p>
+                    <button onclick="closeOverlay()" style="padding: 10px 20px; background: var(--bg-blueprint); color: white; border: none; cursor: pointer;">Cerrar y Anotar</button>
                 </div>
             </div>
         </div>
 
         <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← ABORTAR MISIÓN</button>
+            <button class="back-btn" onclick="returnToMenu()">← Volver al Índice</button>
             
-            <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
-            <div id="terminal" class="terminal-log">
-                <div class="log-entry">Esperando conexión...</div>
+            <h3 style="margin-bottom: 10px; font-family: 'Merriweather', serif;">Registro de Pasos</h3>
+            <div id="log-area" class="log-area">
+                <div style="margin-bottom: 5px;">> Inicializando variables...</div>
             </div>
 
-            <div style="flex-grow: 1;"></div>
-            <div id="cipher-box" class="cipher-box">
-                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
+            <div id="proof-box" class="proof-box">
+                <span id="status-label" class="status-label" style="color: #94a3b8;">⚠️ DEMOSTRACIÓN PENDIENTE</span>
                 
-                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">
-                    Jaque Mate requerido para desbloquear la entrada de datos.
+                <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">
+                    Complete el Jaque Mate para obtener el valor de la incógnita <strong>X</strong>.
                 </p>
                 
-                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
-                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
-                <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
+                <input type="text" id="solution-input" class="math-input" placeholder="x = ?" disabled autocomplete="off">
+                <button id="submit-btn" class="btn-verify" onclick="verifySolution()" disabled>VERIFICAR RESULTADO</button>
+                <div id="feedback-msg" style="text-align: center; margin-top: 10px; font-weight: bold; height: 20px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATOS DE LAS MISIONES ---
+        // CONFIGURACIÓN DE TEOREMAS MATEMÁTICOS
         const missions = {
             1: {
                 initial: [
@@ -350,13 +379,13 @@
                     ['', '', '', '', 'k', '', '', '']
                 ],
                 solutionMoves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, // 1. g6 c6
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, // 2. h5 Ad7
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, // 3. Ah4 Ac8
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }                         // 4. Axg3++
+                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
+                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
                 ],
-                fakeHash: "A-X-Q-B-V", // Lo que se muestra al ganar
-                answer: "AXQBV"        // Lo que el usuario debe escribir
+                fakeHash: "3.1416", // PI
+                answer: "3.1416"
             },
             2: {
                 initial: [
@@ -375,8 +404,8 @@
                     { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
                 ],
-                fakeHash: "C-A-B-A-L-L-O",
-                answer: "CABALLO"
+                fakeHash: "VECTOR",
+                answer: "VECTOR"
             },
             3: {
                 initial: [
@@ -395,21 +424,15 @@
                     { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
                     { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
                 ],
-                fakeHash: "S-A-C-R-I-F-I-C-I-O",
-                answer: "SACRIFICIO"
+                fakeHash: "INFINITO",
+                answer: "INFINITO"
             }
         };
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
-        // ESTADO GLOBAL
         let currentMissionId = 1;
-        let gameState = {
-            position: [],
-            moveIdx: 0,
-            selection: null,
-            locked: false
-        };
+        let gameState = { position: [], moveIdx: 0, selection: null, locked: false };
 
         // --- NAVEGACIÓN ---
         function loadMission(id) {
@@ -417,17 +440,14 @@
             document.getElementById('mission-select-screen').classList.remove('active');
             document.getElementById('game-interface').classList.add('active');
             
-            // Reiniciar juego
             gameState.position = JSON.parse(JSON.stringify(missions[id].initial));
             gameState.moveIdx = 0;
             gameState.selection = null;
             gameState.locked = false;
             
-            // Bloquear input
             lockInput();
-            document.getElementById('terminal').innerHTML = '<div class="log-entry">Inicializando protocolo de misión...</div>';
+            document.getElementById('log-area').innerHTML = '<div style="margin-bottom:5px;">> Teorema ' + id + ' cargado.</div>';
             document.getElementById('victory-overlay').classList.remove('active');
-            
             drawBoard();
         }
 
@@ -449,16 +469,18 @@
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
-                        sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
-                        sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
+                        // Estilo clásico: Blancas son Blancas, Negras son Negras (pero ajustado al fondo azul)
+                        if(p === p.toUpperCase()) {
+                            sq.style.color = '#fff'; 
+                            sq.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+                        } else {
+                            sq.style.color = '#1e3a8a'; // Azul oscuro para contrastar con casillas claras
+                        }
                     }
-                    
                     sq.onclick = () => handleSquare(r, c);
-                    
                     if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
                         sq.classList.add('selected');
                     }
-                    
                     board.appendChild(sq);
                 }
             }
@@ -466,31 +488,22 @@
 
         function handleSquare(r, c) {
             if(gameState.locked) return;
-            
             const p = gameState.position[r][c];
-            // Seleccionar blancas
             if(p && p === p.toUpperCase()) {
                 gameState.selection = {r, c};
                 drawBoard();
                 return;
             }
-            
-            // Mover
             if(gameState.selection) {
                 const solution = missions[currentMissionId].solutionMoves;
-                // Verificar si quedan movimientos
                 if (gameState.moveIdx >= solution.length) return;
 
                 const correctMove = solution[gameState.moveIdx].w;
-                
-                // Verificar si el movimiento es correcto
                 if(correctMove.f.r === gameState.selection.r && correctMove.f.c === gameState.selection.c &&
                    correctMove.t.r === r && correctMove.t.c === c) {
-                    
                     executeMove(gameState.selection, {r, c}, true);
-                    
                 } else {
-                    log("Movimiento inválido. Protocolo fallido.", true);
+                    log("❌ Error en el cálculo. Intente otra variante.");
                     gameState.selection = null;
                     drawBoard();
                 }
@@ -502,7 +515,8 @@
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
             
-            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`);
+            const coord = `${String.fromCharCode(97+from.c)}${8-from.r} → ${String.fromCharCode(97+to.c)}${8-to.r}`;
+            log((isPlayer ? "Jugador" : "Oponente") + ": " + coord);
             
             gameState.selection = null;
             drawBoard();
@@ -510,10 +524,8 @@
             if(isPlayer) {
                 const step = missions[currentMissionId].solutionMoves[gameState.moveIdx];
                 if(!step.b) {
-                    // JAQUE MATE
                     setTimeout(missionComplete, 500);
                 } else {
-                    // Turno CPU
                     gameState.locked = true;
                     setTimeout(() => {
                         executeMove(step.b.f, step.b.t, false);
@@ -525,12 +537,10 @@
         }
 
         function missionComplete() {
-            log("AMENAZA NEUTRALIZADA. OBTENIENDO HASH...", false, true);
+            log("✅ Q.E.D. Demostración correcta.");
             const mission = missions[currentMissionId];
-            
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
-            
             unlockInput();
         }
 
@@ -538,72 +548,61 @@
             document.getElementById('victory-overlay').classList.remove('active');
         }
 
-        // --- SISTEMA DE INPUT ---
+        // --- INPUT SISTEMA ---
         function lockInput() {
-            const box = document.getElementById('cipher-box');
+            const box = document.getElementById('proof-box');
             const inp = document.getElementById('solution-input');
             const btn = document.getElementById('submit-btn');
-            const status = document.getElementById('cipher-status');
+            const lbl = document.getElementById('status-label');
             
             box.classList.remove('unlocked');
             inp.disabled = true;
             inp.value = '';
-            inp.placeholder = "ACCESO DENEGADO";
+            inp.placeholder = "x = ?";
             btn.disabled = true;
-            status.innerText = "🔒 INPUT BLOQUEADO";
-            status.style.color = "#666";
+            lbl.innerText = "⚠️ DEMOSTRACIÓN PENDIENTE";
+            lbl.style.color = "#94a3b8";
             document.getElementById('feedback-msg').innerText = '';
         }
 
         function unlockInput() {
-            const box = document.getElementById('cipher-box');
+            const box = document.getElementById('proof-box');
             const inp = document.getElementById('solution-input');
             const btn = document.getElementById('submit-btn');
-            const status = document.getElementById('cipher-status');
+            const lbl = document.getElementById('status-label');
             
             box.classList.add('unlocked');
             inp.disabled = false;
-            inp.placeholder = "INTRODUZCA HASH";
+            inp.placeholder = "Ingrese el valor de X";
             inp.focus();
             btn.disabled = false;
-            status.innerText = "🔓 PUERTO ABIERTO";
-            status.style.color = "var(--primary)";
+            lbl.innerText = "✏️ LISTO PARA ANOTAR";
+            lbl.style.color = "var(--success)";
         }
 
         function verifySolution() {
-            const val = document.getElementById('solution-input').value.toUpperCase().replace(/-/g, '').trim();
+            const val = document.getElementById('solution-input').value.toUpperCase().trim();
             const correct = missions[currentMissionId].answer;
-            const feedback = document.getElementById('feedback-msg');
+            const fb = document.getElementById('feedback-msg');
             
             if(val === correct) {
-                feedback.innerText = "ACCESO CONCEDIDO.";
-                feedback.style.color = "var(--primary)";
-                log("Credencial verificada. Archivo guardado.", false, true);
-                setTimeout(() => {
-                    alert("¡Misión Cumplida! Volviendo al menú.");
-                    returnToMenu();
-                }, 1000);
+                fb.innerText = "CORRECTO";
+                fb.style.color = "var(--success)";
+                setTimeout(() => { alert("¡Teorema Demostrado! Volviendo al índice."); returnToMenu(); }, 1000);
             } else {
-                feedback.innerText = "ERROR DE CREDENCIAL";
-                feedback.style.color = "var(--danger)";
-                log("Intento de inyección fallido.", true);
+                fb.innerText = "INCORRECTO";
+                fb.style.color = "#ef4444";
             }
         }
 
-        // --- UTILS ---
-        function log(msg, err=false, success=false) {
-            const t = document.getElementById('terminal');
-            const d = document.createElement('div');
-            d.className = 'log-entry';
-            d.innerText = msg;
-            if(err) d.style.color = 'var(--danger)';
-            if(success) d.style.color = 'var(--primary)';
-            t.appendChild(d);
-            t.scrollTop = t.scrollHeight;
+        function log(msg) {
+            const area = document.getElementById('log-area');
+            const line = document.createElement('div');
+            line.style.marginBottom = "5px";
+            line.innerText = "> " + msg;
+            area.appendChild(line);
+            area.scrollTop = area.scrollHeight;
         }
-
-        function coords(o) { return `${String.fromCharCode(97+o.c)}${8-o.r}`; }
-
     </script>
 </body>
 </html>
