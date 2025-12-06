@@ -322,42 +322,42 @@
             
             <div id="card-1" class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
-                <div class="mission-title">NODE_01</div>
+                <div class="mission-title">PROBLEMA 1</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
                 <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
             <div id="card-2" class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
-                <div class="mission-title">NODE_02</div>
+                <div class="mission-title">PROBLEMA 2</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
                 <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
             </div>
             
             <div id="card-3" class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
-                <div class="mission-title">NODE_03</div>
+                <div class="mission-title">PROBLEMA 3</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
                 <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
             </div>
             
             <div id="card-4" class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
-                <div class="mission-title">NODE_04</div>
+                <div class="mission-title">PROBLEMA 4</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
                 <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
             </div>
             
             <div id="card-5" class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
-                <div class="mission-title">NODE_05</div>
+                <div class="mission-title">PROBLEMA 5</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
                 <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
             </div>
             
             <div id="card-6" class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
-                <div class="mission-title">NODE_06</div>
+                <div class="mission-title">PROBLEMA 6</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
                 <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
             </div>
@@ -467,7 +467,6 @@
             }
         };
 
-        // Niveles 4, 5 y 6 repiten lógica para demostración
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
@@ -494,7 +493,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico NODE_0${id}...`, false, true);
+            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -542,7 +541,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN (Jaque/Movimientos) ---
+        // --- MOTOR DE VALIDACIÓN ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
@@ -752,11 +751,11 @@
                 feedback.style.color = "var(--primary)";
                 log("Credencial verificada. Archivo guardado.", false, true);
                 
-                // MARCAR COMO RESUELTO
+                // Marcar como resuelto
                 solvedLevels.add(currentMissionId);
                 document.getElementById(`card-${currentMissionId}`).classList.add('solved');
                 
-                // CHEQUEAR CONDICIÓN GLOBAL
+                // Chequear condición de victoria global
                 checkGlobalWinCondition();
 
                 setTimeout(() => {
