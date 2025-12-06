@@ -378,7 +378,7 @@
             <div id="victory-overlay" class="overlay">
                 <div class="data-packet">
                     <h2 style="color: white; margin-bottom: 15px;">ESCAC I MAT EXECUTAT</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Hash de victòria:</p>
+                    <p style="color: #888; margin-bottom: 10px;">Missatge a desxifrar:</p>
                     <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
                     <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">TANCAR I DESXIFRAR</button>
                 </div>
@@ -397,7 +397,7 @@
 
         <div class="side-panel">
             <button class="back-btn" onclick="returnToMenu()">← AVORTAR</button>
-            <div style="margin-bottom: 5px; color: #666;">// SORTIDA_TERMINAL</div>
+            <div style="margin-bottom: 5px; color: #666;">MOVIMENTS REALITZATS</div>
             <div id="terminal" class="terminal-log"><div class="log-entry">Analitzant posició...</div></div>
 
             <div style="flex-grow: 1;"></div>
