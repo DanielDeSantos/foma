@@ -111,7 +111,6 @@
             opacity: 0.8;
         }
 
-        /* CINTA DE ESTADO */
         .mission-card::before {
             content: "NO SOLUCIONADO";
             position: absolute;
@@ -290,7 +289,6 @@
             max-width: 500px; animation: glitch 0.3s;
         }
 
-        /* ESTILOS PARA LA VENTANA DE ADVERTENCIA */
         .btn-group {
             display: flex; gap: 10px; margin-top: 20px;
         }
@@ -410,9 +408,9 @@
     </div>
 
     <div id="warning-overlay" class="overlay">
-        <div class="data-packet" style="border-color: var(--danger);">
-            <h2 id="warning-title" style="color: var(--danger); margin-bottom: 15px;">ATENCIÓN</h2>
-            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
+        <div class="data-packet" style="border-color: var(--primary);">
+            <h2 id="warning-title" style="color: var(--primary); margin-bottom: 15px;">ATENCIÓN</h2>
+            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">Mensaje de advertencia...</p>
             <div class="btn-group">
                 <button class="btn-cancel" onclick="closeWarning()">CANCELAR</button>
                 <button class="btn-submit" id="btn-warning-confirm">CONTINUAR</button>
@@ -437,23 +435,9 @@
                 initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
                 moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
-            },
-            4: {
-                initial: [['r','','','','','','k',''],['p','p','p','','','n','p','p'],['','','','q','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','Q','','','',''],['P','P','P','','','P','P','P'],['','','','R','R','','K','']],
-                moves: [{ w: {f:{r:5,c:3}, t:{r:0,c:3}}, b: {f:{r:0,c:0}, t:{r:0,c:3}} }, { w: {f:{r:7,c:3}, t:{r:0,c:3}}, b: {f:{r:1,c:5}, t:{r:0,c:4}} }, { w: {f:{r:0,c:3}, t:{r:0,c:4}}, b: {f:{r:2,c:3}, t:{r:0,c:5}} }, { w: {f:{r:0,c:4}, t:{r:0,c:5}}, b: null }],
-                fakeHash: "FIREWALL-BYPASS-OK", answer: "BACKDOOR"
-            },
-            5: {
-                initial: [['','','','','','r','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','N',''],['','','Q','','','','',''],['','','','','','','',''],['P','P','','','','P','P','P'],['','','','','','','K','']],
-                moves: [{ w: {f:{r:3,c:6}, t:{r:1,c:5}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:1,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:4,c:2}, t:{r:0,c:6}}, b: {f:{r:0,c:5}, t:{r:0,c:6}} }, { w: {f:{r:2,c:7}, t:{r:1,c:5}}, b: null }],
-                fakeHash: "BUFFER-OVERFLOW-X", answer: "DDOS"
-            },
-            6: {
-                initial: [['','','','','','','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','','','P','P','P'],['','','','Q','','','','R']],
-                moves: [{ w: {f:{r:7,c:7}, t:{r:0,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:7,c:3}, t:{r:7,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:7,c:7}, t:{r:1,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:5}} }, { w: {f:{r:1,c:7}, t:{r:0,c:7}}, b: null }],
-                fakeHash: "KERNEL-PANIC-00", answer: "EXPLOIT"
             }
         };
+        levels[4] = levels[1]; levels[5] = levels[2]; levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         let currentMissionId = 1;
@@ -463,30 +447,54 @@
         // --- SISTEMA DE CONTROL Y VENTANAS ---
         
         function checkAndLoadMission(id) {
+            // 1. Caso: Problema ya resuelto
             if (solvedLevels.has(id)) {
-                showWarning("PROBLEMA YA SOLUCIONADO", "Este nodo ya está bajo control administrativo. ¿Deseas volver a ejecutar la simulación?", () => startLevel(id));
+                showWarning(
+                    "PROBLEMA YA SOLUCIONADO", 
+                    "Ya has resuelto este problema. ¿Deseas volver a intentar resolver el problema?",
+                    () => startLevel(id)
+                );
                 return;
             }
+
+            // 2. Caso: Paridad repetida
             const isTargetEven = (id % 2 === 0);
             let hasSameParitySolved = false;
+            
             solvedLevels.forEach(solvedId => {
-                if ((solvedId % 2 === 0) === isTargetEven) hasSameParitySolved = true;
+                if ((solvedId % 2 === 0) === isTargetEven) {
+                    hasSameParitySolved = true;
+                }
             });
+
             if (hasSameParitySolved) {
                 const type = isTargetEven ? "PAR" : "IMPAR";
-                showWarning("REDUNDANCIA DETECTADA", `Ya has superado un problema ${type}. No es necesario para completar la prueba, pero puedes proceder para entrenamiento.`, () => startLevel(id));
+                showWarning(
+                    "REDUNDANCIA DETECTADA", 
+                    `Ya has superado un problema ${type}. No es necesario para completar la prueba, pero puedes proceder para entrenamiento.`,
+                    () => startLevel(id)
+                );
                 return;
             }
+
+            // Si no hay avisos
             startLevel(id);
         }
 
         function showWarning(title, msg, confirmCallback) {
             document.getElementById('warning-title').innerText = title;
             document.getElementById('warning-msg').innerText = msg;
+            
             const btnConfirm = document.getElementById('btn-warning-confirm');
+            // Eliminar listeners antiguos clonando el botón
             const newBtn = btnConfirm.cloneNode(true);
             btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
-            newBtn.onclick = () => { closeWarning(); confirmCallback(); };
+            
+            newBtn.onclick = () => {
+                closeWarning();
+                confirmCallback();
+            };
+            
             document.getElementById('warning-overlay').classList.add('active');
         }
 
@@ -498,16 +506,19 @@
             currentMissionId = id;
             document.getElementById('mission-select-screen').classList.remove('active');
             document.getElementById('game-interface').classList.add('active');
+            
             gameState.position = JSON.parse(JSON.stringify(levels[id].initial));
             gameState.moveIdx = 0;
             gameState.selection = null;
             gameState.locked = false;
             gameState.validMoves = [];
+            
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
+            log(`Inicializando tablero PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
+            
             drawBoard();
         }
 
@@ -667,7 +678,7 @@
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
                     } else {
-                        log("Error Táctico: Movimiento subóptimo.", true);
+                        log("Error Táctico: Movimiento incorrecto.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
