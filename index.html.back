@@ -111,7 +111,6 @@
             opacity: 0.8;
         }
 
-        /* CINTA DE ESTADO (RIBBON) */
         .mission-card::before {
             content: "NO SOLUCIONADO";
             position: absolute;
@@ -279,7 +278,7 @@
         .overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9);
-            display: none; justify-content: center; align-items: center; z-index: 10;
+            display: none; justify-content: center; align-items: center; z-index: 100;
             backdrop-filter: blur(5px);
         }
         .overlay.active { display: flex; }
@@ -289,6 +288,15 @@
             background: #000; text-align: center;
             max-width: 500px; animation: glitch 0.3s;
         }
+
+        .btn-group {
+            display: flex; gap: 10px; margin-top: 20px;
+        }
+        .btn-cancel {
+            background: transparent; border: 1px solid var(--danger); color: var(--danger);
+            width: 100%; padding: 1rem; font-weight: bold; cursor: pointer; font-family: inherit;
+        }
+        .btn-cancel:hover { background: rgba(255, 0, 60, 0.1); }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -312,53 +320,51 @@
 
     <div id="mission-select-screen" class="screen active">
         <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
-            SELECCIONA UN PROBLEMA
+            // SELECCIONA UN PROBLEMA
         </h2>
         
         <div class="mission-grid">
-            
-            <div id="card-1" class="mission-card" onclick="loadMission(1)">
+            <div id="card-1" class="mission-card" onclick="checkAndLoadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">PROBLEMA 1</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
                 <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
-            <div id="card-2" class="mission-card" onclick="loadMission(2)">
+            <div id="card-2" class="mission-card" onclick="checkAndLoadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">PROBLEMA 2</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
                 <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
             </div>
             
-            <div id="card-3" class="mission-card" onclick="loadMission(3)">
+            <div id="card-3" class="mission-card" onclick="checkAndLoadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">PROBLEMA 3</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
                 <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
             </div>
             
-            <div id="card-4" class="mission-card" onclick="loadMission(4)">
+            <div id="card-4" class="mission-card" onclick="checkAndLoadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">PROBLEMA 4</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
                 <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
             </div>
             
-            <div id="card-5" class="mission-card" onclick="loadMission(5)">
+            <div id="card-5" class="mission-card" onclick="checkAndLoadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">PROBLEMA 5</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
                 <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
             </div>
             
-            <div id="card-6" class="mission-card" onclick="loadMission(6)">
+            <div id="card-6" class="mission-card" onclick="checkAndLoadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">PROBLEMA 6</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
                 <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
             </div>
-
         </div>
     </div>
 
@@ -377,13 +383,12 @@
 
             <div id="success-overlay" class="overlay">
                 <div class="data-packet" style="border-color: var(--primary); box-shadow: 0 0 30px rgba(0,255,65,0.2);">
-                    <h2 id="success-title" style="color: var(--primary); margin-bottom: 15px;">MISIÓN COMPLETADA</h2>
+                    <h2 id="success-title" style="color: var(--primary); margin-bottom: 15px;">...</h2>
                     <p id="success-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
                     <div id="success-icon" style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
                     <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
                 </div>
             </div>
-
         </div>
 
         <div class="side-panel">
@@ -402,90 +407,102 @@
         </div>
     </div>
 
+    <div id="warning-overlay" class="overlay">
+        <div class="data-packet" style="border-color: var(--primary);">
+            <h2 id="warning-title" style="color: var(--primary); margin-bottom: 15px;">ATENCIÓN</h2>
+            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">Mensaje de advertencia...</p>
+            <div class="btn-group">
+                <button class="btn-cancel" onclick="closeWarning()">CANCELAR</button>
+                <button class="btn-submit" id="btn-warning-confirm">CONTINUAR</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- NIVELES (CONFIGURACIÓN DE AJEDREZ) ---
+        // --- NIVELES ---
         const levels = {
             1: {
-                initial: [
-                    ['', '', '', '', 'b', '', '', ''],
-                    ['', '', 'p', '', 'B', '', 'p', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', 'P', '', '', 'p', 'P', ''],
-                    ['', 'P', '', 'P', '', 'P', '', 'P'],
-                    ['', '', 'p', '', 'K', '', 'p', ''],
-                    ['', '', 'P', '', 'B', '', 'P', ''],
-                    ['', '', '', '', 'k', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
-                ],
+                initial: [['','','','','b','','',''],['','','p','','B','','p',''],['','','','','','','',''],['','','P','','','p','P',''],['','P','','P','','P','','P'],['','','p','','K','','p',''],['','','P','','B','','P',''],['','','','','k','','','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }],
                 fakeHash: "TWYTTERUPCEPSEVZ", answer: "AXQBVQXAÇÇXEUSRE"
             },
             2: {
-                initial: [
-                    ['', '', 'k', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', 'K', '', '', ''],
-                    ['', '', '', 'N', 'B', '', '', ''],
-                    ['', '', '', '', 'N', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
-                ],
+                initial: [['','','k','','','','',''],['','','','','','','',''],['','','','','K','','',''],['','','','N','B','','',''],['','','','','N','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','','']],
+                moves: [{ w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} }, { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }],
                 fakeHash: "KNIGHT-FORK-X", answer: "SECRET"
             },
             3: {
-                initial: [
-                    ['', 'n', '', 'b', '', 'r', 'k', ''],
-                    ['', '', 'p', 'p', '', '', '', 'p'],
-                    ['', '', '', 'p', '', '', 'p', 'Q'],
-                    ['', '', '', 'R', '', 'p', '', ''],
-                    ['', '', '', '', 'B', 'B', 'P', ''],
-                    ['', '', '', 'P', 'R', '', 'P', ''],
-                    ['', '', '', '', '', '', 'P', 'K'],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
-                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
-                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
-                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
-                ],
+                initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
+                moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
             }
         };
-
-        // Copias para tener 6 niveles jugables
-        levels[4] = levels[1];
-        levels[5] = levels[2];
-        levels[6] = levels[3];
+        levels[4] = levels[1]; levels[5] = levels[2]; levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
-        
-        // ESTADO GLOBAL
         let currentMissionId = 1;
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
-        let solvedLevels = new Set(); // Almacena los IDs de niveles resueltos
+        let solvedLevels = new Set();
 
-        // --- SISTEMA DE JUEGO ---
-
-        function loadMission(id) {
-            // CONFIRMACIÓN SI YA ESTÁ RESUELTO
+        // --- SISTEMA DE CONTROL Y VENTANAS ---
+        
+        function checkAndLoadMission(id) {
+            // 1. Caso: Problema ya resuelto
             if (solvedLevels.has(id)) {
-                if (!confirm("Este problema ya ha sido solucionado. ¿Deseas volver a acceder?")) {
-                    return;
-                }
+                showWarning(
+                    "PROBLEMA YA SOLUCIONADO", 
+                    "Ya has resuelto este problema. ¿Deseas volver a intentar resolver el problema?",
+                    () => startLevel(id)
+                );
+                return;
             }
 
+            // 2. Caso: Paridad repetida
+            const isTargetEven = (id % 2 === 0);
+            let hasSameParitySolved = false;
+            
+            solvedLevels.forEach(solvedId => {
+                if ((solvedId % 2 === 0) === isTargetEven) {
+                    hasSameParitySolved = true;
+                }
+            });
+
+            if (hasSameParitySolved) {
+                const type = isTargetEven ? "PAR" : "IMPAR";
+                showWarning(
+                    "REDUNDANCIA DETECTADA", 
+                    `Ya has superado un problema ${type}. No es necesario para completar la prueba, pero puedes proceder para entrenamiento.`,
+                    () => startLevel(id)
+                );
+                return;
+            }
+
+            // Si no hay avisos
+            startLevel(id);
+        }
+
+        function showWarning(title, msg, confirmCallback) {
+            document.getElementById('warning-title').innerText = title;
+            document.getElementById('warning-msg').innerText = msg;
+            
+            const btnConfirm = document.getElementById('btn-warning-confirm');
+            // Eliminar listeners antiguos clonando el botón
+            const newBtn = btnConfirm.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
+            
+            newBtn.onclick = () => {
+                closeWarning();
+                confirmCallback();
+            };
+            
+            document.getElementById('warning-overlay').classList.add('active');
+        }
+
+        function closeWarning() {
+            document.getElementById('warning-overlay').classList.remove('active');
+        }
+
+        function startLevel(id) {
             currentMissionId = id;
             document.getElementById('mission-select-screen').classList.remove('active');
             document.getElementById('game-interface').classList.add('active');
@@ -498,7 +515,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
+            log(`Inicializando tablero PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -513,29 +530,21 @@
         function drawBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
-            
             for(let r=0; r<8; r++) {
                 for(let c=0; c<8; c++) {
                     const sq = document.createElement('div');
                     sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
-                    
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
                         sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
                         sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
                     }
-                    
                     sq.onclick = () => handleSquare(r, c);
-                    
-                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
-                        sq.classList.add('selected');
-                    }
-
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) sq.classList.add('selected');
                     const moveType = getMoveType(r, c);
                     if(moveType === 'move') sq.classList.add('valid-move');
                     if(moveType === 'capture') sq.classList.add('capture-move');
-
                     board.appendChild(sq);
                 }
             }
@@ -546,36 +555,27 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN DE JAQUES ---
-        
+        // --- VALIDACIÓN JAQUES ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
-            
-            // 1. Peones
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
             const pawnChar = attackerColor === 'white' ? 'P' : 'p';
             if(pawnAttackRow >= 0 && pawnAttackRow < 8) {
                 if(c > 0 && boardToCheck[pawnAttackRow][c-1] === pawnChar) return true;
                 if(c < 7 && boardToCheck[pawnAttackRow][c+1] === pawnChar) return true;
             }
-
-            // 2. Caballos
             const knightChar = attackerColor === 'white' ? 'N' : 'n';
             const knightMoves = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
             for(let m of knightMoves) {
                 let nr=r+m[0], nc=c+m[1];
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === knightChar) return true;
             }
-
-            // 3. Reyes
             const kingChar = attackerColor === 'white' ? 'K' : 'k';
             const kingMoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let m of kingMoves) {
                 let nr=r+m[0], nc=c+m[1];
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === kingChar) return true;
             }
-
-            // 4. Lineales
             const rookChar = attackerColor === 'white' ? 'R' : 'r';
             const queenChar = attackerColor === 'white' ? 'Q' : 'q';
             const linearDirs = [[0,1],[0,-1],[1,0],[-1,0]];
@@ -585,15 +585,10 @@
                     let nr=r+d[0]*i, nc=c+d[1]*i;
                     if(nr<0||nr>7||nc<0||nc>7) break;
                     let p = boardToCheck[nr][nc];
-                    if(p) {
-                        if(p===rookChar || p===queenChar) return true;
-                        break; 
-                    }
+                    if(p) { if(p===rookChar || p===queenChar) return true; break; }
                     i++;
                 }
             }
-
-            // 5. Diagonales
             const bishopChar = attackerColor === 'white' ? 'B' : 'b';
             const diagDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let d of diagDirs) {
@@ -602,10 +597,7 @@
                     let nr=r+d[0]*i, nc=c+d[1]*i;
                     if(nr<0||nr>7||nc<0||nc>7) break;
                     let p = boardToCheck[nr][nc];
-                    if(p) {
-                        if(p===bishopChar || p===queenChar) return true;
-                        break;
-                    }
+                    if(p) { if(p===bishopChar || p===queenChar) return true; break; }
                     i++;
                 }
             }
@@ -617,17 +609,12 @@
             const p = tempBoard[fromR][fromC];
             tempBoard[toR][toC] = p;
             tempBoard[fromR][fromC] = '';
-
             let myKing = null;
             const myColor = (p === p.toUpperCase()) ? 'white' : 'black';
             const enemyColor = (myColor === 'white') ? 'black' : 'white';
-
             for(let r=0; r<8; r++) {
                 for(let c=0; c<8; c++) {
-                    if(tempBoard[r][c] === (myColor==='white'?'K':'k')) {
-                        myKing = {r,c};
-                        break;
-                    }
+                    if(tempBoard[r][c] === (myColor==='white'?'K':'k')) { myKing = {r,c}; break; }
                 }
             }
             if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) return false; 
@@ -638,24 +625,16 @@
             let moves = [];
             const type = piece.toUpperCase();
             const isWhite = piece === piece.toUpperCase();
-            
             const tryAdd = (tr, tc) => {
                 if(tr<0||tr>7||tc<0||tc>7) return false; 
                 const target = gameState.position[tr][tc];
                 let moveType = null;
-                if(!target) {
-                    moveType = 'move';
-                } else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) {
-                    moveType = 'capture';
-                } else {
-                    return false; 
-                }
-                if(testMove(r, c, tr, tc)) {
-                    moves.push({r:tr, c:tc, type:moveType});
-                }
+                if(!target) { moveType = 'move'; } 
+                else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) { moveType = 'capture'; } 
+                else { return false; }
+                if(testMove(r, c, tr, tc)) { moves.push({r:tr, c:tc, type:moveType}); }
                 return (moveType === 'move'); 
             };
-
             if(type === 'P') { 
                 const dir = -1;
                 if(r+dir>=0 && !gameState.position[r+dir][c]) {
@@ -675,29 +654,15 @@
                     }
                 }
             }
-            if(type === 'R' || type === 'Q') {
-                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => {
-                    for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break;
-                });
-            }
-            if(type === 'B' || type === 'Q') {
-                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
-                    for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break;
-                });
-            }
-            if(type === 'N') {
-                [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc));
-            }
-            if(type === 'K') {
-                [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc));
-            }
+            if(type === 'R' || type === 'Q') { [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'B' || type === 'Q') { [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => { for(let i=1; i<8; i++) if(!tryAdd(r+dr*i, c+dc*i)) break; }); }
+            if(type === 'N') { [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
+            if(type === 'K') { [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => tryAdd(r+dr, c+dc)); }
             return moves;
         }
 
-        // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(gameState.locked) return;
-            
             const p = gameState.position[r][c];
             if(p && p === p.toUpperCase()) {
                 gameState.selection = {r, c};
@@ -705,20 +670,15 @@
                 drawBoard();
                 return;
             }
-            
             if(gameState.selection) {
                 const validMove = gameState.validMoves.find(m => m.r === r && m.c === c);
-                
                 if(validMove) {
                     const puzzleMove = levels[currentMissionId].moves[gameState.moveIdx].w;
-                    
                     if(puzzleMove.f.r === gameState.selection.r && puzzleMove.f.c === gameState.selection.c &&
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
-                        
                         executeMove(gameState.selection, {r, c}, true);
-                        
                     } else {
-                        log("Error Táctico: Movimiento subóptimo.", true);
+                        log("Error Táctico: Movimiento incorrecto.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
@@ -735,13 +695,10 @@
             const p = gameState.position[from.r][from.c];
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
-            
             log(`${isPlayer ? 'USR' : 'SYS'} mueve: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
-            
             gameState.selection = null;
             gameState.validMoves = [];
             drawBoard();
-            
             if(isPlayer) {
                 const step = levels[currentMissionId].moves[gameState.moveIdx];
                 if(!step.b) {
@@ -804,11 +761,11 @@
                 feedback.style.color = "var(--primary)";
                 log("Credencial verificada. Archivo guardado.", false, true);
                 
-                // Marcar como resuelto
+                // MARCAR COMO RESUELTO
                 solvedLevels.add(currentMissionId);
                 document.getElementById(`card-${currentMissionId}`).classList.add('solved');
                 
-                // --- LÓGICA DE MENSAJE DINÁMICO DE VICTORIA ---
+                // LÓGICA DE MENSAJES DE PROGRESO
                 let hasOdd = false;
                 let hasEven = false;
                 solvedLevels.forEach(lvl => {
@@ -822,16 +779,16 @@
 
                 if (hasOdd && hasEven) {
                     title = "¡PRUEBA SUPERADA!";
-                    msg = "Has demostrado dominio táctico en ambos flancos. Acceso Root Concedido.";
-                    icon = "🏆";
+                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. Pronto nos pondremos en contacto contigo.";
+                    icon = "🤝";
                     // Update Header
                     const globalStatus = document.getElementById('global-status');
                     globalStatus.innerText = "SUPERADA";
                     globalStatus.style.color = "var(--primary)";
                     globalStatus.style.textShadow = "0 0 10px var(--primary)";
                 } else {
-                    if (!hasOdd) msg = "Acceso parcial. Aún necesitas resolver un problema IMPAR (1, 3, 5).";
-                    else if (!hasEven) msg = "Acceso parcial. Aún necesitas resolver un problema PAR (2, 4, 6).";
+                    if (!hasOdd) msg = "Acceso parcial. Aún necesitas resolver un problema IMPAR (1, 3, 5) para superar la prueba.";
+                    else if (!hasEven) msg = "Acceso parcial. Aún necesitas resolver un problema PAR (2, 4, 6) para superar la prueba.";
                 }
 
                 document.getElementById('success-title').innerText = title;
