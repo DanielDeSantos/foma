@@ -515,7 +515,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
+            log(`Inicializando tablero PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -678,7 +678,7 @@
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
                     } else {
-                        log("Error Táctico: Movimiento subóptimo.", true);
+                        log("Error Táctico: Movimiento incorrecto.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
