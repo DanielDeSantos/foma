@@ -320,7 +320,7 @@
 
     <div id="mission-select-screen" class="screen active">
         <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
-            SELECCIONA UN PROBLEMA
+            // SELECCIONA UN PROBLEMA
         </h2>
         
         <div class="mission-grid">
@@ -375,7 +375,7 @@
             <div id="victory-overlay" class="overlay">
                 <div class="data-packet">
                     <h2 style="color: white; margin-bottom: 15px;">JAQUE MATE EJECUTADO</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Es hora de descifrar el siguiente mensaje:</p>
+                    <p style="color: #888; margin-bottom: 10px;">Hash de victoria:</p>
                     <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
                     <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
                 </div>
@@ -444,21 +444,20 @@
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
         let solvedLevels = new Set();
 
-        // --- LÓGICA DE CONTROL Y ADVERTENCIAS ---
+        // --- SISTEMA DE CONTROL Y VENTANAS ---
         
         function checkAndLoadMission(id) {
             // 1. Caso: Problema ya resuelto
             if (solvedLevels.has(id)) {
                 showWarning(
                     "PROBLEMA YA SOLUCIONADO", 
-                    "Ya has resuelto este problema.",
-                    "¿Seguro que quieres volver a intentar resolver el problema?",
+                    "Ya has resuelto este problema. ¿Deseas volver a intentar resolver el problema?",
                     () => startLevel(id)
                 );
                 return;
             }
 
-            // 2. Caso: Paridad repetida (Ya tengo un Impar y voy a por otro, o ya tengo Par y voy a por otro)
+            // 2. Caso: Paridad repetida
             const isTargetEven = (id % 2 === 0);
             let hasSameParitySolved = false;
             
@@ -478,17 +477,16 @@
                 return;
             }
 
-            // Si no hay avisos, entrar directo
+            // Si no hay avisos
             startLevel(id);
         }
 
-        // Función que muestra el modal de advertencia
         function showWarning(title, msg, confirmCallback) {
             document.getElementById('warning-title').innerText = title;
             document.getElementById('warning-msg').innerText = msg;
             
             const btnConfirm = document.getElementById('btn-warning-confirm');
-            // Clona el botón para limpiar event listeners anteriores de forma segura
+            // Eliminar listeners antiguos clonando el botón
             const newBtn = btnConfirm.cloneNode(true);
             btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
             
@@ -557,7 +555,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN ---
+        // --- VALIDACIÓN JAQUES ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
@@ -781,8 +779,7 @@
 
                 if (hasOdd && hasEven) {
                     title = "¡PRUEBA SUPERADA!";
-                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. \n
-                        Pronto nos pondremos en contacto contigo.";
+                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. Pronto nos pondremos en contacto contigo.";
                     icon = "🤝";
                     // Update Header
                     const globalStatus = document.getElementById('global-status');
