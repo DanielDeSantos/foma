@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="ca">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prueba de Nivel - Ciberseguridad</title>
+    <title>Prova de Nivell - Ciberseguretat</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,7 +29,7 @@
             flex-direction: column;
         }
 
-        /* EFECTO CRT */
+        /* EFECTE CRT */
         body::before {
             content: " ";
             display: block;
@@ -54,7 +54,7 @@
 
         h1 { color: var(--primary); text-shadow: 0 0 10px var(--primary); letter-spacing: 2px; }
 
-        /* PANTALLAS */
+        /* PANTALLES */
         .screen {
             display: none;
             flex-grow: 1;
@@ -65,7 +65,7 @@
         }
         .screen.active { display: flex; }
 
-        /* MENU GRID */
+        /* GRAELLA MENÚ */
         #mission-select-screen {
             flex-direction: column;
             align-items: center;
@@ -80,7 +80,7 @@
             margin-top: 2rem;
         }
 
-        /* TARJETAS */
+        /* TARGETES */
         .mission-card {
             background: #000;
             border: 1px solid var(--border);
@@ -111,8 +111,9 @@
             opacity: 0.8;
         }
 
+        /* CINTA D'ESTAT (RIBBON) - TRADUÏDA */
         .mission-card::before {
-            content: "NO SOLUCIONADO";
+            content: "NO SOLUCIONAT";
             position: absolute;
             top: 25px; 
             right: -55px; 
@@ -129,7 +130,7 @@
         }
         
         .mission-card.solved::before {
-            content: "SOLUCIONADO";
+            content: "SOLUCIONAT";
             background: var(--primary);
         }
 
@@ -150,7 +151,7 @@
             justify-content: space-between;
         }
 
-        /* INTERFAZ DE JUEGO */
+        /* INTERFÍCIE DE JOC */
         #game-interface {
             display: none;
             grid-template-columns: 1fr 350px;
@@ -186,7 +187,7 @@
         
         .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 15px var(--primary); }
         
-        /* MOVIMIENTOS E INDICADORES */
+        /* MOVIMENTS I INDICADORS */
         .valid-move::after {
             content: ''; position: absolute;
             width: 18px; height: 18px;
@@ -209,7 +210,7 @@
             pointer-events: none;
         }
 
-        /* PANEL LATERAL */
+        /* PANELL LATERAL */
         .side-panel {
             background: #0a0a0a;
             border-left: 1px solid var(--border);
@@ -312,59 +313,61 @@
 <body>
 
     <header>
-        <h1><span style="color:white">PRUEBA</span> DE NIVEL</h1>
+        <h1><span style="color:white">PROVA</span> DE NIVELL</h1>
         <div style="font-size: 0.9rem; color: #666; font-weight: bold;">
-            ESTADO: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
+            ESTAT: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
         </div>
     </header>
 
     <div id="mission-select-screen" class="screen active">
         <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
-            // SELECCIONA UN PROBLEMA
+            TRIA UN PROBLEMA
         </h2>
         
         <div class="mission-grid">
+            
             <div id="card-1" class="mission-card" onclick="checkAndLoadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">PROBLEMA 1</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
-                <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Cadena de peons bloquejada. El Rei oponent està restringit per les seves pròpies peces.</div>
+                <div class="mission-footer"><span>RANG: PEÓ</span><span>TEMA: RUPTURA</span></div>
             </div>
             
             <div id="card-2" class="mission-card" onclick="checkAndLoadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">PROBLEMA 2</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
-                <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Posició tancada. Es requereix un salt tàctic sobre les defenses enemigues.</div>
+                <div class="mission-footer"><span>RANG: CAVALL</span><span>TEMA: OFEGAT</span></div>
             </div>
             
             <div id="card-3" class="mission-card" onclick="checkAndLoadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">PROBLEMA 3</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
-                <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Control absolut de les caselles de color clar. La gran diagonal és decisiva.</div>
+                <div class="mission-footer"><span>RANG: ALFIL</span><span>TEMA: CLAVADA</span></div>
             </div>
             
             <div id="card-4" class="mission-card" onclick="checkAndLoadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">PROBLEMA 4</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
-                <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Columna oberta dominada. El Rei enemic no té caselles de fuga a la vuitena fila.</div>
+                <div class="mission-footer"><span>RANG: TORRE</span><span>TEMA: PASSADÍS</span></div>
             </div>
             
             <div id="card-5" class="mission-card" onclick="checkAndLoadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">PROBLEMA 5</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
-                <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Sobrecàrrega en la defensa. Múltiples amenaces simultànies sobre l'enroc.</div>
+                <div class="mission-footer"><span>RANG: DAMA</span><span>TEMA: DOBLE</span></div>
             </div>
             
             <div id="card-6" class="mission-card" onclick="checkAndLoadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">PROBLEMA 6</div>
-                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
-                <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Rei exposat al centre. Coordinació final per tancar la xarxa de mat.</div>
+                <div class="mission-footer"><span>RANG: REI</span><span>TEMA: XARXA</span></div>
             </div>
+
         </div>
     </div>
 
@@ -374,10 +377,10 @@
             
             <div id="victory-overlay" class="overlay">
                 <div class="data-packet">
-                    <h2 style="color: white; margin-bottom: 15px;">JAQUE MATE EJECUTADO</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Hash de victoria:</p>
+                    <h2 style="color: white; margin-bottom: 15px;">ESCAC I MAT EXECUTAT</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Hash de victòria:</p>
                     <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
-                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
+                    <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">TANCAR I DESXIFRAR</button>
                 </div>
             </div>
 
@@ -386,40 +389,41 @@
                     <h2 id="success-title" style="color: var(--primary); margin-bottom: 15px;">...</h2>
                     <p id="success-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
                     <div id="success-icon" style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
-                    <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
+                    <button class="btn-submit" onclick="closeSuccessAndReturn()">TORNAR AL MENÚ</button>
                 </div>
             </div>
+
         </div>
 
         <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← ABORTAR</button>
-            <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
-            <div id="terminal" class="terminal-log"><div class="log-entry">Analizando posición...</div></div>
+            <button class="back-btn" onclick="returnToMenu()">← AVORTAR</button>
+            <div style="margin-bottom: 5px; color: #666;">// SORTIDA_TERMINAL</div>
+            <div id="terminal" class="terminal-log"><div class="log-entry">Analitzant posició...</div></div>
 
             <div style="flex-grow: 1;"></div>
             <div id="cipher-box" class="cipher-box">
-                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
-                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">Jaque Mate requerido para desbloquear.</p>
-                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
-                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
+                <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEJAT</span>
+                <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">Escac i mat requerit per desbloquejar.</p>
+                <input type="text" id="solution-input" class="cipher-input" placeholder="ACCÉS DENEGAT" disabled autocomplete="off">
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CODI</button>
                 <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
             </div>
         </div>
     </div>
 
     <div id="warning-overlay" class="overlay">
-        <div class="data-packet" style="border-color: var(--primary);">
-            <h2 id="warning-title" style="color: var(--primary); margin-bottom: 15px;">ATENCIÓN</h2>
-            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">Mensaje de advertencia...</p>
+        <div class="data-packet" style="border-color: var(--danger);">
+            <h2 id="warning-title" style="color: var(--danger); margin-bottom: 15px;">ATENCIÓ</h2>
+            <p id="warning-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
             <div class="btn-group">
-                <button class="btn-cancel" onclick="closeWarning()">CANCELAR</button>
+                <button class="btn-cancel" onclick="closeWarning()">CANCEL·LAR</button>
                 <button class="btn-submit" id="btn-warning-confirm">CONTINUAR</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- NIVELES ---
+        // --- NIVELLS (CONFIGURACIÓ D'ESCACS) ---
         const levels = {
             1: {
                 initial: [['','','','','b','','',''],['','','p','','B','','p',''],['','','','','','','',''],['','','P','','','p','P',''],['','P','','P','','P','','P'],['','','p','','K','','p',''],['','','P','','B','','P',''],['','','','','k','','','']],
@@ -435,29 +439,43 @@
                 initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
                 moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
+            },
+            4: {
+                initial: [['r','','','','','','k',''],['p','p','p','','','n','p','p'],['','','','q','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','Q','','','',''],['P','P','P','','','P','P','P'],['','','','R','R','','K','']],
+                moves: [{ w: {f:{r:5,c:3}, t:{r:0,c:3}}, b: {f:{r:0,c:0}, t:{r:0,c:3}} }, { w: {f:{r:7,c:3}, t:{r:0,c:3}}, b: {f:{r:1,c:5}, t:{r:0,c:4}} }, { w: {f:{r:0,c:3}, t:{r:0,c:4}}, b: {f:{r:2,c:3}, t:{r:0,c:5}} }, { w: {f:{r:0,c:4}, t:{r:0,c:5}}, b: null }],
+                fakeHash: "FIREWALL-BYPASS-OK", answer: "BACKDOOR"
+            },
+            5: {
+                initial: [['','','','','','r','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','N',''],['','','Q','','','','',''],['','','','','','','',''],['P','P','','','','P','P','P'],['','','','','','','K','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:1,c:5}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:1,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:4,c:2}, t:{r:0,c:6}}, b: {f:{r:0,c:5}, t:{r:0,c:6}} }, { w: {f:{r:2,c:7}, t:{r:1,c:5}}, b: null }],
+                fakeHash: "BUFFER-OVERFLOW-X", answer: "DDOS"
+            },
+            6: {
+                initial: [['','','','','','','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','','','P','P','P'],['','','','Q','','','','R']],
+                moves: [{ w: {f:{r:7,c:7}, t:{r:0,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:7,c:3}, t:{r:7,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:7,c:7}, t:{r:1,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:5}} }, { w: {f:{r:1,c:7}, t:{r:0,c:7}}, b: null }],
+                fakeHash: "KERNEL-PANIC-00", answer: "EXPLOIT"
             }
         };
-        levels[4] = levels[1]; levels[5] = levels[2]; levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         let currentMissionId = 1;
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
         let solvedLevels = new Set();
 
-        // --- SISTEMA DE CONTROL Y VENTANAS ---
+        // --- SISTEMA DE CONTROL I FINESTRES ---
         
         function checkAndLoadMission(id) {
-            // 1. Caso: Problema ya resuelto
+            // 1. Cas: Problema ja resolt
             if (solvedLevels.has(id)) {
                 showWarning(
-                    "PROBLEMA YA SOLUCIONADO", 
-                    "Ya has resuelto este problema. ¿Deseas volver a intentar resolver el problema?",
+                    "PROBLEMA JA SOLUCIONAT", 
+                    "Ja has resolt aquest problema. Desitges tornar a intentar resoldre el problema?",
                     () => startLevel(id)
                 );
                 return;
             }
 
-            // 2. Caso: Paridad repetida
+            // 2. Cas: Paritat repetida
             const isTargetEven = (id % 2 === 0);
             let hasSameParitySolved = false;
             
@@ -468,16 +486,16 @@
             });
 
             if (hasSameParitySolved) {
-                const type = isTargetEven ? "PAR" : "IMPAR";
+                const type = isTargetEven ? "PARELL" : "SENAR";
                 showWarning(
-                    "REDUNDANCIA DETECTADA", 
-                    `Ya has superado un problema ${type}. No es necesario para completar la prueba, pero puedes proceder para entrenamiento.`,
+                    "REDUNDÀNCIA DETECTADA", 
+                    `Ja has superat un problema ${type}. No és necessari per completar la prova, però pots procedir per a entrenament.`,
                     () => startLevel(id)
                 );
                 return;
             }
 
-            // Si no hay avisos
+            // Si no hi ha avisos
             startLevel(id);
         }
 
@@ -486,7 +504,7 @@
             document.getElementById('warning-msg').innerText = msg;
             
             const btnConfirm = document.getElementById('btn-warning-confirm');
-            // Eliminar listeners antiguos clonando el botón
+            // Clonar botó per netejar listeners anteriors
             const newBtn = btnConfirm.cloneNode(true);
             btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
             
@@ -515,7 +533,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero PROBLEMA ${id}...`, false, true);
+            log(`Inicialitzant tauler PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -555,7 +573,7 @@
             return move ? move.type : null;
         }
 
-        // --- VALIDACIÓN JAQUES ---
+        // --- VALIDACIÓ ESCACS ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
@@ -678,7 +696,7 @@
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
                     } else {
-                        log("Error Táctico: Movimiento incorrecto.", true);
+                        log("Error Tàctic: Moviment incorrecte.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
@@ -695,7 +713,7 @@
             const p = gameState.position[from.r][from.c];
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
-            log(`${isPlayer ? 'USR' : 'SYS'} mueve: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
+            log(`${isPlayer ? 'USU' : 'SIS'} mou: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
             gameState.selection = null;
             gameState.validMoves = [];
             drawBoard();
@@ -715,7 +733,7 @@
         }
 
         function missionComplete() {
-            log("REY ENEMIGO CAPTURADO. CIFRADO ROTO.", false, true);
+            log("REI ENEMIC CAPTURAT.", false, true);
             const mission = levels[currentMissionId];
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
@@ -733,9 +751,9 @@
             const status = document.getElementById('cipher-status');
             
             box.classList.remove('unlocked');
-            inp.disabled = true; inp.value = ''; inp.placeholder = "ACCESO DENEGADO";
+            inp.disabled = true; inp.value = ''; inp.placeholder = "ACCÉS DENEGAT";
             btn.disabled = true;
-            status.innerText = "🔒 INPUT BLOQUEADO"; status.style.color = "#666";
+            status.innerText = "🔒 INPUT BLOQUEJAT"; status.style.color = "#666";
             document.getElementById('feedback-msg').innerText = '';
         }
 
@@ -746,9 +764,9 @@
             const status = document.getElementById('cipher-status');
             
             box.classList.add('unlocked');
-            inp.disabled = false; inp.placeholder = "INTRODUZCA HASH"; inp.focus();
+            inp.disabled = false; inp.placeholder = "INTRODUEIX HASH"; inp.focus();
             btn.disabled = false;
-            status.innerText = "🔓 PUERTO ABIERTO"; status.style.color = "var(--primary)";
+            status.innerText = "🔓 PORT OBERT"; status.style.color = "var(--primary)";
         }
 
         function verifySolution() {
@@ -757,15 +775,15 @@
             const feedback = document.getElementById('feedback-msg');
             
             if(val === correct) {
-                feedback.innerText = "ACCESO CONCEDIDO.";
+                feedback.innerText = "ACCÉS CONCEDIT.";
                 feedback.style.color = "var(--primary)";
-                log("Credencial verificada. Archivo guardado.", false, true);
+                log("Credencial verificada. Arxiu desat.", false, true);
                 
-                // MARCAR COMO RESUELTO
+                // MARCAR COM A RESOLT
                 solvedLevels.add(currentMissionId);
                 document.getElementById(`card-${currentMissionId}`).classList.add('solved');
                 
-                // LÓGICA DE MENSAJES DE PROGRESO
+                // LÒGICA DE MISSATGES DE PROGRÉS
                 let hasOdd = false;
                 let hasEven = false;
                 solvedLevels.forEach(lvl => {
@@ -773,13 +791,13 @@
                     else hasOdd = true;
                 });
 
-                let title = "PROBLEMA RESUELTO";
+                let title = "PROBLEMA RESOLT";
                 let msg = "";
                 let icon = "🔓";
 
                 if (hasOdd && hasEven) {
-                    title = "¡PRUEBA SUPERADA!";
-                    msg = "Has demostrado ser un buen candidato y te concederemos una entrevista de trabajo. Pronto nos pondremos en contacto contigo.";
+                    title = "PROVA SUPERADA!";
+                    msg = "Has demostrat ser un bon candidat i et concedirem una entrevista de treball. Aviat ens posarem en contacte amb vos.";
                     icon = "🤝";
                     // Update Header
                     const globalStatus = document.getElementById('global-status');
@@ -787,8 +805,8 @@
                     globalStatus.style.color = "var(--primary)";
                     globalStatus.style.textShadow = "0 0 10px var(--primary)";
                 } else {
-                    if (!hasOdd) msg = "Acceso parcial. Aún necesitas resolver un problema IMPAR (1, 3, 5) para superar la prueba.";
-                    else if (!hasEven) msg = "Acceso parcial. Aún necesitas resolver un problema PAR (2, 4, 6) para superar la prueba.";
+                    if (!hasOdd) msg = "Accés parcial. Encara necessites resoldre un problema SENAR (1, 3, 5) per superar la prova.";
+                    else if (!hasEven) msg = "Accés parcial. Encara necessites resoldre un problema PARELL (2, 4, 6) per superar la prova.";
                 }
 
                 document.getElementById('success-title').innerText = title;
@@ -801,7 +819,7 @@
             } else {
                 feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
-                log("Intento de descifrar fallido.", true);
+                log("Intent de desxiframent fallit.", true);
             }
         }
         
