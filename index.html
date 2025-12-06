@@ -111,13 +111,12 @@
             opacity: 0.8;
         }
 
-        /* CINTA DE ESTADO (RIBBON) */
         .mission-card::before {
             content: "NO SOLUCIONADO";
             position: absolute;
             top: 25px; 
-            right: -55px; /* Ajuste para texto largo */
-            width: 200px; /* Ancho suficiente para rotar */
+            right: -55px; 
+            width: 200px; 
             background: var(--danger);
             color: black;
             font-size: 0.65rem;
@@ -316,49 +315,42 @@
         </h2>
         
         <div class="mission-grid">
-            
             <div id="card-1" class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">PROBLEMA 1</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
                 <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
             </div>
-            
             <div id="card-2" class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">PROBLEMA 2</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
                 <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
             </div>
-            
             <div id="card-3" class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">PROBLEMA 3</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
                 <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
             </div>
-            
             <div id="card-4" class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">PROBLEMA 4</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
                 <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
             </div>
-            
             <div id="card-5" class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">PROBLEMA 5</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
                 <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
             </div>
-            
             <div id="card-6" class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">PROBLEMA 6</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
                 <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
             </div>
-
         </div>
     </div>
 
@@ -377,9 +369,9 @@
 
             <div id="success-overlay" class="overlay">
                 <div class="data-packet" style="border-color: var(--primary); box-shadow: 0 0 30px rgba(0,255,65,0.2);">
-                    <h2 style="color: var(--primary); margin-bottom: 15px;">PROBLEMA RESUELTO</h2>
-                    <p style="color: #ccc; margin-bottom: 20px;">Acceso administrativo restaurado con éxito.</p>
-                    <div style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
+                    <h2 id="success-title" style="color: var(--primary); margin-bottom: 15px;">MISIÓN COMPLETADA</h2>
+                    <p id="success-msg" style="color: #ccc; margin-bottom: 20px;">...</p>
+                    <div id="success-icon" style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
                     <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
                 </div>
             </div>
@@ -403,81 +395,40 @@
     </div>
 
     <script>
-        // --- NIVELES (CONFIGURACIÓN DE AJEDREZ) ---
+        // --- NIVELES ---
         const levels = {
             1: {
-                initial: [
-                    ['', '', '', '', 'b', '', '', ''],
-                    ['', '', 'p', '', 'B', '', 'p', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', 'P', '', '', 'p', 'P', ''],
-                    ['', 'P', '', 'P', '', 'P', '', 'P'],
-                    ['', '', 'p', '', 'K', '', 'p', ''],
-                    ['', '', 'P', '', 'B', '', 'P', ''],
-                    ['', '', '', '', 'k', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
-                ],
+                initial: [['','','','','b','','',''],['','','p','','B','','p',''],['','','','','','','',''],['','','P','','','p','P',''],['','P','','P','','P','','P'],['','','p','','K','','p',''],['','','P','','B','','P',''],['','','','','k','','','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }],
                 fakeHash: "TWYTTERUPCEPSEVZ", answer: "AXQBVQXAÇÇXEUSRE"
             },
             2: {
-                initial: [
-                    ['', '', 'k', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', 'K', '', '', ''],
-                    ['', '', '', 'N', 'B', '', '', ''],
-                    ['', '', '', '', 'N', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', ''],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
-                    { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
-                    { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
-                ],
+                initial: [['','','k','','','','',''],['','','','','','','',''],['','','','','K','','',''],['','','','N','B','','',''],['','','','','N','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','','']],
+                moves: [{ w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} }, { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }],
                 fakeHash: "KNIGHT-FORK-X", answer: "SECRET"
             },
             3: {
-                initial: [
-                    ['', 'n', '', 'b', '', 'r', 'k', ''],
-                    ['', '', 'p', 'p', '', '', '', 'p'],
-                    ['', '', '', 'p', '', '', 'p', 'Q'],
-                    ['', '', '', 'R', '', 'p', '', ''],
-                    ['', '', '', '', 'B', 'B', 'P', ''],
-                    ['', '', '', 'P', 'R', '', 'P', ''],
-                    ['', '', '', '', '', '', 'P', 'K'],
-                    ['', '', '', '', '', '', '', '']
-                ],
-                moves: [
-                    { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
-                    { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
-                    { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
-                    { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
-                ],
+                initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
+                moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
             }
         };
-
-        levels[4] = levels[1];
-        levels[5] = levels[2];
-        levels[6] = levels[3];
+        levels[4] = levels[1]; levels[5] = levels[2]; levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
-        
-        // ESTADO GLOBAL
         let currentMissionId = 1;
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
-        let solvedLevels = new Set(); // Almacena los IDs de niveles resueltos
+        let solvedLevels = new Set();
 
-        // --- SISTEMA DE JUEGO ---
-
+        // --- SISTEMA ---
         function loadMission(id) {
+            // CONFIRMACIÓN SI YA ESTÁ RESUELTO
+            if (solvedLevels.has(id)) {
+                if (!confirm("Este problema ya ha sido solucionado. ¿Deseas volver a acceder?")) {
+                    return;
+                }
+            }
+
             currentMissionId = id;
             document.getElementById('mission-select-screen').classList.remove('active');
             document.getElementById('game-interface').classList.add('active');
@@ -490,7 +441,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
+            log(`Accediendo al PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -505,29 +456,21 @@
         function drawBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
-            
             for(let r=0; r<8; r++) {
                 for(let c=0; c<8; c++) {
                     const sq = document.createElement('div');
                     sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
-                    
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
                         sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
                         sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
                     }
-                    
                     sq.onclick = () => handleSquare(r, c);
-                    
-                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
-                        sq.classList.add('selected');
-                    }
-
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) sq.classList.add('selected');
                     const moveType = getMoveType(r, c);
                     if(moveType === 'move') sq.classList.add('valid-move');
                     if(moveType === 'capture') sq.classList.add('capture-move');
-
                     board.appendChild(sq);
                 }
             }
@@ -538,7 +481,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN ---
+        // --- VALIDACIÓN DE JAQUES ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
@@ -644,7 +587,6 @@
             return moves;
         }
 
-        // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(gameState.locked) return;
             const p = gameState.position[r][c];
@@ -752,8 +694,35 @@
                 solvedLevels.add(currentMissionId);
                 document.getElementById(`card-${currentMissionId}`).classList.add('solved');
                 
-                // Chequear condición de victoria global
-                checkGlobalWinCondition();
+                // Mensaje Dinámico de Éxito
+                let hasOdd = false;
+                let hasEven = false;
+                solvedLevels.forEach(lvl => {
+                    if (lvl % 2 === 0) hasEven = true;
+                    else hasOdd = true;
+                });
+
+                let title = "MISIÓN COMPLETADA";
+                let msg = "";
+                let icon = "🔓";
+
+                if (hasOdd && hasEven) {
+                    title = "¡PRUEBA SUPERADA!";
+                    msg = "Has demostrado dominio en ambos tipos de sistemas. Acceso Root Concedido.";
+                    icon = "🏆";
+                    // Update Header
+                    const globalStatus = document.getElementById('global-status');
+                    globalStatus.innerText = "SUPERADA";
+                    globalStatus.style.color = "var(--primary)";
+                    globalStatus.style.textShadow = "0 0 10px var(--primary)";
+                } else {
+                    if (!hasOdd) msg = "Acceso parcial. Aún necesitas resolver un problema IMPAR (1, 3, 5).";
+                    else if (!hasEven) msg = "Acceso parcial. Aún necesitas resolver un problema PAR (2, 4, 6).";
+                }
+
+                document.getElementById('success-title').innerText = title;
+                document.getElementById('success-msg').innerText = msg;
+                document.getElementById('success-icon').innerText = icon;
 
                 setTimeout(() => {
                     document.getElementById('success-overlay').classList.add('active');
@@ -762,23 +731,6 @@
                 feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
                 log("Intento de inyección fallido.", true);
-            }
-        }
-
-        function checkGlobalWinCondition() {
-            let hasOdd = false;
-            let hasEven = false;
-            
-            solvedLevels.forEach(id => {
-                if(id % 2 === 0) hasEven = true;
-                else hasOdd = true;
-            });
-
-            if(hasOdd && hasEven) {
-                const globalStatus = document.getElementById('global-status');
-                globalStatus.innerText = "SUPERADA";
-                globalStatus.style.color = "var(--primary)";
-                globalStatus.style.textShadow = "0 0 10px var(--primary)";
             }
         }
         
