@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Cifrado - Selección de Misión</title>
+    <title>Protocolo de Cifrado - Acceso Root</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,6 +14,8 @@
             --danger: #ff003c;
             --text-main: #e0e0e0;
             --border: #333;
+            /* Nuevo color para indicador de movimiento */
+            --valid-indicator: rgba(0, 255, 65, 0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -75,10 +77,11 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             width: 100%;
-            max-width: 1200px;
+            max-width: 1400px;
             margin-top: 2rem;
         }
 
+        /* TARJETAS DE MISIONES */
         .mission-card {
             background: #000;
             border: 1px solid var(--border);
@@ -87,6 +90,8 @@
             cursor: pointer;
             transition: all 0.3s;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .mission-card:hover {
@@ -96,7 +101,7 @@
         }
 
         .mission-card::before {
-            content: "CONFIDENTIAL";
+            content: "LOCKED";
             position: absolute;
             top: 20px; right: -30px;
             background: var(--danger);
@@ -107,13 +112,26 @@
             font-weight: bold;
         }
 
-        .mission-icon { font-size: 3rem; margin-bottom: 1rem; color: var(--primary); }
-        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; }
-        .mission-desc { color: #888; font-size: 0.9rem; line-height: 1.4; }
+        .mission-icon { font-size: 2rem; margin-bottom: 1rem; color: var(--primary); }
+        .mission-title { font-size: 1.5rem; margin-bottom: 0.5rem; color: white; font-weight: bold; }
+        .mission-desc { 
+            color: #888; font-size: 0.9rem; line-height: 1.4; font-family: 'Courier New', monospace; flex-grow: 1;
+        }
+        .mission-desc::before { content: "> "; color: var(--primary); }
         
+        .mission-footer {
+            margin-top: 15px;
+            border-top: 1px dashed #333;
+            padding-top: 10px;
+            font-size: 0.8rem;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+        }
+
         /* VISTA 2: INTERFAZ DE JUEGO */
         #game-interface {
-            display: none; /* Controlado por JS */
+            display: none;
             grid-template-columns: 1fr 350px;
             gap: 20px;
             height: 100%;
@@ -140,15 +158,40 @@
 
         .square {
             display: flex; align-items: center; justify-content: center;
-            font-size: 45px; cursor: pointer;
+            font-size: 45px; cursor: pointer; position: relative;
         }
 
         .light { background-color: #0f2615; color: var(--primary); }
         .dark { background-color: #030f06; color: var(--primary); }
         
-        .square:hover { box-shadow: inset 0 0 15px var(--primary); }
-        .selected { background-color: rgba(255, 255, 0, 0.2) !important; }
-        .last-move { background-color: rgba(255, 255, 255, 0.1) !important; }
+        /* Highlight Selección */
+        .square.selected { background-color: rgba(0, 255, 65, 0.2) !important; box-shadow: inset 0 0 15px var(--primary); }
+        
+        /* --- INDICADORES DE MOVIMIENTO (NUEVO) --- */
+        
+        /* 1. Punto Verde (Movimiento válido a casilla vacía) */
+        .valid-move::after {
+            content: ''; position: absolute;
+            width: 18px; height: 18px;
+            background-color: var(--valid-indicator);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--primary);
+            pointer-events: none;
+        }
+        
+        /* 2. Mira de Captura (Comer pieza enemiga) */
+        .capture-move {
+            box-shadow: inset 0 0 15px var(--danger);
+        }
+        .capture-move::after {
+            content: ''; position: absolute;
+            width: 70%; height: 70%;
+            border: 2px dashed var(--danger);
+            box-sizing: border-box;
+            border-radius: 50%;
+            animation: spin 4s linear infinite;
+            pointer-events: none;
+        }
 
         /* PANEL LATERAL */
         .side-panel {
@@ -184,6 +227,8 @@
         }
         .log-entry { margin-bottom: 5px; }
         .log-entry::before { content: "> "; color: var(--primary); }
+        .log-entry.err { color: var(--danger); }
+        .log-entry.sys { color: var(--primary); }
 
         /* INPUT SEGURO */
         .cipher-box {
@@ -241,7 +286,7 @@
         }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes glitch { 0% { transform: translate(2px, 2px); } 20% { transform: translate(-2px, -2px); } 40% { transform: translate(2px, -2px); } 100% { transform: translate(0); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         /* Responsive */
         @media (max-width: 900px) {
@@ -260,39 +305,51 @@
     </header>
 
     <div id="mission-select-screen" class="screen active">
-        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1200px;">
-            // SELECCIONAR_VECTOR_DE_ATAQUE
+        <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
+            // SELECCIONAR_VULNERABILIDAD
         </h2>
         
         <div class="mission-grid">
             <div class="mission-card" onclick="loadMission(1)">
-                <div class="mission-icon">♟️</div>
-                <div class="mission-title">ARCHIVO 01: PEÓN</div>
-                <div class="mission-desc">
-                    Intercepta la comunicación enemiga utilizando una estructura de peones. 
-                    <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
-                </div>
+                <div class="mission-icon">🔒</div>
+                <div class="mission-title">NODE_01</div>
+                <div class="mission-desc">ERROR 503: Servicio de autenticación no responde. Gateway inaccesible.</div>
+                <div class="mission-footer"><span>PORT: 8080</span><span>STATUS: ACTIVE</span></div>
             </div>
 
             <div class="mission-card" onclick="loadMission(2)">
-                <div class="mission-icon">♞</div>
-                <div class="mission-title">ARCHIVO 02: INCURSIÓN</div>
-                <div class="mission-desc">
-                    Hackea el servidor central mediante una maniobra de caballería ligera.
-                    <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
-                </div>
+                <div class="mission-icon">📡</div>
+                <div class="mission-title">NODE_02</div>
+                <div class="mission-desc">Tráfico interceptado. Checksum incorrecto en el stream de datos.</div>
+                <div class="mission-footer"><span>TYPE: STREAM</span><span>ENC: UNKNOWN</span></div>
             </div>
 
             <div class="mission-card" onclick="loadMission(3)">
-                <div class="mission-icon">💥</div>
-                <div class="mission-title">ARCHIVO 03: SACRIFICIO</div>
-                <div class="mission-desc">
-                    Sobrecarga el sistema con un sacrificio de material pesado.
-                    <br><br>
-                    <span style="color:var(--primary)">OBJETIVO: Mate en 4</span>
-                </div>
+                <div class="mission-icon">💾</div>
+                <div class="mission-title">NODE_03</div>
+                <div class="mission-desc">Violación de segmento. Volcado de memoria incompleto.</div>
+                <div class="mission-footer"><span>ADDR: 0x0F4A</span><span>MEM: CORRUPT</span></div>
+            </div>
+
+            <div class="mission-card" onclick="loadMission(4)">
+                <div class="mission-icon">⚠️</div>
+                <div class="mission-title">NODE_04</div>
+                <div class="mission-desc">Alerta de seguridad: Protocolo interrumpido. Exceso de peticiones.</div>
+                <div class="mission-footer"><span>PID: 4421</span><span>QUEUE: FULL</span></div>
+            </div>
+
+            <div class="mission-card" onclick="loadMission(5)">
+                <div class="mission-icon">🌐</div>
+                <div class="mission-title">NODE_05</div>
+                <div class="mission-desc">Anomalía en capa de transporte. Latencia inusual detectada.</div>
+                <div class="mission-footer"><span>NET: TCP/IP</span><span>FLAG: SYN_ACK</span></div>
+            </div>
+
+            <div class="mission-card" onclick="loadMission(6)">
+                <div class="mission-icon">☢️</div>
+                <div class="mission-title">NODE_06</div>
+                <div class="mission-desc">¡CRÍTICO! Archivo de sistema bloqueado. Firma digital no reconocida.</div>
+                <div class="mission-footer"><span>LEVEL: KERNEL</span><span>PERM: DENIED</span></div>
             </div>
         </div>
     </div>
@@ -313,7 +370,7 @@
         </div>
 
         <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← ABORTAR MISIÓN</button>
+            <button class="back-btn" onclick="returnToMenu()">← DESCONECTAR</button>
             
             <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
             <div id="terminal" class="terminal-log">
@@ -329,15 +386,15 @@
                 </p>
                 
                 <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
-                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR PAYLOAD</button>
                 <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DATOS DE LAS MISIONES ---
-        const missions = {
+        // --- CONFIGURACIÓN DE NIVELES (MISMOS 3 NIVELES REPLICADOS PARA 6 NODOS) ---
+        const levels = {
             1: {
                 initial: [
                     ['', '', '', '', 'b', '', '', ''],
@@ -349,14 +406,13 @@
                     ['', '', 'P', '', 'B', '', 'P', ''],
                     ['', '', '', '', 'k', '', '', '']
                 ],
-                solutionMoves: [
-                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} }, // 1. g6 c6
-                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} }, // 2. h5 Ad7
-                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} }, // 3. Ah4 Ac8
-                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }                         // 4. Axg3++
+                moves: [
+                    { w: {f:{r:3,c:6}, t:{r:2,c:6}}, b: {f:{r:1,c:2}, t:{r:2,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:3,c:7}}, b: {f:{r:0,c:4}, t:{r:1,c:3}} },
+                    { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
+                    { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
                 ],
-                fakeHash: "A-X-Q-B-V", // Lo que se muestra al ganar
-                answer: "AXQBV"        // Lo que el usuario debe escribir
+                fakeHash: "SQL-INJECT-01", answer: "ADMIN"
             },
             2: {
                 initial: [
@@ -369,14 +425,13 @@
                     ['', '', '', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', '']
                 ],
-                solutionMoves: [
+                moves: [
                     { w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} },
                     { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
                 ],
-                fakeHash: "C-A-B-A-L-L-O",
-                answer: "CABALLO"
+                fakeHash: "CESAR-ROT13", answer: "SECRET"
             },
             3: {
                 initial: [
@@ -389,16 +444,20 @@
                     ['', '', '', '', '', '', 'P', 'K'],
                     ['', '', '', '', '', '', '', '']
                 ],
-                solutionMoves: [
+                moves: [
                     { w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} },
                     { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} },
                     { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
                     { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
                 ],
-                fakeHash: "S-A-C-R-I-F-I-C-I-O",
-                answer: "SACRIFICIO"
+                fakeHash: "STACK-OVERFLOW", answer: "ROOT"
             }
         };
+
+        // Copiamos niveles para tener 6 funcionales
+        levels[4] = levels[1];
+        levels[5] = levels[2];
+        levels[6] = levels[3];
 
         const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
@@ -408,7 +467,8 @@
             position: [],
             moveIdx: 0,
             selection: null,
-            locked: false
+            locked: false,
+            validMoves: []
         };
 
         // --- NAVEGACIÓN ---
@@ -418,14 +478,16 @@
             document.getElementById('game-interface').classList.add('active');
             
             // Reiniciar juego
-            gameState.position = JSON.parse(JSON.stringify(missions[id].initial));
+            gameState.position = JSON.parse(JSON.stringify(levels[id].initial));
             gameState.moveIdx = 0;
             gameState.selection = null;
             gameState.locked = false;
+            gameState.validMoves = [];
             
             // Bloquear input
             lockInput();
-            document.getElementById('terminal').innerHTML = '<div class="log-entry">Inicializando protocolo de misión...</div>';
+            document.getElementById('terminal').innerHTML = '';
+            log(`Conectando a NODE_0${id}... Iniciando protocolo.`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             
             drawBoard();
@@ -436,7 +498,7 @@
             document.getElementById('mission-select-screen').classList.add('active');
         }
 
-        // --- LÓGICA DE JUEGO ---
+        // --- RENDERIZADO DEL TABLERO ---
         function drawBoard() {
             const board = document.getElementById('board');
             board.innerHTML = '';
@@ -449,6 +511,7 @@
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
+                        // Piezas blancas brillan, negras son oscuras
                         sq.style.color = (p === p.toUpperCase()) ? 'var(--primary)' : '#1a4d2e';
                         sq.style.textShadow = (p === p.toUpperCase()) ? '0 0 5px var(--primary)' : 'none';
                     }
@@ -459,39 +522,107 @@
                         sq.classList.add('selected');
                     }
                     
+                    // MOSTRAR INDICADORES VISUALES
+                    const moveType = getMoveType(r, c);
+                    if(moveType === 'move') sq.classList.add('valid-move');
+                    if(moveType === 'capture') sq.classList.add('capture-move');
+
                     board.appendChild(sq);
                 }
             }
         }
 
+        function getMoveType(r, c) {
+            const move = gameState.validMoves.find(m => m.r === r && m.c === c);
+            return move ? move.type : null;
+        }
+
+        // --- MOTOR DE AJEDREZ (Cálculo de movimientos posibles) ---
+        function calculatePossibleMoves(r, c, piece) {
+            let moves = [];
+            const type = piece.toUpperCase();
+            const isWhite = piece === piece.toUpperCase();
+            
+            const add = (tr, tc) => {
+                if(tr<0||tr>7||tc<0||tc>7) return false;
+                const target = gameState.position[tr][tc];
+                if(!target) {
+                    moves.push({r:tr, c:tc, type:'move'});
+                    return true; // Sigue buscando en esta dirección
+                } else if((isWhite && target===target.toLowerCase()) || (!isWhite && target===target.toUpperCase())) {
+                    moves.push({r:tr, c:tc, type:'capture'});
+                    return false; // Bloqueado por captura
+                }
+                return false; // Bloqueado por pieza propia
+            };
+
+            if(type === 'P') { // Peón (Blancas suben, index--)
+                const dir = -1; 
+                if(r+dir >= 0 && !gameState.position[r+dir][c]) {
+                    moves.push({r:r+dir, c:c, type:'move'});
+                    if(r===6 && !gameState.position[r+(dir*2)][c]) moves.push({r:r+(dir*2), c:c, type:'move'});
+                }
+                if(r+dir >= 0 && c>0 && gameState.position[r+dir][c-1] && gameState.position[r+dir][c-1]===gameState.position[r+dir][c-1].toLowerCase()) 
+                    moves.push({r:r+dir, c:c-1, type:'capture'});
+                if(r+dir >= 0 && c<7 && gameState.position[r+dir][c+1] && gameState.position[r+dir][c+1]===gameState.position[r+dir][c+1].toLowerCase()) 
+                    moves.push({r:r+dir, c:c+1, type:'capture'});
+            }
+            if(type === 'R' || type === 'Q') { // Torre/Reina
+                [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dr, dc]) => {
+                    for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
+                });
+            }
+            if(type === 'B' || type === 'Q') { // Alfil/Reina
+                [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr, dc]) => {
+                    for(let i=1; i<8; i++) if(!add(r+dr*i, c+dc*i)) break;
+                });
+            }
+            if(type === 'N') { // Caballo
+                [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]].forEach(([dr,dc]) => add(r+dr, c+dc));
+            }
+            if(type === 'K') { // Rey
+                [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([dr,dc]) => add(r+dr, c+dc));
+            }
+            return moves;
+        }
+
+        // --- INTERACCIÓN ---
         function handleSquare(r, c) {
             if(gameState.locked) return;
             
             const p = gameState.position[r][c];
-            // Seleccionar blancas
+            // 1. Selección de pieza blanca
             if(p && p === p.toUpperCase()) {
                 gameState.selection = {r, c};
+                gameState.validMoves = calculatePossibleMoves(r, c, p);
                 drawBoard();
                 return;
             }
             
-            // Mover
+            // 2. Intentar mover
             if(gameState.selection) {
-                const solution = missions[currentMissionId].solutionMoves;
-                // Verificar si quedan movimientos
-                if (gameState.moveIdx >= solution.length) return;
-
-                const correctMove = solution[gameState.moveIdx].w;
+                // Verificar si el clic es un movimiento posible calculado
+                const validMove = gameState.validMoves.find(m => m.r === r && m.c === c);
                 
-                // Verificar si el movimiento es correcto
-                if(correctMove.f.r === gameState.selection.r && correctMove.f.c === gameState.selection.c &&
-                   correctMove.t.r === r && correctMove.t.c === c) {
+                if(validMove) {
+                    const puzzleMove = levels[currentMissionId].moves[gameState.moveIdx].w;
                     
-                    executeMove(gameState.selection, {r, c}, true);
-                    
+                    // Verificar si es el movimiento CORRECTO del puzzle
+                    if(puzzleMove.f.r === gameState.selection.r && puzzleMove.f.c === gameState.selection.c &&
+                       puzzleMove.t.r === r && puzzleMove.t.c === c) {
+                        
+                        executeMove(gameState.selection, {r, c}, true);
+                        
+                    } else {
+                        log("Error: Movimiento ineficaz. Protocolo fallido.", true);
+                        gameState.selection = null;
+                        gameState.validMoves = [];
+                        drawBoard();
+                    }
                 } else {
-                    log("Movimiento inválido. Protocolo fallido.", true);
+                    // Clic en casilla no válida -> Deseleccionar
                     gameState.selection = null;
+                    gameState.validMoves = [];
                     drawBoard();
                 }
             }
@@ -502,18 +633,17 @@
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
             
-            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`);
+            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
             
             gameState.selection = null;
+            gameState.validMoves = [];
             drawBoard();
             
             if(isPlayer) {
-                const step = missions[currentMissionId].solutionMoves[gameState.moveIdx];
+                const step = levels[currentMissionId].moves[gameState.moveIdx];
                 if(!step.b) {
-                    // JAQUE MATE
                     setTimeout(missionComplete, 500);
                 } else {
-                    // Turno CPU
                     gameState.locked = true;
                     setTimeout(() => {
                         executeMove(step.b.f, step.b.t, false);
@@ -526,7 +656,7 @@
 
         function missionComplete() {
             log("AMENAZA NEUTRALIZADA. OBTENIENDO HASH...", false, true);
-            const mission = missions[currentMissionId];
+            const mission = levels[currentMissionId];
             
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
@@ -572,7 +702,7 @@
 
         function verifySolution() {
             const val = document.getElementById('solution-input').value.toUpperCase().replace(/-/g, '').trim();
-            const correct = missions[currentMissionId].answer;
+            const correct = levels[currentMissionId].answer;
             const feedback = document.getElementById('feedback-msg');
             
             if(val === correct) {
@@ -595,9 +725,9 @@
             const t = document.getElementById('terminal');
             const d = document.createElement('div');
             d.className = 'log-entry';
+            if(err) d.classList.add('err');
+            if(success) d.classList.add('sys');
             d.innerText = msg;
-            if(err) d.style.color = 'var(--danger)';
-            if(success) d.style.color = 'var(--primary)';
             t.appendChild(d);
             t.scrollTop = t.scrollHeight;
         }
