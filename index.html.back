@@ -801,7 +801,7 @@
             } else {
                 feedback.innerText = "ERROR DE CREDENCIAL";
                 feedback.style.color = "var(--danger)";
-                log("Intento de inyección fallido.", true);
+                log("Intento de descifrar fallido.", true);
             }
         }
         
