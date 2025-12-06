@@ -3,749 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajedrez de Ataque - Maestría Táctica</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <title>Torneo Oficial - Ajedrez de Ataque</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Paleta de Colores Profesional */
-            --bg-body: #f1f5f9;
-            --bg-card: #ffffff;
-            --primary: #0f172a; /* Azul noche profundo */
-            --accent: #b45309; /* Bronce/Dorado oscuro */
-            --accent-hover: #92400e;
-            --board-light: #eeeed2;
-            --board-dark: #769656; /* Verde clásico de torneo */
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --success: #15803d;
-            --error: #b91c1c;
-            --radius: 12px;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --bg-body: #0f172a; /* Fondo oscuro para competición */
+            --bg-card: #1e293b;
+            --primary: #3b82f6; /* Azul eléctrico */
+            --accent: #f59e0b; /* Dorado trofeo */
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --board-light: #e2e8f0;
+            --board-dark: #475569;
+            --radius: 8px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             min-height: 100vh;
-            line-height: 1.6;
         }
 
-        /* HEADER */
+        /* HEADER DE COMPETICIÓN */
         header {
-            background: var(--primary);
+            background: linear-gradient(90deg, #0f172a 0%, #1e3a8a 100%);
+            border-bottom: 4px solid var(--accent);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .tournament-title h1 {
+            font-family: 'Chakra Petch', sans-serif;
+            font-size: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
             color: white;
-            padding: 2rem 1rem;
-            text-align: center;
-            margin-bottom: 3rem;
-            box-shadow: var(--shadow-md);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
 
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
+        .live-badge {
+            background: var(--danger);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            animation: pulse 2s infinite;
         }
 
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        /* PROBLEM SELECTION GRID */
+        /* CARDS DE RONDAS */
         .problem-selection {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 2rem;
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 3rem auto;
             padding: 0 20px;
         }
 
         .problem-card {
             background: var(--bg-card);
+            border: 1px solid #334155;
             border-radius: var(--radius);
-            padding: 2rem;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+            transition: transform 0.3s;
+            position: relative;
         }
 
         .problem-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-            border-color: #cbd5e1;
+            transform: translateY(-5px);
+            border-color: var(--accent);
         }
 
-        .problem-card h2 {
-            font-family: 'Playfair Display', serif;
-            color: var(--primary);
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .problem-card p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            flex-grow: 1;
-        }
-
-        .problem-preview {
-            background: #f8fafc;
-            border-left: 3px solid var(--accent);
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-family: 'Courier New', monospace;
-            font-size: 0.85rem;
-            color: #334155;
-            border-radius: 0 6px 6px 0;
-        }
-
-        /* BOTONES MODERNOS */
-        button {
-            font-family: 'Inter', sans-serif;
-        }
-
-        .btn-select, .btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            font-size: 0.95rem;
-        }
-
-        .btn-select:hover, .btn:hover {
-            background-color: #334155;
-            transform: translateY(-1px);
-        }
-
-        /* MODAL */
-        .problem-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .problem-modal.active {
-            display: flex;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: 16px;
-            width: 100%;
-            max-width: 1100px;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 0; /* Padding controlado internamente */
-            position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            display: grid;
-            grid-template-rows: auto 1fr;
-        }
-
-        .modal-header {
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid #e2e8f0;
+        .card-header {
+            background: #020617;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #334155;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        .problem-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.5rem;
-            color: var(--primary);
+        .round-badge {
+            font-family: 'Chakra Petch', sans-serif;
+            color: var(--accent);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
         }
 
-        .close-modal {
-            background: transparent;
-            color: #94a3b8;
+        .card-body { padding: 1.5rem; }
+        
+        .card-body h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .btn-select {
+            background: var(--primary);
+            color: white;
             border: none;
-            font-size: 2rem;
+            padding: 1rem;
+            width: 100%;
+            font-weight: 700;
+            text-transform: uppercase;
             cursor: pointer;
-            line-height: 1;
-            transition: color 0.2s;
+            transition: background 0.2s;
+        }
+        .btn-select:hover { background: #2563eb; }
+
+        /* MODAL DE TORNEO */
+        .problem-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .problem-modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--bg-card);
+            width: 95%;
+            max-width: 1100px;
+            height: 90vh;
+            display: grid;
+            grid-template-rows: auto 1fr;
+            border: 1px solid #475569;
+            box-shadow: 0 0 50px rgba(0,0,0,0.7);
         }
 
-        .close-modal:hover {
-            color: var(--error);
-        }
-
-        /* GAME LAYOUT */
+        /* AREA DE JUEGO */
         .game-container {
             display: grid;
             grid-template-columns: 1fr 350px;
-            gap: 0;
             height: 100%;
+            overflow: hidden;
         }
 
-        /* TABLERO AREA */
-        .board-container {
-            background: #f8fafc;
-            padding: 2rem;
+        .board-area {
+            background: #0f172a;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-        }
-
-        .board-wrapper {
+            align-items: center;
+            padding: 1rem;
             position: relative;
-            padding: 10px;
-            background: white;
-            border-radius: 4px;
-            box-shadow: var(--shadow-lg);
         }
 
+        /* Player Plates */
+        .player-plate {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 480px; /* Ancho del tablero */
+            padding: 0.5rem 1rem;
+            background: #1e293b;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid transparent;
+        }
+        
+        .player-top { border-left-color: #ef4444; } /* Rival */
+        .player-bottom { border-left-color: #22c55e; } /* Usuario */
+
+        .player-name { font-weight: 600; font-size: 0.9rem; }
+        .player-rating { color: var(--text-muted); font-family: monospace; }
+        
+        /* Board */
         .board {
             display: grid;
             grid-template-columns: repeat(8, 60px);
             grid-template-rows: repeat(8, 60px);
-            border: 2px solid #404040;
-            user-select: none;
+            border: 5px solid #334155;
         }
-
         .square {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            cursor: pointer;
-            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 40px; cursor: pointer;
         }
-
-        .light { background-color: var(--board-light); color: #000; }
-        .dark { background-color: var(--board-dark); color: #000; }
-
-        /* Estilo de las piezas */
-        .square {
-            font-family: "Segoe UI Symbol", "Arial Unicode MS", sans-serif; 
-            /* Sombra sutil para dar efecto de "pieza" y no solo texto */
-            text-shadow: 0 2px 2px rgba(0,0,0,0.15); 
-        }
-
-        /* Diferenciar piezas blancas y negras visualmente mejor */
-        .square:not(:empty) {
-            transition: transform 0.1s;
-        }
-        .square:hover:not(:empty) {
-            transform: scale(1.05);
-            z-index: 10;
-        }
-
-        /* Estados del tablero */
-        .selected {
-            background-color: rgba(255, 255, 0, 0.5) !important;
-        }
-
-        .valid-move::after {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 50%;
-        }
-
-        .capture-move::after {
-            content: '';
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(0, 0, 0, 0.2);
-            border-radius: 50%;
-        }
+        .light { background-color: var(--board-light); color: black; }
+        .dark { background-color: var(--board-dark); color: white; }
         
-        .last-move {
-            background-color: rgba(155, 199, 0, 0.41) !important;
-        }
-
-        /* Coordenadas */
-        .rank-coordinates {
-            position: absolute;
-            left: -15px;
-            top: 0;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            color: #94a3b8;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .file-coordinates {
-            position: absolute;
-            bottom: -20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            color: #94a3b8;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* SIDEBAR (INFO) */
-        .game-info {
-            background: white;
-            border-left: 1px solid #e2e8f0;
-            padding: 2rem;
+        /* Sidebar Info */
+        .info-panel {
+            background: #1e293b;
+            border-left: 1px solid #334155;
+            padding: 1.5rem;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
-            overflow-y: auto;
         }
 
-        /* Turn Indicator */
-        .turn-indicator {
+        /* CLOCK */
+        .clock-container {
+            background: black;
+            color: var(--danger);
+            font-family: 'Chakra Petch', monospace;
+            font-size: 2.5rem;
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 4px;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+
+        .status-box {
+            text-align: center;
             padding: 1rem;
-            border-radius: 8px;
-            background: #f1f5f9;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-left: 4px solid #cbd5e1;
+            background: #0f172a;
+            border-radius: 4px;
+            border: 1px solid #334155;
+        }
+
+        /* Inputs de Código */
+        .vault {
+            margin-top: auto;
+            background: #0f172a;
+            padding: 1rem;
+            border: 1px solid #334155;
+            border-radius: 4px;
         }
         
-        .turn-white { border-left-color: #fff; background: white; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm); }
-        .turn-black { border-left-color: #0f172a; background: #0f172a; color: white; }
-
-        /* Moves List */
-        .moves-list {
-            flex-grow: 1;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .moves-list h3 {
-            background: #f8fafc;
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .move-history-content {
-            padding: 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .move-item {
-            padding: 0.5rem 1rem;
-            border-bottom: 1px solid #f1f5f9;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-        }
-        .move-item:last-child { border-bottom: none; }
-
-        /* Controls */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .btn-danger { background-color: var(--error); }
-        .btn-danger:hover { background-color: #991b1b; }
-        
-        .btn-secondary { background-color: white; color: var(--text-main); border: 1px solid #cbd5e1; }
-        .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; transform: none; }
-
-        /* Status */
-        .status {
-            padding: 1rem;
-            border-radius: 8px;
-            background: #f8fafc;
-            font-weight: 500;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .status.success { background-color: #dcfce7; color: #166534; }
-        .status.error { background-color: #fee2e2; color: #991b1b; }
-
-        /* Keyword Section (Vault Style) */
-        .keyword-section {
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            transition: all 0.3s;
-        }
-
-        .keyword-section.locked {
-            opacity: 0.6;
-            background: #f1f5f9;
-        }
-
-        .keyword-section.unlocked {
-            border-color: var(--success);
-            box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
-        }
-
-        .keyword-input {
+        .vault-input {
             width: 100%;
-            padding: 0.75rem;
-            margin: 1rem 0;
-            border: 2px solid #e2e8f0;
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
+            background: black;
+            border: 1px solid #333;
+            color: var(--accent);
+            padding: 0.8rem;
+            font-family: monospace;
             text-align: center;
-            font-size: 1rem;
-            transition: border-color 0.2s;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
 
-        .keyword-input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-
-        .keyword-btn {
-            background: var(--accent);
+        .btn-action {
+            width: 100%;
+            padding: 0.8rem;
+            background: #334155;
             color: white;
             border: none;
-            padding: 0.75rem;
-            border-radius: 6px;
-            width: 100%;
-            font-weight: 600;
             cursor: pointer;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
         }
-        
-        .keyword-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .keyword-btn:not(:disabled):hover { background: var(--accent-hover); }
+        .btn-primary { background: var(--primary); }
+        .btn-accent { background: var(--accent); color: black; }
 
-        /* Animation */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
         /* Responsive */
         @media (max-width: 900px) {
-            .game-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-            }
-            
-            .game-info {
-                border-left: none;
-                border-top: 1px solid #e2e8f0;
-                max-height: none;
-                overflow: visible;
-            }
-
-            .board {
-                grid-template-columns: repeat(8, 45px);
-                grid-template-rows: repeat(8, 45px);
-            }
-            .square { font-size: 30px; }
-            .capture-move::after { width: 35px; height: 35px; }
+            .game-container { grid-template-columns: 1fr; grid-template-rows: auto auto; overflow-y: auto; }
+            .board { grid-template-columns: repeat(8, 42px); grid-template-rows: repeat(8, 42px); }
+            .player-plate { width: 336px; }
+            .square { font-size: 28px; }
         }
-
+        
+        /* Overlays */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none; justify-content: center; align-items: center; z-index: 50;
+        }
+        .overlay.active { display: flex; }
+        .overlay-content { text-align: center; animation: pulse 1s infinite alternate; }
+        
         /* Utility */
-        .checkmate { color: var(--error); font-weight: 700; }
-        
-        /* Solucion Text */
-        .solution-text {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            background: #f0f9ff;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #0369a1;
-        }
-        .solution-text.active { display: block; }
-        
-        /* Congratulations Overlay */
-        .congratulations {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            text-align: center;
-        }
-        
-        .congrats-card {
-            background: white;
-            color: var(--text-main);
-            padding: 3rem;
-            border-radius: 20px;
-            max-width: 500px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            animation: fadeIn 0.5s ease-out;
-        }
-        
-        .congrats-card h2 { color: var(--success); font-family: 'Playfair Display', serif; margin-bottom: 1rem; font-size: 2.5rem; }
-
+        .selected { background-color: rgba(255, 215, 0, 0.5) !important; }
+        .valid-move::after { content: ''; position: absolute; width: 12px; height: 12px; background: rgba(0,0,0,0.3); border-radius: 50%; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>♔ Ajedrez de Ataque</h1>
-        <div class="subtitle">Entrenamiento Táctico y Problemas de Mate</div>
+        <div class="tournament-title">
+            <span class="live-badge">● EN VIVO</span>
+            <h1>Copa de Maestros 2025</h1>
+        </div>
+        <div style="text-align: right; color: var(--text-muted); font-size: 0.9rem;">
+            <div>Jugador: <strong style="color: white;">Candidato</strong></div>
+            <div>Ranking: 1850 ELO</div>
+        </div>
     </header>
-    
+
     <div class="problem-selection">
-        <div class="problem-card" data-problem="1">
-            <h2>Problema 1</h2>
-            <p>Estructura de Peones y Alfiles. Un clásico ataque a la descubierta con remate limpio.</p>
-            <div class="problem-preview">Mate en 4 Jugadas</div>
-            <button class="btn-select">Comenzar Desafío</button>
-        </div>
-        
-        <div class="problem-card" data-problem="2">
-            <h2>Problema 2</h2>
-            <p>Coordinación de Caballos. Maniobra precisa para encerrar al rey enemigo.</p>
-            <div class="problem-preview">Mate en 4 Jugadas</div>
-            <button class="btn-select">Comenzar Desafío</button>
-        </div>
-
-        <div class="problem-card" data-problem="3">
-            <h2>Problema 3</h2>
-            <p>El Sacrificio Inmortal. Entrega material pesado para abrir líneas decisivas.</p>
-            <div class="problem-preview">Mate en 4 Jugadas</div>
-            <button class="btn-select">Comenzar Desafío</button>
-        </div>
-    </div>
-
-    <div id="problem1-modal" class="problem-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="problem-title">Problema 1: Peones y Alfiles</h2>
-                <button class="close-modal" data-problem="1">×</button>
+        <div class="problem-card">
+            <div class="card-header">
+                <span class="round-badge">Ronda 1</span>
+                <span style="color:#94a3b8">Blitz 5|0</span>
             </div>
-            
-            <div class="game-container">
-                <div class="board-container">
-                    <div id="turn-indicator1" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
-                        <span>Turno de las Blancas</span>
-                    </div>
+            <div class="card-body">
+                <h2>Clasificatoria</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Derrota al Maestro Nacional. Mate en 4 obligatorio para avanzar.</p>
+                <button class="btn-select" onclick="startRound(1)">Iniciar Partida</button>
+            </div>
+        </div>
 
-                    <div class="board-wrapper">
-                        <div class="rank-coordinates">
-                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-                        </div>
-                        <div id="board1" class="board"></div>
-                        <div class="file-coordinates">
-                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="game-info">
-                    <div id="status1" class="status">Selecciona pieza blanca</div>
+        <div class="problem-card">
+            <div class="card-header">
+                <span class="round-badge">Semifinal</span>
+                <span style="color:#94a3b8">Tactical Rush</span>
+            </div>
+            <div class="card-body">
+                <h2>Duelo de Caballos</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Un final complejo contra el Maestro Internacional. Precisión absoluta requerida.</p>
+                <button class="btn-select" onclick="startRound(2)">Iniciar Partida</button>
+            </div>
+        </div>
 
-                    <div class="moves-list">
-                        <h3>Historial de Partida</h3>
-                        <div id="moves-container1" class="move-history-content">
-                            </div>
-                    </div>
-
-                    <div class="controls">
-                        <button id="reset-btn1" class="btn btn-danger">Reiniciar</button>
-                        <button id="hint-btn1" class="btn btn-secondary">Pista</button>
-                        <button id="solution-btn1" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
-                    </div>
-
-                    <div id="solution-text1" class="solution-text">
-                        <strong>Solución:</strong> 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
-                    </div>
-
-                    <div id="keyword-section1" class="keyword-section locked">
-                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
-                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">Resuelve el mate para desbloquear</p>
-                        <input type="text" id="keyword-input1" class="keyword-input" placeholder="---" disabled>
-                        <button id="keyword-btn1" class="keyword-btn" disabled>Verificar Código</button>
-                        <div id="keyword-feedback1" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
-                    </div>
-                </div>
+        <div class="problem-card" style="border-color: var(--accent);">
+            <div class="card-header" style="background: rgba(245, 158, 11, 0.1);">
+                <span class="round-badge" style="color: #fff;">🏆 GRAN FINAL</span>
+                <span style="color:#94a3b8">Muerte Súbita</span>
+            </div>
+            <div class="card-body">
+                <h2 style="color: var(--accent);">El Sacrificio Final</h2>
+                <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Enfréntate al Gran Maestro motor de IA. Solo un sacrificio brillante te dará la victoria.</p>
+                <button class="btn-select" style="background: var(--accent); color: black;" onclick="startRound(3)">Jugar la Final</button>
             </div>
         </div>
     </div>
 
-    <div id="problem2-modal" class="problem-modal">
+    <div id="game-modal" class="problem-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="problem-title">Problema 2: Caballos y Alfil</h2>
-                <button class="close-modal" data-problem="2">×</button>
+            <div class="card-header">
+                <h2 id="modal-title" style="color:white; font-family:'Chakra Petch'">Ronda 1</h2>
+                <button onclick="closeModal()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">×</button>
             </div>
-            
+
             <div class="game-container">
-                <div class="board-container">
-                    <div id="turn-indicator2" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
-                        <span>Turno de las Blancas</span>
+                <div class="board-area">
+                    <div class="player-plate player-top">
+                        <span class="player-name" id="opponent-name">Gran Maestro (CPU)</span>
+                        <span class="player-rating">2400</span>
                     </div>
-                    <div class="board-wrapper">
-                        <div class="rank-coordinates">
-                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-                        </div>
-                        <div id="board2" class="board"></div>
-                        <div class="file-coordinates">
-                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+
+                    <div id="board" class="board"></div>
+
+                    <div class="player-plate player-bottom">
+                        <span class="player-name">Candidato (Tú)</span>
+                        <span class="player-rating">1850</span>
+                    </div>
+
+                    <div id="result-overlay" class="overlay">
+                        <div class="overlay-content">
+                            <h1 style="font-size:3rem; color: var(--accent); margin-bottom:1rem;">VICTORIA</h1>
+                            <p style="margin-bottom:1rem; font-size:1.2rem;">Código de Pase:</p>
+                            <div id="victory-code" style="font-family:monospace; background:white; color:black; padding:10px; font-weight:bold; font-size:1.5rem;">---</div>
+                            <button onclick="closeModal()" class="btn-select" style="margin-top:20px; width: auto; padding: 10px 30px;">Salir al Lobby</button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="game-info">
-                    <div id="status2" class="status">Selecciona pieza blanca</div>
 
-                    <div class="moves-list">
-                        <h3>Historial de Partida</h3>
-                        <div id="moves-container2" class="move-history-content"></div>
-                    </div>
-
-                    <div class="controls">
-                        <button id="reset-btn2" class="btn btn-danger">Reiniciar</button>
-                        <button id="hint-btn2" class="btn btn-secondary">Pista</button>
-                        <button id="solution-btn2" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
-                    </div>
+                <div class="info-panel">
+                    <div class="clock-container" id="clock">05:00</div>
                     
-                    <div id="solution-text2" class="solution-text">
-                        <strong>Solución:</strong> 1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++
+                    <div class="status-box" id="game-status">
+                        Turno de las Blancas
                     </div>
 
-                    <div id="keyword-section2" class="keyword-section locked">
-                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
-                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
-                        <input type="text" id="keyword-input2" class="keyword-input" placeholder="---" disabled>
-                        <button id="keyword-btn2" class="keyword-btn" disabled>Verificar Código</button>
-                        <div id="keyword-feedback2" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="problem3-modal" class="problem-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="problem-title">Problema 3: Sacrificios</h2>
-                <button class="close-modal" data-problem="3">×</button>
-            </div>
-            
-            <div class="game-container">
-                <div class="board-container">
-                    <div id="turn-indicator3" class="turn-indicator turn-white" style="margin-bottom: 20px; width: 100%; justify-content: center;">
-                        <span>Turno de las Blancas</span>
-                    </div>
-                    <div class="board-wrapper">
-                        <div class="rank-coordinates">
-                            <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
-                        </div>
-                        <div id="board3" class="board"></div>
-                        <div class="file-coordinates">
-                            <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="game-info">
-                    <div id="status3" class="status">Selecciona pieza blanca</div>
-
-                    <div class="moves-list">
-                        <h3>Historial de Partida</h3>
-                        <div id="moves-container3" class="move-history-content"></div>
+                    <div style="flex-grow:1; overflow-y:auto; border:1px solid #333; padding:10px; font-family:monospace; color:#ccc;">
+                        <div id="move-history"></div>
                     </div>
 
                     <div class="controls">
-                        <button id="reset-btn3" class="btn btn-danger">Reiniciar</button>
-                        <button id="hint-btn3" class="btn btn-secondary">Pista</button>
-                        <button id="solution-btn3" class="btn btn-secondary" style="grid-column: span 2;">Ver Solución</button>
+                        <button class="btn-action" onclick="resetCurrentGame()">Reiniciar Tablero</button>
+                        <button class="btn-action" onclick="showHint()">Solicitar Ayuda (Penalización)</button>
                     </div>
 
-                    <div id="solution-text3" class="solution-text">
-                        <strong>Solución:</strong> 1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++
-                    </div>
-
-                    <div id="keyword-section3" class="keyword-section locked">
-                        <div style="font-size: 2rem; margin-bottom: 10px;" class="lock-icon">🔒</div>
-                        <h4 style="margin-bottom: 10px; color: var(--text-main);">Código de Seguridad</h4>
-                        <input type="text" id="keyword-input3" class="keyword-input" placeholder="---" disabled>
-                        <button id="keyword-btn3" class="keyword-btn" disabled>Verificar Código</button>
-                        <div id="keyword-feedback3" style="margin-top: 10px; font-weight: 600; font-size: 0.9rem;"></div>
+                    <div class="vault">
+                        <label style="display:block; margin-bottom:5px; color:#64748b; font-size:0.8rem;">SISTEMA DE VERIFICACIÓN</label>
+                        <input type="text" id="code-input" class="vault-input" placeholder="INGRESA CÓDIGO">
+                        <button class="btn-action btn-accent" onclick="verifyCode()">VALIDAR VICTORIA</button>
+                        <div id="code-feedback" style="text-align:center; font-weight:bold; height:20px;"></div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="congratulations" class="congratulations">
-        <div class="congrats-card">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">🏆</div>
-            <h2>¡Excelente!</h2>
-            <p id="congrats-message" style="margin-bottom: 1.5rem; color: #64748b;">Problema resuelto correctamente.</p>
-            
-            <div style="background: #f1f5f9; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
-                <p style="font-size: 0.9rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 0.5rem;">Palabra Clave</p>
-                <p id="accepted-keyword" style="font-family: 'Courier New', monospace; font-size: 1.5rem; font-weight: bold; color: var(--text-main);"></p>
-            </div>
-            
-            <button id="continue-btn" class="btn" style="background: var(--success);">Continuar Entrenando</button>
         </div>
     </div>
 
     <script>
-        // MANTENGO LA LÓGICA DE JAVASCRIPT EXACTAMENTE IGUAL, SOLO MODIFICANDO EMOJIS LIGERAMENTE PARA QUE SE VEAN MEJOR
+        // CONFIGURACIÓN DE PROBLEMAS (LOGICA DE AJEDREZ)
+        const pieces = { 'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙', 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' };
         
-        // Use solid emojis for pieces for better contrast
-        const pieces = {
-            'K': '♔', 'Q': '♕', 'R': '♖', 'B': '♗', 'N': '♘', 'P': '♙',
-            'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
-        };
-
-        const keywords = {
-            1: "AXQBVQXAÇÇXEUSRE",
-            2: "CABALLO",
-            3: "SACRIFICIO"
-        };
-
-        // ========== CONFIGURACIÓN DE PROBLEMAS ==========
-        const problems = {
+        // Datos del Torneo
+        const rounds = {
             1: {
-                name: "Mate con Peones y Alfiles",
-                initialPosition: [
+                title: "Ronda 1: Clasificatoria",
+                opponent: "Maestro FIDE (2300)",
+                code: "RONDA1-OK",
+                initial: [
                     ['', '', '', '', 'b', '', '', ''],
                     ['', '', 'p', '', 'B', '', 'p', ''],
                     ['', '', '', '', '', '', '', ''],
@@ -755,17 +413,19 @@
                     ['', '', 'P', '', 'B', '', 'P', ''],
                     ['', '', '', '', 'k', '', '', '']
                 ],
+                // Solución: 1. g6 c6 2. h5 Ad7 3. Ah4 Ac8 4. Axg3++
                 solution: [
-                    { white: { from: { row: 3, col: 6 }, to: { row: 2, col: 6 } }, black: { from: { row: 1, col: 2 }, to: { row: 2, col: 2 } } },
-                    { white: { from: { row: 4, col: 7 }, to: { row: 3, col: 7 } }, black: { from: { row: 0, col: 4 }, to: { row: 1, col: 3 } } },
-                    { white: { from: { row: 1, col: 4 }, to: { row: 4, col: 7 } }, black: { from: { row: 1, col: 3 }, to: { row: 0, col: 2 } } },
-                    { white: { from: { row: 4, col: 7 }, to: { row: 5, col: 6 } }, black: null }
-                ],
-                moveNotation: ["1. g6 c6", "2. h5 Ad7", "3. Ah4 Ac8", "4. Axg3++"]
+                    { white: {f:{r:3,c:6}, t:{r:2,c:6}}, black: {f:{r:1,c:2}, t:{r:2,c:2}} },
+                    { white: {f:{r:4,c:7}, t:{r:3,c:7}}, black: {f:{r:0,c:4}, t:{r:1,c:3}} },
+                    { white: {f:{r:1,c:4}, t:{r:4,c:7}}, black: {f:{r:1,c:3}, t:{r:0,c:2}} },
+                    { white: {f:{r:4,c:7}, t:{r:5,c:6}}, black: null }
+                ]
             },
             2: {
-                name: "Mate con Caballos y Alfil",
-                initialPosition: [
+                title: "Semifinal: Duelo Táctico",
+                opponent: "Maestro Internacional (2450)",
+                code: "SEMIFINAL-WIN",
+                initial: [
                     ['', '', 'k', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', ''],
                     ['', '', '', '', 'K', '', '', ''],
@@ -775,17 +435,19 @@
                     ['', '', '', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', '']
                 ],
+                // Solución: 1. Cc5 Rd8 2. Rf7 Rc8 3. Cb6+ Rd8 4. Ce6++
                 solution: [
-                    { white: { from: { row: 4, col: 4 }, to: { row: 3, col: 2 } }, black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } } },
-                    { white: { from: { row: 2, col: 4 }, to: { row: 1, col: 5 } }, black: { from: { row: 0, col: 3 }, to: { row: 0, col: 2 } } },
-                    { white: { from: { row: 3, col: 3 }, to: { row: 2, col: 1 } }, black: { from: { row: 0, col: 2 }, to: { row: 0, col: 3 } } },
-                    { white: { from: { row: 3, col: 2 }, to: { row: 2, col: 4 } }, black: null }
-                ],
-                moveNotation: ["1. Cc5 Rd8", "2. Rf7 Rc8", "3. Cb6+ Rd8", "4. Ce6++"]
+                    { white: {f:{r:4,c:4}, t:{r:3,c:2}}, black: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { white: {f:{r:2,c:4}, t:{r:1,c:5}}, black: {f:{r:0,c:3}, t:{r:0,c:2}} },
+                    { white: {f:{r:3,c:3}, t:{r:2,c:1}}, black: {f:{r:0,c:2}, t:{r:0,c:3}} },
+                    { white: {f:{r:3,c:2}, t:{r:2,c:4}}, black: null }
+                ]
             },
             3: {
-                name: "Mate con Sacrificios",
-                initialPosition: [
+                title: "GRAN FINAL: La Inmortal",
+                opponent: "Gran Maestro IA (3200)",
+                code: "CHAMPION-2025",
+                initial: [
                     ['', 'n', '', 'b', '', 'r', 'k', ''],
                     ['', '', 'p', 'p', '', '', '', 'p'],
                     ['', '', '', 'p', '', '', 'p', 'Q'],
@@ -795,473 +457,214 @@
                     ['', '', '', '', '', '', 'P', 'K'],
                     ['', '', '', '', '', '', '', '']
                 ],
+                // Solución: 1. Txf5 Txf5 2. Ad5+ Txd5 3. Te8+ Rf7 4. Df8++
                 solution: [
-                    { white: { from: { row: 3, col: 3 }, to: { row: 3, col: 5 } }, black: { from: { row: 0, col: 5 }, to: { row: 3, col: 5 } } },
-                    { white: { from: { row: 4, col: 4 }, to: { row: 3, col: 3 } }, black: { from: { row: 3, col: 5 }, to: { row: 3, col: 3 } } },
-                    { white: { from: { row: 5, col: 4 }, to: { row: 0, col: 4 } }, black: { from: { row: 0, col: 6 }, to: { row: 1, col: 5 } } },
-                    { white: { from: { row: 2, col: 7 }, to: { row: 0, col: 5 } }, black: null }
-                ],
-                moveNotation: ["1. Txf5 Txf5", "2. Ad5+ Txd5", "3. Te8+ Rf7", "4. Df8++"]
+                    { white: {f:{r:3,c:3}, t:{r:3,c:5}}, black: {f:{r:0,c:5}, t:{r:3,c:5}} },
+                    { white: {f:{r:4,c:4}, t:{r:3,c:3}}, black: {f:{r:3,c:5}, t:{r:3,c:3}} },
+                    { white: {f:{r:5,c:4}, t:{r:0,c:4}}, black: {f:{r:0,c:6}, t:{r:1,c:5}} },
+                    { white: {f:{r:2,c:7}, t:{r:0,c:5}}, black: null }
+                ]
             }
         };
 
-        // ========== ESTADO GLOBAL ==========
-        let currentProblem = null;
-        let gameStates = {};
+        // ESTADO GLOBAL
+        let activeRound = 1;
+        let gameState = {
+            position: [],
+            selection: null,
+            moveIdx: 0,
+            locked: false,
+            timerInterval: null
+        };
 
-        // ========== FUNCIONES DE INTERFAZ ==========
-        function showProblemSelection() {
-            document.querySelectorAll('.problem-modal').forEach(modal => {
-                modal.classList.remove('active');
-            });
-        }
-
-        function showProblem(problemNumber) {
-            currentProblem = problemNumber;
-            document.getElementById(`problem${problemNumber}-modal`).classList.add('active');
-            document.getElementById(`solution-text${problemNumber}`).classList.remove('active');
+        // UI ACTIONS
+        function startRound(roundNum) {
+            activeRound = roundNum;
+            const round = rounds[roundNum];
             
-            if (!gameStates[problemNumber]) {
-                initializeGame(problemNumber);
-            } else {
-                createBoard(problemNumber);
-            }
-        }
-
-        function closeProblemModal(problemNumber) {
-            document.getElementById(`problem${problemNumber}-modal`).classList.remove('active');
-        }
-
-        // ========== FUNCIONES DEL JUEGO ==========
-        function initializeGame(problemNumber) {
-            const problem = problems[problemNumber];
+            document.getElementById('game-modal').classList.add('active');
+            document.getElementById('modal-title').innerText = round.title;
+            document.getElementById('opponent-name').innerText = round.opponent;
+            document.getElementById('result-overlay').classList.remove('active');
+            document.getElementById('code-input').value = "";
+            document.getElementById('code-feedback').innerText = "";
             
-            gameStates[problemNumber] = {
-                currentPosition: JSON.parse(JSON.stringify(problem.initialPosition)),
-                selectedSquare: null,
-                validMoves: [],
-                currentMoveIndex: 0,
-                playerMoves: [],
-                gameCompleted: false,
-                keywordVerified: false,
-                isWhiteTurn: true,
-                gamePaused: false
-            };
-            
-            createBoard(problemNumber);
-            updateKeywordSection(problemNumber);
-            updateTurnIndicator(problemNumber);
+            startClock();
+            initGame();
         }
 
-        function createBoard(problemNumber) {
-            const state = gameStates[problemNumber];
-            const board = document.getElementById(`board${problemNumber}`);
+        function closeModal() {
+            document.getElementById('game-modal').classList.remove('active');
+            stopClock();
+        }
+
+        // RELOJ DEL TORNEO
+        function startClock() {
+            stopClock();
+            let time = 300; // 5 minutos
+            const display = document.getElementById('clock');
+            
+            gameState.timerInterval = setInterval(() => {
+                time--;
+                const m = Math.floor(time / 60).toString().padStart(2, '0');
+                const s = (time % 60).toString().padStart(2, '0');
+                display.innerText = `${m}:${s}`;
+                
+                if (time <= 0) {
+                    stopClock();
+                    alert("¡Tiempo agotado! Has perdido la partida.");
+                    closeModal();
+                }
+            }, 1000);
+        }
+
+        function stopClock() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            document.getElementById('clock').innerText = "05:00";
+        }
+
+        // MOTOR DE JUEGO (Simplificado para el ejemplo)
+        function initGame() {
+            // Copia profunda de la posición
+            gameState.position = JSON.parse(JSON.stringify(rounds[activeRound].initial));
+            gameState.selection = null;
+            gameState.moveIdx = 0;
+            gameState.locked = false;
+            document.getElementById('move-history').innerHTML = "";
+            drawBoard();
+            updateStatus("Tu turno - Encuentra el mate");
+        }
+        
+        function resetCurrentGame() {
+            initGame();
+        }
+
+        function drawBoard() {
+            const board = document.getElementById('board');
             board.innerHTML = '';
             
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const square = document.createElement('div');
-                    square.classList.add('square');
-                    square.classList.add((row + col) % 2 === 0 ? 'light' : 'dark');
-                    square.dataset.row = row;
-                    square.dataset.col = col;
+            for(let r=0; r<8; r++) {
+                for(let c=0; c<8; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = `square ${(r+c)%2===0 ? 'light' : 'dark'}`;
+                    sq.dataset.r = r; sq.dataset.c = c;
                     
-                    const piece = state.currentPosition[row][col];
-                    if (piece) {
-                        square.textContent = pieces[piece];
-                        // Estilizar piezas según color para mejor visibilidad visual
-                        if (isWhitePiece(piece)) {
-                            square.style.color = "#ffffff";
-                            square.style.textShadow = "0px 1px 3px rgba(0,0,0,0.8)";
-                        } else {
-                            square.style.color = "#1e293b";
-                            square.style.textShadow = "0px 1px 1px rgba(255,255,255,0.5)";
-                        }
+                    const p = gameState.position[r][c];
+                    if(p) {
+                        sq.innerText = pieces[p];
+                        sq.style.color = (p === p.toUpperCase()) ? '#fff' : '#000';
+                        sq.style.textShadow = (p === p.toUpperCase()) ? '0 2px 2px rgba(0,0,0,0.5)' : 'none';
                     }
                     
-                    if (state.playerMoves.length > 0) {
-                        const lastMove = state.playerMoves[state.playerMoves.length - 1];
-                        if ((row === lastMove.from.row && col === lastMove.from.col) || 
-                            (row === lastMove.to.row && col === lastMove.to.col)) {
-                            square.classList.add('last-move');
-                        }
-                    }
+                    sq.onclick = () => handleSquareClick(r, c);
                     
-                    square.addEventListener('click', () => handleSquareClick(problemNumber, row, col));
-                    board.appendChild(square);
+                    if(gameState.selection && gameState.selection.r === r && gameState.selection.c === c) {
+                        sq.classList.add('selected');
+                    }
+                    board.appendChild(sq);
                 }
             }
-            
-            updateStatus(problemNumber);
-            updateMovesList(problemNumber);
         }
 
-        function handleSquareClick(problemNumber, row, col) {
-            const state = gameStates[problemNumber];
-            if (state.gameCompleted || state.gamePaused) return;
+        function handleSquareClick(r, c) {
+            if(gameState.locked) return;
             
-            const piece = state.currentPosition[row][col];
-            
-            if (state.selectedSquare) {
-                const fromRow = state.selectedSquare.row;
-                const fromCol = state.selectedSquare.col;
-                const isValidMove = state.validMoves.some(move => move.to.row === row && move.to.col === col);
+            const p = gameState.position[r][c];
+            const isWhite = p && p === p.toUpperCase();
+
+            // Selección
+            if(isWhite) {
+                gameState.selection = {r, c};
+                drawBoard();
+                return;
+            }
+
+            // Movimiento
+            if(gameState.selection) {
+                const move = {
+                    f: gameState.selection,
+                    t: {r, c}
+                };
                 
-                if (isValidMove) {
-                    makeMove(problemNumber, fromRow, fromCol, row, col, true);
+                if(validateMove(move)) {
+                    executeMove(move, true);
                 } else {
-                    clearSelection(problemNumber);
-                    if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
-                        selectSquare(problemNumber, row, col);
-                    }
-                }
-            } else {
-                if (piece && isWhitePiece(piece) && state.isWhiteTurn) {
-                    selectSquare(problemNumber, row, col);
+                    // Si clic en vacío o pieza negra incorrecta, deseleccionar
+                    gameState.selection = null;
+                    drawBoard();
                 }
             }
         }
 
-        function selectSquare(problemNumber, row, col) {
-            const state = gameStates[problemNumber];
-            clearSelection(problemNumber);
+        function validateMove(userMove) {
+            const expected = rounds[activeRound].solution[gameState.moveIdx].white;
+            return (userMove.f.r === expected.f.r && userMove.f.c === expected.f.c &&
+                    userMove.t.r === expected.t.r && userMove.t.c === expected.t.c);
+        }
+
+        function executeMove(move, isPlayer) {
+            const p = gameState.position[move.f.r][move.f.c];
+            gameState.position[move.t.r][move.t.c] = p;
+            gameState.position[move.f.r][move.f.c] = '';
+            gameState.selection = null;
             
-            state.selectedSquare = { row, col };
-            const squareElement = document.querySelector(`#board${problemNumber} .square[data-row="${row}"][data-col="${col}"]`);
-            squareElement.classList.add('selected');
+            // Notación simple
+            const log = document.createElement('div');
+            log.innerText = `${isPlayer ? 'Tú' : 'CPU'}: ${String.fromCharCode(97+move.f.c)}${8-move.f.r} -> ${String.fromCharCode(97+move.t.c)}${8-move.t.r}`;
+            document.getElementById('move-history').appendChild(log);
             
-            calculateValidMoves(problemNumber, row, col);
-            
-            state.validMoves.forEach(move => {
-                const targetSquare = document.querySelector(`#board${problemNumber} .square[data-row="${move.to.row}"][data-col="${move.to.col}"]`);
-                const targetPiece = state.currentPosition[move.to.row][move.to.col];
+            drawBoard();
+
+            if(isPlayer) {
+                const currentStep = rounds[activeRound].solution[gameState.moveIdx];
                 
-                if (targetPiece && isBlackPiece(targetPiece)) {
-                    targetSquare.classList.add('capture-move');
-                } else {
-                    targetSquare.classList.add('valid-move');
+                // Verificar si terminó el problema
+                if (gameState.moveIdx === rounds[activeRound].solution.length - 1 && !currentStep.black) {
+                    gameWin();
+                    return;
                 }
-            });
+
+                // Respuesta de la CPU
+                gameState.locked = true;
+                setTimeout(() => {
+                    const cpuMove = currentStep.black;
+                    executeMove(cpuMove, false);
+                    gameState.moveIdx++;
+                    gameState.locked = false;
+                }, 600);
+            }
         }
 
-        // --- GAME LOGIC HELPERS --- (Se mantiene igual, solo comprimido para brevedad)
-        function isWhitePiece(p){return p===p.toUpperCase()}
-        function isBlackPiece(p){return p===p.toLowerCase()}
+        function gameWin() {
+            stopClock();
+            updateStatus("¡JAQUE MATE!");
+            document.getElementById('victory-code').innerText = rounds[activeRound].code;
+            document.getElementById('result-overlay').classList.add('active');
+        }
+
+        function updateStatus(msg) {
+            document.getElementById('game-status').innerText = msg;
+        }
         
-        function calculateValidMoves(problemNumber, row, col) {
-            // Lógica simplificada de movimiento para este ejemplo (usando la tuya original)
-            // En una implementación real completa, esto valida las reglas del ajedrez
-            const state = gameStates[problemNumber];
-            const piece = state.currentPosition[row][col];
-            if (!piece || !isWhitePiece(piece)) return;
-            state.validMoves = [];
+        function verifyCode() {
+            const input = document.getElementById('code-input').value.trim();
+            const feedback = document.getElementById('code-feedback');
             
-            // Reutilizando tu lógica de movimientos
-            switch(piece.toUpperCase()) {
-                case 'P': calculatePawnMoves(problemNumber, row, col); break;
-                case 'R': calculateRookMoves(problemNumber, row, col); break;
-                case 'N': calculateKnightMoves(problemNumber, row, col); break;
-                case 'B': calculateBishopMoves(problemNumber, row, col); break;
-                case 'Q': calculateQueenMoves(problemNumber, row, col); break;
-                case 'K': calculateKingMoves(problemNumber, row, col); break;
-            }
-            // Filtro de jaque...
-            if (piece.toUpperCase() !== 'K') {
-                state.validMoves = state.validMoves.filter(move => !wouldKingBeInCheck(problemNumber, move.from.row, move.from.col, move.to.row, move.to.col));
-            }
-        }
-
-        // --- MOVE CALCULATORS (COPIED FROM ORIGINAL) ---
-        function calculatePawnMoves(pN, r, c) {
-            const s = gameStates[pN];
-            if (r > 0 && !s.currentPosition[r-1][c]) {
-                s.validMoves.push({ from: {row:r, col:c}, to: {row:r-1, col:c} });
-                if (r === 6 && !s.currentPosition[r-2][c]) s.validMoves.push({ from: {row:r, col:c}, to: {row:r-2, col:c} });
-            }
-            if (r > 0 && c > 0) { const t=s.currentPosition[r-1][c-1]; if(t && isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:r-1,col:c-1}});}
-            if (r > 0 && c < 7) { const t=s.currentPosition[r-1][c+1]; if(t && isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:r-1,col:c+1}});}
-        }
-        function calculateRookMoves(pN, r, c) {
-            const s = gameStates[pN];
-            const dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]];
-            dirs.forEach(([dr, dc]) => {
-                let nr = r + dr, nc = c + dc;
-                while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-                    const t = s.currentPosition[nr][nc];
-                    if (!t) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
-                    else { if (isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}}); break; }
-                    nr += dr; nc += dc;
-                }
-            });
-        }
-        function calculateKnightMoves(pN, r, c) {
-            const s = gameStates[pN];
-            const moves = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
-            moves.forEach(([dr,dc])=>{
-                const nr=r+dr, nc=c+dc;
-                if(nr>=0&&nr<8&&nc>=0&&nc<8){
-                    const t=s.currentPosition[nr][nc];
-                    if(!t||isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
-                }
-            });
-        }
-        function calculateBishopMoves(pN,r,c){
-            const s=gameStates[pN];
-            const dirs=[[-1,-1],[-1,1],[1,-1],[1,1]];
-            dirs.forEach(([dr,dc])=>{
-                let nr=r+dr,nc=c+dc;
-                while(nr>=0&&nr<8&&nc>=0&&nc<8){
-                    const t=s.currentPosition[nr][nc];
-                    if(!t) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
-                    else{if(isBlackPiece(t)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}}); break;}
-                    nr+=dr;nc+=dc;
-                }
-            });
-        }
-        function calculateQueenMoves(pN,r,c){calculateRookMoves(pN,r,c);calculateBishopMoves(pN,r,c);}
-        function calculateKingMoves(pN,r,c){
-            const s=gameStates[pN];
-            const moves=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-            moves.forEach(([dr,dc])=>{
-                const nr=r+dr,nc=c+dc;
-                if(nr>=0&&nr<8&&nc>=0&&nc<8){
-                    const t=s.currentPosition[nr][nc];
-                    if((!t||isBlackPiece(t)) && !isAdjacentToBlackKing(pN,nr,nc)) s.validMoves.push({from:{row:r,col:c},to:{row:nr,col:nc}});
-                }
-            });
-        }
-
-        // --- CHECK LOGIC ---
-        function isAdjacentToBlackKing(pN, r, c) {
-            const s = gameStates[pN];
-            let bKr = -1, bKc = -1;
-            for(let i=0;i<8;i++) for(let j=0;j<8;j++) if(s.currentPosition[i][j]==='k'){bKr=i;bKc=j;break;}
-            if(bKr===-1) return false;
-            return Math.abs(r-bKr)<=1 && Math.abs(c-bKc)<=1;
-        }
-
-        function wouldKingBeInCheck(pN, fr, fc, tr, tc) {
-            const s = gameStates[pN];
-            const temp = JSON.parse(JSON.stringify(s.currentPosition));
-            temp[tr][tc] = temp[fr][fc];
-            temp[fr][fc] = '';
-            let kr = -1, kc = -1;
-            for(let i=0;i<8;i++) for(let j=0;j<8;j++) if(temp[i][j]==='K'){kr=i;kc=j;break;}
-            if(kr===-1) return false;
-            
-            // Check attacks (simplified from original)
-            // Peones
-            if(kr<7){
-                if(kc>0 && temp[kr+1][kc-1]==='p') return true;
-                if(kc<7 && temp[kr+1][kc+1]==='p') return true;
-            }
-            // Caballos
-            const nm = [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
-            for(let m of nm) {
-                let r=kr+m[0], c=kc+m[1];
-                if(r>=0&&r<8&&c>=0&&c<8&&temp[r][c]==='n') return true;
-            }
-            // Lineal y Diagonal
-            const ld=[[-1,0],[1,0],[0,-1],[0,1]], dd=[[-1,-1],[-1,1],[1,-1],[1,1]];
-            for(let d of ld){
-                let r=kr+d[0], c=kc+d[1];
-                while(r>=0&&r<8&&c>=0&&c<8){ if(temp[r][c]){if('rq'.includes(temp[r][c])) return true; break;} r+=d[0];c+=d[1];}
-            }
-            for(let d of dd){
-                let r=kr+d[0], c=kc+d[1];
-                while(r>=0&&r<8&&c>=0&&c<8){ if(temp[r][c]){if('bq'.includes(temp[r][c])) return true; break;} r+=d[0];c+=d[1];}
-            }
-            return false;
-        }
-
-        function makeMove(problemNumber, fromRow, fromCol, toRow, toCol, isPlayerMove) {
-            const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
-            const piece = state.currentPosition[fromRow][fromCol];
-            
-            state.currentPosition[toRow][toCol] = piece;
-            state.currentPosition[fromRow][fromCol] = '';
-            
-            if (isPlayerMove) {
-                state.playerMoves.push({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
-                
-                const expectedMove = problem.solution[state.currentMoveIndex].white;
-                const isCorrectMove = (fromRow === expectedMove.from.row && fromCol === expectedMove.from.col && toRow === expectedMove.to.row && toCol === expectedMove.to.col);
-                
-                if (isCorrectMove) {
-                    state.isWhiteTurn = false;
-                    updateTurnIndicator(problemNumber);
-                    
-                    if (state.currentMoveIndex === problem.solution.length - 1 && !problem.solution[state.currentMoveIndex].black) {
-                        state.gameCompleted = true;
-                        state.currentMoveIndex++;
-                        document.getElementById(`status${problemNumber}`).innerHTML = "<span class='checkmate'>¡Jaque Mate!</span>";
-                        document.getElementById(`status${problemNumber}`).className = "status success";
-                        unlockKeywordSection(problemNumber);
-                    } else {
-                        setTimeout(() => makeBlackMove(problemNumber), 800);
-                    }
-                } else {
-                    state.gamePaused = true;
-                    document.getElementById(`status${problemNumber}`).innerHTML = "Movimiento incorrecto. Reinicia el problema.";
-                    document.getElementById(`status${problemNumber}`).className = "status error";
-                }
-            }
-            clearSelection(problemNumber);
-            createBoard(problemNumber);
-        }
-
-        function makeBlackMove(problemNumber) {
-            const state = gameStates[problemNumber];
-            const problem = problems[problemNumber];
-            
-            if (state.currentMoveIndex < problem.solution.length) {
-                const blackMove = problem.solution[state.currentMoveIndex].black;
-                if (blackMove) {
-                    const piece = state.currentPosition[blackMove.from.row][blackMove.from.col];
-                    state.currentPosition[blackMove.to.row][blackMove.to.col] = piece;
-                    state.currentPosition[blackMove.from.row][blackMove.from.col] = '';
-                    
-                    state.currentMoveIndex++;
-                    state.isWhiteTurn = true;
-                    updateTurnIndicator(problemNumber);
-                    document.getElementById(`status${problemNumber}`).textContent = "Tu turno.";
-                }
-            }
-            createBoard(problemNumber);
-        }
-
-        function clearSelection(pN) {
-            gameStates[pN].selectedSquare = null;
-            gameStates[pN].validMoves = [];
-            createBoard(pN); // Redraw removes classes
-        }
-
-        function updateStatus(pN) {
-            const s = gameStates[pN];
-            const el = document.getElementById(`status${pN}`);
-            if (s.gameCompleted) {
-                el.innerHTML = "¡Problema resuelto!";
-                el.className = "status success";
-            } else if (s.gamePaused) {
-                el.textContent = "Movimiento incorrecto. Reinicia.";
-                el.className = "status error";
+            if(input === rounds[activeRound].code) {
+                feedback.innerText = "¡CÓDIGO ACEPTADO!";
+                feedback.style.color = "#22c55e";
             } else {
-                el.textContent = s.currentMoveIndex === 0 ? "Juegan blancas" : "Tu turno";
-                el.className = "status";
+                feedback.innerText = "CÓDIGO INVÁLIDO";
+                feedback.style.color = "#ef4444";
             }
         }
-
-        function updateTurnIndicator(pN) {
-            const el = document.getElementById(`turn-indicator${pN}`);
-            if (gameStates[pN].isWhiteTurn) {
-                el.className = "turn-indicator turn-white";
-                el.innerHTML = '<span>♔ Juegan Blancas</span>';
-            } else {
-                el.className = "turn-indicator turn-black";
-                el.innerHTML = '<span>♚ Juegan Negras</span>';
-            }
-        }
-
-        function updateMovesList(pN) {
-            const s = gameStates[pN];
-            const p = problems[pN];
-            const c = document.getElementById(`moves-container${pN}`);
-            c.innerHTML = '';
-            s.playerMoves.forEach((move, i) => {
-                const div = document.createElement('div');
-                div.className = 'move-item';
-                div.innerHTML = `<span>Movimiento ${i+1}</span> <strong>${p.moveNotation[i]}</strong>`;
-                c.appendChild(div);
-            });
-        }
-
-        function updateKeywordSection(pN) {
-            const s = gameStates[pN];
-            const sec = document.getElementById(`keyword-section${pN}`);
-            const inp = document.getElementById(`keyword-input${pN}`);
-            const btn = document.getElementById(`keyword-btn${pN}`);
-            
-            if (s.gameCompleted) {
-                sec.classList.remove('locked'); sec.classList.add('unlocked');
-                inp.disabled = false; inp.placeholder = "Ingresa el código"; btn.disabled = false;
-                sec.querySelector('.lock-icon').textContent = '🔓';
-            } else {
-                sec.classList.remove('unlocked'); sec.classList.add('locked');
-                inp.disabled = true; inp.placeholder = "---"; btn.disabled = true;
-                sec.querySelector('.lock-icon').textContent = '🔒';
-                document.getElementById(`keyword-feedback${pN}`).textContent = '';
-                inp.value = '';
-            }
-        }
-
-        function unlockKeywordSection(pN) {
-            updateKeywordSection(pN);
-            // Smooth scroll
-            setTimeout(() => {
-                document.getElementById(`keyword-section${pN}`).scrollIntoView({ behavior: 'smooth' });
-            }, 500);
-        }
-
-        function verifyKeyword(pN) {
-            const inp = document.getElementById(`keyword-input${pN}`);
-            const fb = document.getElementById(`keyword-feedback${pN}`);
-            const val = inp.value.trim().toUpperCase();
-            
-            if (val === keywords[pN]) {
-                fb.textContent = "Código Correcto";
-                fb.style.color = "var(--success)";
-                showCongratulations(pN, keywords[pN]);
-            } else {
-                fb.textContent = "Código Incorrecto";
-                fb.style.color = "var(--error)";
-            }
-        }
-
-        function showCongratulations(pN, kw) {
-            document.getElementById('congrats-message').textContent = `Problema ${pN} resuelto exitosamente.`;
-            document.getElementById('accepted-keyword').textContent = kw;
-            document.getElementById('congratulations').style.display = 'flex';
-        }
         
-        function hideCongratulations() {
-            document.getElementById('congratulations').style.display = 'none';
-            showProblemSelection();
+        function showHint() {
+            if(gameState.locked) return;
+            const nextMove = rounds[activeRound].solution[gameState.moveIdx].white;
+            alert(`Pista: Mueve la pieza en ${String.fromCharCode(97+nextMove.f.c)}${8-nextMove.f.r}`);
         }
 
-        function showHint(pN) {
-            const s = gameStates[pN];
-            if(s.gameCompleted || s.gamePaused) return;
-            const m = problems[pN].solution[s.currentMoveIndex].white;
-            document.getElementById(`status${pN}`).textContent = `Pista: Mueve desde ${String.fromCharCode(97+m.from.col)}${8-m.from.row}`;
-        }
-        
-        function resetGame(pN) {
-            initializeGame(pN);
-            document.getElementById(`solution-text${pN}`).classList.remove('active');
-        }
-
-        // Listeners
-        document.querySelectorAll('.btn-select').forEach(b => b.addEventListener('click', function() {
-            showProblem(this.closest('.problem-card').dataset.problem);
-        }));
-        
-        document.querySelectorAll('.close-modal').forEach(b => b.addEventListener('click', function() {
-            closeProblemModal(this.dataset.problem);
-        }));
-        
-        // Setup buttons for each problem
-        for(let i=1; i<=3; i++) {
-            document.getElementById(`reset-btn${i}`).addEventListener('click', ()=>resetGame(i));
-            document.getElementById(`hint-btn${i}`).addEventListener('click', ()=>showHint(i));
-            document.getElementById(`solution-btn${i}`).addEventListener('click', ()=>document.getElementById(`solution-text${i}`).classList.toggle('active'));
-            document.getElementById(`keyword-btn${i}`).addEventListener('click', ()=>verifyKeyword(i));
-        }
-        
-        document.getElementById('continue-btn').addEventListener('click', hideCongratulations);
-        
-        // Init
-        showProblemSelection();
     </script>
 </body>
 </html>
