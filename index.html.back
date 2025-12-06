@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Protocolo de Cifrado - Acceso Root</title>
+    <title>Prueba de Nivel - Ciberseguridad</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -108,32 +108,29 @@
 
         .mission-card.solved {
             border-color: var(--primary);
-            opacity: 0.7;
-        }
-        
-        .mission-card.solved::after {
-            content: "✓ SOLUCIONADO";
-            position: absolute;
-            bottom: 10px; right: 10px;
-            color: var(--primary);
-            font-weight: bold;
-            font-size: 0.8rem;
+            opacity: 0.8;
         }
 
+        /* CINTA DE ESTADO (RIBBON) */
         .mission-card::before {
-            content: "LOCKED";
+            content: "NO SOLUCIONADO";
             position: absolute;
-            top: 20px; right: -30px;
+            top: 25px; 
+            right: -55px; /* Ajuste para texto largo */
+            width: 200px; /* Ancho suficiente para rotar */
             background: var(--danger);
             color: black;
-            font-size: 0.7rem;
-            padding: 5px 30px;
+            font-size: 0.65rem;
+            padding: 5px 0;
+            text-align: center;
             transform: rotate(45deg);
             font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 5;
         }
         
         .mission-card.solved::before {
-            content: "OPEN";
+            content: "SOLUCIONADO";
             background: var(--primary);
         }
 
@@ -307,57 +304,57 @@
 <body>
 
     <header>
-        <h1><span style="color:white">CYBER</span>_CHESS_PROTOCOL</h1>
+        <h1><span style="color:white">PRUEBA</span> DE NIVEL</h1>
         <div style="font-size: 0.9rem; color: #666; font-weight: bold;">
-            PRUEBA_DE_NIVEL: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
+            ESTADO: <span id="global-status" style="color:var(--danger)">NO SUPERADA</span>
         </div>
     </header>
 
     <div id="mission-select-screen" class="screen active">
         <h2 style="margin-top: 1rem; border-bottom: 1px solid #333; padding-bottom: 10px; width: 100%; max-width: 1400px; color: var(--text-main);">
-            // SELECCIONAR_VULNERABILIDAD
+            // SELECCIONA UN PROBLEMA
         </h2>
         
         <div class="mission-grid">
             
             <div id="card-1" class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
-                <div class="mission-title">NODE_01</div>
+                <div class="mission-title">PROBLEMA 1</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
                 <div class="mission-footer"><span>RANK: PAWN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
             <div id="card-2" class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
-                <div class="mission-title">NODE_02</div>
+                <div class="mission-title">PROBLEMA 2</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
                 <div class="mission-footer"><span>RANK: KNIGHT</span><span>TEMA: AHOGADO</span></div>
             </div>
             
             <div id="card-3" class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
-                <div class="mission-title">NODE_03</div>
+                <div class="mission-title">PROBLEMA 3</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
                 <div class="mission-footer"><span>RANK: BISHOP</span><span>TEMA: CLAVADA</span></div>
             </div>
             
             <div id="card-4" class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
-                <div class="mission-title">NODE_04</div>
+                <div class="mission-title">PROBLEMA 4</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
                 <div class="mission-footer"><span>RANK: ROOK</span><span>TEMA: PASILLO</span></div>
             </div>
             
             <div id="card-5" class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
-                <div class="mission-title">NODE_05</div>
+                <div class="mission-title">PROBLEMA 5</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
                 <div class="mission-footer"><span>RANK: QUEEN</span><span>TEMA: DOBLE</span></div>
             </div>
             
             <div id="card-6" class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
-                <div class="mission-title">NODE_06</div>
+                <div class="mission-title">PROBLEMA 6</div>
                 <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
                 <div class="mission-footer"><span>RANK: KING</span><span>TEMA: RED</span></div>
             </div>
@@ -380,7 +377,7 @@
 
             <div id="success-overlay" class="overlay">
                 <div class="data-packet" style="border-color: var(--primary); box-shadow: 0 0 30px rgba(0,255,65,0.2);">
-                    <h2 style="color: var(--primary); margin-bottom: 15px;">MISION_COMPLETA</h2>
+                    <h2 style="color: var(--primary); margin-bottom: 15px;">PROBLEMA RESUELTO</h2>
                     <p style="color: #ccc; margin-bottom: 20px;">Acceso administrativo restaurado con éxito.</p>
                     <div style="font-size: 3rem; margin-bottom: 20px;">🔓</div>
                     <button class="btn-submit" onclick="closeSuccessAndReturn()">VOLVER AL MENÚ</button>
@@ -467,7 +464,6 @@
             }
         };
 
-        // Niveles 4, 5 y 6 repiten lógica para demostración
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
@@ -494,7 +490,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Inicializando tablero táctico NODE_0${id}...`, false, true);
+            log(`Inicializando tablero táctico PROBLEMA ${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             document.getElementById('success-overlay').classList.remove('active');
             
@@ -542,7 +538,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN (Jaque/Movimientos) ---
+        // --- MOTOR DE VALIDACIÓN ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
@@ -752,11 +748,11 @@
                 feedback.style.color = "var(--primary)";
                 log("Credencial verificada. Archivo guardado.", false, true);
                 
-                // MARCAR COMO RESUELTO
+                // Marcar como resuelto
                 solvedLevels.add(currentMissionId);
                 document.getElementById(`card-${currentMissionId}`).classList.add('solved');
                 
-                // CHEQUEAR CONDICIÓN GLOBAL
+                // Chequear condición de victoria global
                 checkGlobalWinCondition();
 
                 setTimeout(() => {
