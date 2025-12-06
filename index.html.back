@@ -80,7 +80,7 @@
             margin-top: 2rem;
         }
 
-        /* --- TARJETAS CON TEMÁTICA AJEDREZ --- */
+        /* TARJETAS */
         .mission-card {
             background: #000;
             border: 1px solid var(--border);
@@ -93,11 +93,11 @@
             flex-direction: column;
         }
 
-        /* Fondo ajedrezado al hacer hover */
         .mission-card:hover {
             border-color: var(--primary);
             box-shadow: 0 0 20px var(--primary-dim);
             transform: translateY(-5px);
+            /* Patrón de ajedrez sutil en hover */
             background-image: 
                 linear-gradient(45deg, #051a05 25%, transparent 25%), 
                 linear-gradient(-45deg, #051a05 25%, transparent 25%), 
@@ -299,47 +299,49 @@
         </h2>
         
         <div class="mission-grid">
+            
             <div class="mission-card" onclick="loadMission(1)">
                 <div class="mission-icon">♟️</div>
                 <div class="mission-title">NODE_01</div>
-                <div class="mission-desc">ERROR 503: Autenticación de bajo nivel fallida. Credenciales básicas requeridas.</div>
-                <div class="mission-footer"><span>RANK: PAWN</span><span>STATUS: ACTIVE</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Cadena de peones bloqueada. El Rey oponente está restringido por sus propias piezas.</div>
+                <div class="mission-footer"><span>PIEZA: PEÓN</span><span>TEMA: RUPTURA</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(2)">
                 <div class="mission-icon">♞</div>
                 <div class="mission-title">NODE_02</div>
-                <div class="mission-desc">Saltos de memoria no lineales detectados en el sector L. Tráfico interceptado.</div>
-                <div class="mission-footer"><span>RANK: KNIGHT</span><span>ENC: UNKNOWN</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Posición cerrada. Se requiere un salto táctico sobre las defensas enemigas.</div>
+                <div class="mission-footer"><span>PIEZA: CABALLO</span><span>TEMA: AHOGADO</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(3)">
                 <div class="mission-icon">♝</div>
                 <div class="mission-title">NODE_03</div>
-                <div class="mission-desc">Ataque diagonal en la subrutina de cifrado. Volcado de memoria incompleto.</div>
-                <div class="mission-footer"><span>RANK: BISHOP</span><span>MEM: CORRUPT</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Control absoluto de las casillas de color claro. La gran diagonal es decisiva.</div>
+                <div class="mission-footer"><span>PIEZA: ALFIL</span><span>TEMA: CLAVADA</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(4)">
                 <div class="mission-icon">♜</div>
                 <div class="mission-title">NODE_04</div>
-                <div class="mission-desc">Bloqueo lineal en puertos principales. Firewall perimetral activado.</div>
-                <div class="mission-footer"><span>RANK: ROOK</span><span>QUEUE: FULL</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Columna abierta dominada. El Rey enemigo no tiene casillas de fuga en la octava fila.</div>
+                <div class="mission-footer"><span>PIEZA: TORRE</span><span>TEMA: PASILLO</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(5)">
                 <div class="mission-icon">♛</div>
                 <div class="mission-title">NODE_05</div>
-                <div class="mission-desc">Anomalía omnidireccional. El núcleo central está comprometido.</div>
-                <div class="mission-footer"><span>RANK: QUEEN</span><span>FLAG: SYN_ACK</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Sobrecarga en la defensa. Múltiples amenazas simultáneas sobre el enroque.</div>
+                <div class="mission-footer"><span>PIEZA: DAMA</span><span>TEMA: DOBLE</span></div>
             </div>
             
             <div class="mission-card" onclick="loadMission(6)">
                 <div class="mission-icon">♚</div>
                 <div class="mission-title">NODE_06</div>
-                <div class="mission-desc">¡CRÍTICO! Acceso Root detectado. Firma digital maestra requerida.</div>
-                <div class="mission-footer"><span>RANK: KING</span><span>PERM: DENIED</span></div>
+                <div class="mission-desc">ANÁLISIS DE POSICIÓN: Rey expuesto en el centro. Coordinación final para cerrar la red de mate.</div>
+                <div class="mission-footer"><span>PIEZA: REY</span><span>TEMA: RED</span></div>
             </div>
+
         </div>
     </div>
 
@@ -348,8 +350,8 @@
             <div id="board" class="board"></div>
             <div id="victory-overlay" class="overlay">
                 <div class="data-packet">
-                    <h2 style="color: white; margin-bottom: 15px;">ACCESO AL NÚCLEO CONCEDIDO</h2>
-                    <p style="color: #888; margin-bottom: 10px;">Hash desencriptado:</p>
+                    <h2 style="color: white; margin-bottom: 15px;">JAQUE MATE EJECUTADO</h2>
+                    <p style="color: #888; margin-bottom: 10px;">Hash de victoria:</p>
                     <div id="hash-display" style="font-size: 2rem; color: var(--primary); border: 1px dashed var(--primary); padding: 10px; margin-bottom: 20px;">---</div>
                     <button onclick="closeOverlay()" style="background: transparent; border: 1px solid white; color: white; padding: 10px 20px; cursor: pointer; font-family:inherit;">CERRAR Y DESCIFRAR</button>
                 </div>
@@ -357,16 +359,16 @@
         </div>
 
         <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← DESCONECTAR</button>
+            <button class="back-btn" onclick="returnToMenu()">← ABORTAR</button>
             <div style="margin-bottom: 5px; color: #666;">// TERMINAL_OUTPUT</div>
-            <div id="terminal" class="terminal-log"><div class="log-entry">Esperando conexión...</div></div>
+            <div id="terminal" class="terminal-log"><div class="log-entry">Analizando posición...</div></div>
 
             <div style="flex-grow: 1;"></div>
             <div id="cipher-box" class="cipher-box">
                 <span id="cipher-status" style="position: absolute; top: -10px; left: 20px; background: #0a0a0a; padding: 0 10px; color: #666; font-size: 0.8rem;">🔒 INPUT BLOQUEADO</span>
                 <p style="font-size: 0.8rem; color: #555; margin-bottom: 15px;">Jaque Mate requerido para desbloquear.</p>
                 <input type="text" id="solution-input" class="cipher-input" placeholder="ACCESO DENEGADO" disabled autocomplete="off">
-                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR PAYLOAD</button>
+                <button id="submit-btn" class="btn-submit" onclick="verifySolution()" disabled>VALIDAR CÓDIGO</button>
                 <div id="feedback-msg" style="text-align: center; margin-top: 10px; height: 20px; font-weight: bold;"></div>
             </div>
         </div>
@@ -392,7 +394,7 @@
                     { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
                     { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
                 ],
-                fakeHash: "SQL-INJECT-01", answer: "ADMIN"
+                fakeHash: "PAWN-STORM-01", answer: "ADMIN"
             },
             2: {
                 initial: [
@@ -411,7 +413,7 @@
                     { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
                 ],
-                fakeHash: "CESAR-ROT13", answer: "SECRET"
+                fakeHash: "KNIGHT-FORK-X", answer: "SECRET"
             },
             3: {
                 initial: [
@@ -430,11 +432,10 @@
                     { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
                     { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
                 ],
-                fakeHash: "STACK-OVERFLOW", answer: "ROOT"
+                fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
             }
         };
 
-        // Copias para tener 6 niveles jugables
         levels[4] = levels[1];
         levels[5] = levels[2];
         levels[6] = levels[3];
@@ -459,7 +460,7 @@
             
             lockInput();
             document.getElementById('terminal').innerHTML = '';
-            log(`Conectando a NODE_0${id}... Iniciando protocolo.`, false, true);
+            log(`Inicializando tablero táctico NODE_0${id}...`, false, true);
             document.getElementById('victory-overlay').classList.remove('active');
             
             drawBoard();
@@ -507,8 +508,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN DE JAQUES ---
-        
+        // --- MOTOR DE VALIDACIÓN ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             
@@ -536,7 +536,7 @@
                 if(nr>=0&&nr<8&&nc>=0&&nc<8 && boardToCheck[nr][nc] === kingChar) return true;
             }
 
-            // 4. Lineales (Torres/Reinas)
+            // 4. Lineales
             const rookChar = attackerColor === 'white' ? 'R' : 'r';
             const queenChar = attackerColor === 'white' ? 'Q' : 'q';
             const linearDirs = [[0,1],[0,-1],[1,0],[-1,0]];
@@ -554,7 +554,7 @@
                 }
             }
 
-            // 5. Diagonales (Alfiles/Reinas)
+            // 5. Diagonales
             const bishopChar = attackerColor === 'white' ? 'B' : 'b';
             const diagDirs = [[1,1],[1,-1],[-1,1],[-1,-1]];
             for(let d of diagDirs) {
@@ -591,10 +591,7 @@
                     }
                 }
             }
-
-            if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) {
-                return false; 
-            }
+            if(myKing && isSquareAttacked(myKing.r, myKing.c, enemyColor, tempBoard)) return false; 
             return true; 
         }
 
@@ -680,7 +677,7 @@
                        puzzleMove.t.r === r && puzzleMove.t.c === c) {
                         executeMove(gameState.selection, {r, c}, true);
                     } else {
-                        log("Movimiento ineficaz. Protocolo fallido.", true);
+                        log("Error Táctico: Movimiento subóptimo.", true);
                         gameState.selection = null;
                         gameState.validMoves = [];
                         drawBoard();
@@ -698,7 +695,7 @@
             gameState.position[to.r][to.c] = p;
             gameState.position[from.r][from.c] = '';
             
-            log(`${isPlayer ? 'USR' : 'SYS'} ejecuta: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
+            log(`${isPlayer ? 'USR' : 'SYS'} mueve: ${coords(from)} -> ${coords(to)}`, false, isPlayer);
             
             gameState.selection = null;
             gameState.validMoves = [];
@@ -720,7 +717,7 @@
         }
 
         function missionComplete() {
-            log("AMENAZA NEUTRALIZADA. OBTENIENDO HASH...", false, true);
+            log("REY ENEMIGO CAPTURADO. CIFRADO ROTO.", false, true);
             const mission = levels[currentMissionId];
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
