@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Proyecto Euler: Lógica y Ajedrez</title>
+    <title>Laboratorio de Álgebra Lineal</title>
     <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-blueprint: #1e3a8a; /* Azul plano técnico */
+            --bg-blueprint: #1e3a8a; /* Azul ingeniería */
             --grid-line: rgba(255, 255, 255, 0.1);
             --text-main: #ffffff;
             --accent: #facc15; /* Amarillo técnico */
@@ -144,7 +144,7 @@
             grid-template-columns: repeat(8, 70px);
             grid-template-rows: repeat(8, 70px);
             border: 4px solid white;
-            background: white; /* Para las casillas claras */
+            background: white; 
         }
 
         .square {
@@ -154,7 +154,7 @@
 
         /* Colores de las casillas */
         .light { background-color: #e0f2fe; color: #000; }
-        .dark { background-color: #3b82f6; color: #fff; } /* Azul medio */
+        .dark { background-color: #3b82f6; color: #fff; } 
         
         .square:hover { opacity: 0.9; }
         .selected { background-color: var(--accent) !important; color: #000 !important; }
@@ -215,6 +215,18 @@
             display: block;
         }
 
+        /* MATRIZ DECORATIVA EN EL FONDO DE LA TARJETA */
+        .matrix-bg {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.1);
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            pointer-events: none;
+            white-space: pre;
+        }
+
         .math-input {
             width: 100%;
             background: transparent;
@@ -257,6 +269,7 @@
             border-radius: 2px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             max-width: 500px;
+            border: 4px solid var(--accent);
         }
 
         .math-symbol { font-size: 3rem; margin-bottom: 1rem; color: var(--bg-blueprint); }
@@ -276,50 +289,55 @@
 
     <header>
         <div>
-            <h1>Dpto. de Matemáticas</h1>
-            <span class="subtitle">Laboratorio de Lógica y Algoritmos</span>
+            <h1>Álgebra Lineal Avanzada</h1>
+            <span class="subtitle">Ejercicios Prácticos de Matrices</span>
         </div>
         <div style="text-align: right; font-size: 0.8rem;">
-            v.3.1416<br>PROYECTO: EULER
+            LAB: MATRICES<br>PROYECTO FINAL
         </div>
     </header>
 
     <div id="mission-select-screen" class="screen active">
         <div class="intro-text">
-            <p>"Las matemáticas son el alfabeto con el cual Dios ha escrito el Universo." - Galileo Galilei.</p>
+            <p>"Una matriz es un arreglo bidimensional de números."</p>
             <br>
-            <p>Selecciona un <strong>Teorema</strong> para comenzar la demostración.</p>
+            <p>Resuelve el <strong>Jaque Mate</strong> para obtener los valores clave de cada operación matricial.</p>
         </div>
         
         <div class="cards-container">
             <div class="math-card" onclick="loadMission(1)">
                 <div class="card-number">I</div>
-                <div class="card-title">Secuencia Aritmética</div>
+                <div class="card-title">El Determinante</div>
                 <div class="card-desc">
-                    Demostración mediante estructura de Peones y Alfiles.
+                    Calcula el determinante de la matriz 2x2 asociada al problema.
                     <br><br>
-                    <strong>Incógnita a despejar:</strong> Número Irracional.
+                    <strong>Objetivo:</strong> Hallar |A|
                 </div>
+                <div class="matrix-bg">| 1  0 |
+| 0  1 |</div>
             </div>
 
             <div class="math-card" onclick="loadMission(2)">
                 <div class="card-number">II</div>
-                <div class="card-title">Geometría Vectorial</div>
+                <div class="card-title">Matriz Identidad</div>
                 <div class="card-desc">
-                    Cálculo de movimiento no lineal usando Caballos (Vectores L).
+                    Identifica el elemento neutro de la multiplicación matricial.
                     <br><br>
-                    <strong>Incógnita a despejar:</strong> Concepto Geométrico.
+                    <strong>Objetivo:</strong> Nombre de la Matriz Iₙ
                 </div>
+                <div class="matrix-bg">[ 1  0 ]
+[ 0  1 ]</div>
             </div>
 
             <div class="math-card" onclick="loadMission(3)">
                 <div class="card-number">III</div>
-                <div class="card-title">Límites al Infinito</div>
+                <div class="card-title">Sistemas Lineales</div>
                 <div class="card-desc">
-                    Aplicación de la derivada mediante sacrificio de material.
+                    Método de resolución utilizando determinantes.
                     <br><br>
-                    <strong>Incógnita a despejar:</strong> Concepto de Cálculo.
+                    <strong>Objetivo:</strong> Regla de resolución.
                 </div>
+                <div class="matrix-bg">Ax = B</div>
             </div>
         </div>
     </div>
@@ -330,44 +348,45 @@
 
             <div id="victory-overlay" class="overlay">
                 <div class="result-card">
-                    <div class="math-symbol">∑</div>
-                    <div class="qed-text">Q.E.D. Demostrado</div>
-                    <p style="margin-bottom: 20px;">La variable resultante es:</p>
+                    <div class="math-symbol">A⁻¹</div>
+                    <div class="qed-text">Solución Encontrada</div>
+                    <p style="margin-bottom: 20px;">El valor de la incógnita matricial es:</p>
                     
-                    <div id="hash-display" style="font-size: 2.5rem; font-weight: bold; font-family: 'Roboto Mono'; margin-bottom: 20px; color: #d946ef;">---</div>
+                    <div id="hash-display" style="font-size: 2rem; font-weight: bold; font-family: 'Roboto Mono'; margin-bottom: 20px; color: #d946ef; border: 2px dashed #333; padding: 10px;">---</div>
                     
-                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Anote este resultado en el Cuaderno de Campo lateral.</p>
-                    <button onclick="closeOverlay()" style="padding: 10px 20px; background: var(--bg-blueprint); color: white; border: none; cursor: pointer;">Cerrar y Anotar</button>
+                    <p style="font-size: 0.8rem; color: #666; margin-bottom: 20px;">Copie este resultado en la caja de verificación.</p>
+                    <button onclick="closeOverlay()" style="padding: 10px 20px; background: var(--bg-blueprint); color: white; border: none; cursor: pointer; font-weight:bold;">CERRAR Y VALIDAR</button>
                 </div>
             </div>
         </div>
 
         <div class="side-panel">
-            <button class="back-btn" onclick="returnToMenu()">← Volver al Índice</button>
+            <button class="back-btn" onclick="returnToMenu()">← Volver a Selección</button>
             
-            <h3 style="margin-bottom: 10px; font-family: 'Merriweather', serif;">Registro de Pasos</h3>
+            <h3 style="margin-bottom: 10px; font-family: 'Merriweather', serif;">Operaciones</h3>
             <div id="log-area" class="log-area">
-                <div style="margin-bottom: 5px;">> Inicializando variables...</div>
+                <div style="margin-bottom: 5px;">> Inicializando matriz A...</div>
             </div>
 
             <div id="proof-box" class="proof-box">
-                <span id="status-label" class="status-label" style="color: #94a3b8;">⚠️ DEMOSTRACIÓN PENDIENTE</span>
+                <span id="status-label" class="status-label" style="color: #94a3b8;">⚠️ CÁLCULO PENDIENTE</span>
                 
                 <p style="font-size: 0.85rem; margin-bottom: 15px; opacity: 0.8;">
-                    Complete el Jaque Mate para obtener el valor de la incógnita <strong>X</strong>.
+                    Desbloquea el campo resolviendo el mate para introducir la respuesta.
                 </p>
                 
-                <input type="text" id="solution-input" class="math-input" placeholder="x = ?" disabled autocomplete="off">
-                <button id="submit-btn" class="btn-verify" onclick="verifySolution()" disabled>VERIFICAR RESULTADO</button>
+                <input type="text" id="solution-input" class="math-input" placeholder="Respuesta..." disabled autocomplete="off">
+                <button id="submit-btn" class="btn-verify" onclick="verifySolution()" disabled>VERIFICAR SOLUCIÓN</button>
                 <div id="feedback-msg" style="text-align: center; margin-top: 10px; font-weight: bold; height: 20px;"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE TEOREMAS MATEMÁTICOS
+        // CONFIGURACIÓN DE EJERCICIOS DE MATRICES
         const missions = {
             1: {
+                title: "Determinante",
                 initial: [
                     ['', '', '', '', 'b', '', '', ''],
                     ['', '', 'p', '', 'B', '', 'p', ''],
@@ -384,10 +403,12 @@
                     { w: {f:{r:1,c:4}, t:{r:4,c:7}}, b: {f:{r:1,c:3}, t:{r:0,c:2}} },
                     { w: {f:{r:4,c:7}, t:{r:5,c:6}}, b: null }
                 ],
-                fakeHash: "3.1416", // PI
-                answer: "3.1416"
+                // El usuario gana y ve: "DET(A) = 0". La respuesta es "0".
+                fakeHash: "DET(A) = 0", 
+                answer: "0" 
             },
             2: {
+                title: "Matriz Identidad",
                 initial: [
                     ['', '', 'k', '', '', '', '', ''],
                     ['', '', '', '', '', '', '', ''],
@@ -404,10 +425,12 @@
                     { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} },
                     { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }
                 ],
-                fakeHash: "VECTOR",
-                answer: "VECTOR"
+                // El usuario gana y ve la matriz identidad. La respuesta es "IDENTIDAD".
+                fakeHash: "[ 1  0 ]\n[ 0  1 ]",
+                answer: "IDENTIDAD"
             },
             3: {
+                title: "Regla de Cramer",
                 initial: [
                     ['', 'n', '', 'b', '', 'r', 'k', ''],
                     ['', '', 'p', 'p', '', '', '', 'p'],
@@ -424,8 +447,9 @@
                     { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} },
                     { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }
                 ],
-                fakeHash: "INFINITO",
-                answer: "INFINITO"
+                // El usuario gana y ve "CRAMER". La respuesta es "CRAMER".
+                fakeHash: "MÉTODO CRAMER",
+                answer: "CRAMER"
             }
         };
 
@@ -446,7 +470,7 @@
             gameState.locked = false;
             
             lockInput();
-            document.getElementById('log-area').innerHTML = '<div style="margin-bottom:5px;">> Teorema ' + id + ' cargado.</div>';
+            document.getElementById('log-area').innerHTML = '<div style="margin-bottom:5px;">> Ejercicio: ' + missions[id].title + ' cargado.</div>';
             document.getElementById('victory-overlay').classList.remove('active');
             drawBoard();
         }
@@ -469,12 +493,12 @@
                     const p = gameState.position[r][c];
                     if(p) {
                         sq.innerText = pieces[p];
-                        // Estilo clásico: Blancas son Blancas, Negras son Negras (pero ajustado al fondo azul)
+                        // Estilo clásico: Blancas son Blancas, Negras son Negras
                         if(p === p.toUpperCase()) {
                             sq.style.color = '#fff'; 
                             sq.style.textShadow = '0 1px 2px rgba(0,0,0,0.5)';
                         } else {
-                            sq.style.color = '#1e3a8a'; // Azul oscuro para contrastar con casillas claras
+                            sq.style.color = '#1e3a8a'; 
                         }
                     }
                     sq.onclick = () => handleSquare(r, c);
@@ -503,7 +527,7 @@
                    correctMove.t.r === r && correctMove.t.c === c) {
                     executeMove(gameState.selection, {r, c}, true);
                 } else {
-                    log("❌ Error en el cálculo. Intente otra variante.");
+                    log("❌ Cálculo de movimiento erróneo.");
                     gameState.selection = null;
                     drawBoard();
                 }
@@ -516,7 +540,7 @@
             gameState.position[from.r][from.c] = '';
             
             const coord = `${String.fromCharCode(97+from.c)}${8-from.r} → ${String.fromCharCode(97+to.c)}${8-to.r}`;
-            log((isPlayer ? "Jugador" : "Oponente") + ": " + coord);
+            log((isPlayer ? "Usted" : "CPU") + ": " + coord);
             
             gameState.selection = null;
             drawBoard();
@@ -537,7 +561,7 @@
         }
 
         function missionComplete() {
-            log("✅ Q.E.D. Demostración correcta.");
+            log("✅ Ejercicio Resuelto.");
             const mission = missions[currentMissionId];
             document.getElementById('hash-display').innerText = mission.fakeHash;
             document.getElementById('victory-overlay').classList.add('active');
@@ -558,9 +582,9 @@
             box.classList.remove('unlocked');
             inp.disabled = true;
             inp.value = '';
-            inp.placeholder = "x = ?";
+            inp.placeholder = "Bloqueado";
             btn.disabled = true;
-            lbl.innerText = "⚠️ DEMOSTRACIÓN PENDIENTE";
+            lbl.innerText = "⚠️ CÁLCULO PENDIENTE";
             lbl.style.color = "#94a3b8";
             document.getElementById('feedback-msg').innerText = '';
         }
@@ -573,10 +597,10 @@
             
             box.classList.add('unlocked');
             inp.disabled = false;
-            inp.placeholder = "Ingrese el valor de X";
+            inp.placeholder = "Ingrese el resultado";
             inp.focus();
             btn.disabled = false;
-            lbl.innerText = "✏️ LISTO PARA ANOTAR";
+            lbl.innerText = "✏️ LISTO PARA VALIDAR";
             lbl.style.color = "var(--success)";
         }
 
@@ -586,9 +610,9 @@
             const fb = document.getElementById('feedback-msg');
             
             if(val === correct) {
-                fb.innerText = "CORRECTO";
+                fb.innerText = "¡CORRECTO!";
                 fb.style.color = "var(--success)";
-                setTimeout(() => { alert("¡Teorema Demostrado! Volviendo al índice."); returnToMenu(); }, 1000);
+                setTimeout(() => { alert("¡Ejercicio Completado! Volviendo al menú."); returnToMenu(); }, 1000);
             } else {
                 fb.innerText = "INCORRECTO";
                 fb.style.color = "#ef4444";
