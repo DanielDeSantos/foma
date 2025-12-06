@@ -444,7 +444,7 @@
         let gameState = { position: [], moveIdx: 0, selection: null, locked: false, validMoves: [] };
         let solvedLevels = new Set();
 
-        // --- LÓGICA DE CONTROL Y ADVERTENCIAS ---
+        // --- SISTEMA DE CONTROL Y VENTANAS ---
         
         function checkAndLoadMission(id) {
             // 1. Caso: Problema ya resuelto
@@ -457,7 +457,7 @@
                 return;
             }
 
-            // 2. Caso: Paridad repetida (Ya tengo un Impar y voy a por otro, o ya tengo Par y voy a por otro)
+            // 2. Caso: Paridad repetida
             const isTargetEven = (id % 2 === 0);
             let hasSameParitySolved = false;
             
@@ -477,17 +477,16 @@
                 return;
             }
 
-            // Si no hay avisos, entrar directo
+            // Si no hay avisos
             startLevel(id);
         }
 
-        // Función que muestra el modal de advertencia
         function showWarning(title, msg, confirmCallback) {
             document.getElementById('warning-title').innerText = title;
             document.getElementById('warning-msg').innerText = msg;
             
             const btnConfirm = document.getElementById('btn-warning-confirm');
-            // Clona el botón para limpiar event listeners anteriores de forma segura
+            // Eliminar listeners antiguos clonando el botón
             const newBtn = btnConfirm.cloneNode(true);
             btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
             
@@ -556,7 +555,7 @@
             return move ? move.type : null;
         }
 
-        // --- MOTOR DE VALIDACIÓN ---
+        // --- VALIDACIÓN JAQUES ---
         function isSquareAttacked(r, c, attackerColor, tempBoard) {
             const boardToCheck = tempBoard || gameState.position;
             const pawnAttackRow = attackerColor === 'white' ? r + 1 : r - 1; 
