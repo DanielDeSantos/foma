@@ -353,6 +353,21 @@
                 <div class="mission-desc">ANÀLISI DE POSICIÓ: Columna oberta dominada. El Rei enemic no té caselles de fuga a la vuitena fila.</div>
                 <div class="mission-footer"><span>RANG: TORRE</span><span>TEMA: PASSADÍS</span></div>
             </div>
+            
+            <div id="card-5" class="mission-card" onclick="checkAndLoadMission(5)">
+                <div class="mission-icon">♛</div>
+                <div class="mission-title">PROBLEMA 5</div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Sobrecàrrega en la defensa. Múltiples amenaces simultànies sobre l'enroc.</div>
+                <div class="mission-footer"><span>RANG: DAMA</span><span>TEMA: DOBLE</span></div>
+            </div>
+            
+            <div id="card-6" class="mission-card" onclick="checkAndLoadMission(6)">
+                <div class="mission-icon">♚</div>
+                <div class="mission-title">PROBLEMA 6</div>
+                <div class="mission-desc">ANÀLISI DE POSICIÓ: Rei exposat al centre. Coordinació final per tancar la xarxa de mat.</div>
+                <div class="mission-footer"><span>RANG: REI</span><span>TEMA: XARXA</span></div>
+            </div>
+
         </div>
     </div>
 
@@ -418,17 +433,27 @@
             2: {
                 initial: [['','','k','','','','',''],['','','','','','','',''],['','','','','K','','',''],['','','','N','B','','',''],['','','','','N','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','','']],
                 moves: [{ w: {f:{r:4,c:4}, t:{r:3,c:2}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:2,c:4}, t:{r:1,c:5}}, b: {f:{r:0,c:3}, t:{r:0,c:2}} }, { w: {f:{r:3,c:3}, t:{r:2,c:1}}, b: {f:{r:0,c:2}, t:{r:0,c:3}} }, { w: {f:{r:3,c:2}, t:{r:2,c:4}}, b: null }],
-                fakeHash: "MUEBEXXRZNXDKMRA", answer: "ATAQUE-CON-TORRE"
+                fakeHash: "KNIGHT-FORK-X", answer: "SECRET"
             },
             3: {
                 initial: [['','n','','b','','r','k',''],['','','p','p','','','','p'],['','','','p','','','p','Q'],['','','','R','','p','',''],['','','','','B','B','P',''],['','','','P','R','','P',''],['','','','','','','P','K'],['','','','','','','','']],
                 moves: [{ w: {f:{r:3,c:3}, t:{r:3,c:5}}, b: {f:{r:0,c:5}, t:{r:3,c:5}} }, { w: {f:{r:4,c:4}, t:{r:3,c:3}}, b: {f:{r:3,c:5}, t:{r:3,c:3}} }, { w: {f:{r:5,c:4}, t:{r:0,c:4}}, b: {f:{r:0,c:6}, t:{r:1,c:5}} }, { w: {f:{r:2,c:7}, t:{r:0,c:5}}, b: null }],
-                fakeHash: "QERTXSEENBENODR-", answer: "TORRE-CONTRA-REY"
+                fakeHash: "BISHOP-PAIR-WIN", answer: "ROOT"
             },
             4: {
                 initial: [['r','','','','','','k',''],['p','p','p','','','n','p','p'],['','','','q','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','Q','','','',''],['P','P','P','','','P','P','P'],['','','','R','R','','K','']],
                 moves: [{ w: {f:{r:5,c:3}, t:{r:0,c:3}}, b: {f:{r:0,c:0}, t:{r:0,c:3}} }, { w: {f:{r:7,c:3}, t:{r:0,c:3}}, b: {f:{r:1,c:5}, t:{r:0,c:4}} }, { w: {f:{r:0,c:3}, t:{r:0,c:4}}, b: {f:{r:2,c:3}, t:{r:0,c:5}} }, { w: {f:{r:0,c:4}, t:{r:0,c:5}}, b: null }],
                 fakeHash: "FIREWALL-BYPASS-OK", answer: "BACKDOOR"
+            },
+            5: {
+                initial: [['','','','','','r','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','N',''],['','','Q','','','','',''],['','','','','','','',''],['P','P','','','','P','P','P'],['','','','','','','K','']],
+                moves: [{ w: {f:{r:3,c:6}, t:{r:1,c:5}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:1,c:5}, t:{r:2,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:4,c:2}, t:{r:0,c:6}}, b: {f:{r:0,c:5}, t:{r:0,c:6}} }, { w: {f:{r:2,c:7}, t:{r:1,c:5}}, b: null }],
+                fakeHash: "BUFFER-OVERFLOW-X", answer: "DDOS"
+            },
+            6: {
+                initial: [['','','','','','','k',''],['p','p','p','','','p','p','p'],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['','','','','','','',''],['P','P','P','','','P','P','P'],['','','','Q','','','','R']],
+                moves: [{ w: {f:{r:7,c:7}, t:{r:0,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:7}} }, { w: {f:{r:7,c:3}, t:{r:7,c:7}}, b: {f:{r:0,c:7}, t:{r:0,c:6}} }, { w: {f:{r:7,c:7}, t:{r:1,c:7}}, b: {f:{r:0,c:6}, t:{r:0,c:5}} }, { w: {f:{r:1,c:7}, t:{r:0,c:7}}, b: null }],
+                fakeHash: "KERNEL-PANIC-00", answer: "EXPLOIT"
             }
         };
 
